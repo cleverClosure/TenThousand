@@ -568,3 +568,308 @@ struct SkillTrackerDataTests {
         UserDefaults.standard.removeObject(forKey: "savedSkills")
     }
 }
+
+// MARK: - Additional Color Extension Tests
+
+@Suite("Color toHex Tests")
+struct ColorToHexTests {
+    @Test("Color toHex conversion for red")
+    func testColorToHexRed() {
+        let color = Color(hex: "#FF0000")
+        let hex = color?.toHex()
+
+        #expect(hex?.uppercased() == "#FF0000")
+    }
+
+    @Test("Color toHex conversion for green")
+    func testColorToHexGreen() {
+        let color = Color(hex: "#00FF00")
+        let hex = color?.toHex()
+
+        #expect(hex?.uppercased() == "#00FF00")
+    }
+
+    @Test("Color toHex conversion for blue")
+    func testColorToHexBlue() {
+        let color = Color(hex: "#0000FF")
+        let hex = color?.toHex()
+
+        #expect(hex?.uppercased() == "#0000FF")
+    }
+}
+
+// MARK: - Date Extension Tests
+
+@Suite("Date Extension Tests")
+struct DateExtensionTests {
+    @Test("Date startOfDay removes time components")
+    func testStartOfDay() {
+        let date = Date(timeIntervalSince1970: 1000000) // Some random time
+        let startOfDay = date.startOfDay
+
+        let components = Calendar.current.dateComponents([.hour, .minute, .second], from: startOfDay)
+        #expect(components.hour == 0)
+        #expect(components.minute == 0)
+        #expect(components.second == 0)
+    }
+
+    @Test("Date endOfDay is at 23:59:59")
+    func testEndOfDay() {
+        let date = Date()
+        let endOfDay = date.endOfDay
+
+        let components = Calendar.current.dateComponents([.hour, .minute, .second], from: endOfDay)
+        #expect(components.hour == 23)
+        #expect(components.minute == 59)
+        #expect(components.second == 59)
+    }
+
+    @Test("Date startOfWeek returns beginning of week")
+    func testStartOfWeek() {
+        let date = Date()
+        let startOfWeek = date.startOfWeek
+
+        let weekday = Calendar.current.component(.weekday, from: startOfWeek)
+        #expect(weekday == 1) // Sunday is 1 in Gregorian calendar
+    }
+
+    @Test("Date endOfWeek is after startOfWeek")
+    func testEndOfWeek() {
+        let date = Date()
+        let startOfWeek = date.startOfWeek
+        let endOfWeek = date.endOfWeek
+
+        #expect(endOfWeek > startOfWeek)
+        let interval = endOfWeek.timeIntervalSince(startOfWeek)
+        // Should be approximately 7 days minus 1 second
+        #expect(interval > 6 * 24 * 3600)
+        #expect(interval < 7 * 24 * 3600)
+    }
+
+    @Test("Date startOfMonth is first day of month")
+    func testStartOfMonth() {
+        let date = Date()
+        let startOfMonth = date.startOfMonth
+
+        let day = Calendar.current.component(.day, from: startOfMonth)
+        #expect(day == 1)
+    }
+
+    @Test("Date endOfMonth is last day of month")
+    func testEndOfMonth() {
+        let date = Date()
+        let startOfMonth = date.startOfMonth
+        let endOfMonth = date.endOfMonth
+
+        #expect(endOfMonth > startOfMonth)
+        // End of month should be in the same month
+        let startMonth = Calendar.current.component(.month, from: startOfMonth)
+        let endMonth = Calendar.current.component(.month, from: endOfMonth)
+        #expect(startMonth == endMonth)
+    }
+
+    @Test("Date startOfYear is January 1st")
+    func testStartOfYear() {
+        let date = Date()
+        let startOfYear = date.startOfYear
+
+        let components = Calendar.current.dateComponents([.month, .day], from: startOfYear)
+        #expect(components.month == 1)
+        #expect(components.day == 1)
+    }
+
+    @Test("Date endOfYear is December 31st at 23:59:59")
+    func testEndOfYear() {
+        let date = Date()
+        let endOfYear = date.endOfYear
+
+        let components = Calendar.current.dateComponents([.month, .day, .hour, .minute, .second], from: endOfYear)
+        #expect(components.month == 12)
+        #expect(components.day == 31)
+        #expect(components.hour == 23)
+        #expect(components.minute == 59)
+        #expect(components.second == 59)
+    }
+
+    @Test("Date timeRemaining formats days correctly")
+    func testTimeRemainingDays() {
+        let start = Date()
+        let end = Calendar.current.date(byAdding: .day, value: 5, to: start)!
+
+        let remaining = start.timeRemaining(until: end)
+        #expect(remaining.contains("d"))
+    }
+
+    @Test("Date timeRemaining formats hours correctly")
+    func testTimeRemainingHours() {
+        let start = Date(timeIntervalSince1970: 0)
+        let end = Date(timeIntervalSince1970: 7200) // 2 hours
+
+        let remaining = start.timeRemaining(until: end)
+        #expect(remaining == "2h 0m")
+    }
+
+    @Test("Date timeRemaining formats minutes correctly")
+    func testTimeRemainingMinutes() {
+        let start = Date(timeIntervalSince1970: 0)
+        let end = Date(timeIntervalSince1970: 1800) // 30 minutes
+
+        let remaining = start.timeRemaining(until: end)
+        #expect(remaining == "30m")
+    }
+}
+
+// MARK: - TimeInterval Extension Tests
+
+@Suite("TimeInterval Extension Tests")
+struct TimeIntervalExtensionTests {
+    @Test("TimeInterval formattedTime with hours and minutes")
+    func testFormattedTimeHoursMinutes() {
+        let interval: TimeInterval = 7260 // 2 hours 1 minute
+
+        #expect(interval.formattedTime == "2h 1m")
+    }
+
+    @Test("TimeInterval formattedTime with only hours")
+    func testFormattedTimeHoursOnly() {
+        let interval: TimeInterval = 7200 // 2 hours
+
+        #expect(interval.formattedTime == "2h 0m")
+    }
+
+    @Test("TimeInterval formattedTime with only minutes")
+    func testFormattedTimeMinutesOnly() {
+        let interval: TimeInterval = 120 // 2 minutes
+
+        #expect(interval.formattedTime == "0h 2m")
+    }
+
+    @Test("TimeInterval formattedTime with zero")
+    func testFormattedTimeZero() {
+        let interval: TimeInterval = 0
+
+        #expect(interval.formattedTime == "0h 0m")
+    }
+
+    @Test("TimeInterval formattedTime with large value")
+    func testFormattedTimeLarge() {
+        let interval: TimeInterval = 36000000 // 10000 hours
+
+        #expect(interval.formattedTime == "10000h 0m")
+    }
+}
+
+// MARK: - Edge Case Tests
+
+@Suite("Skill Edge Cases")
+struct SkillEdgeCaseTests {
+    @Test("Skill percentComplete with zero goal hours")
+    func testPercentCompleteZeroGoal() {
+        let skill = Skill(
+            name: "Test",
+            totalSeconds: 3600,
+            goalHours: 0,
+            colorHex: "#000000"
+        )
+
+        // Should handle division by zero gracefully
+        // percentComplete = (totalHours / goalHours) * 100
+        // With goalHours = 0, this would be infinity
+        let percent = skill.percentComplete
+        #expect(percent.isInfinite || percent.isNaN)
+    }
+
+    @Test("Skill with very large goal hours")
+    func testVeryLargeGoalHours() {
+        let skill = Skill(
+            name: "Test",
+            totalSeconds: 3600,
+            goalHours: 1000000,
+            colorHex: "#000000"
+        )
+
+        #expect(skill.percentComplete < 1.0)
+    }
+
+    @Test("Skill pause tracking when not tracking does nothing")
+    func testPauseWhenNotTracking() {
+        var skill = Skill(name: "Test", colorHex: "#000000")
+        let initialSeconds = skill.totalSeconds
+        let initialSessionCount = skill.sessions.count
+
+        skill.pauseTracking()
+
+        #expect(skill.totalSeconds == initialSeconds)
+        #expect(skill.sessions.count == initialSessionCount)
+        #expect(skill.currentSession == nil)
+    }
+
+    @Test("Skill with negative addTime still updates")
+    func testAddNegativeTime() {
+        var skill = Skill(name: "Test", totalSeconds: 3600, colorHex: "#000000")
+
+        skill.addTime(-1800)
+
+        #expect(skill.totalSeconds == 1800)
+    }
+
+    @Test("Skill multiple tracking sessions accumulate")
+    func testMultipleTrackingSessions() {
+        var skill = Skill(name: "Test", colorHex: "#000000")
+
+        skill.startTracking()
+        Thread.sleep(forTimeInterval: 0.1)
+        skill.pauseTracking()
+
+        let firstTotal = skill.totalSeconds
+
+        skill.startTracking()
+        Thread.sleep(forTimeInterval: 0.1)
+        skill.pauseTracking()
+
+        #expect(skill.totalSeconds > firstTotal)
+        #expect(skill.sessions.count == 2)
+    }
+
+    @Test("Skill projected completion with sessions older than 30 days")
+    func testProjectedCompletionOldSessions() {
+        let sixtyDaysAgo = Calendar.current.date(byAdding: .day, value: -60, to: Date())!
+        let sessions = [
+            Session(
+                startTime: sixtyDaysAgo,
+                endTime: Calendar.current.date(byAdding: .second, value: 3600, to: sixtyDaysAgo)
+            )
+        ]
+
+        let skill = Skill(
+            name: "Test",
+            totalSeconds: 3600,
+            goalHours: 10,
+            colorHex: "#000000",
+            sessions: sessions
+        )
+
+        // Should return nil because no sessions in last 30 days
+        #expect(skill.projectedCompletionDate() == nil)
+    }
+}
+
+@Suite("Session Edge Cases")
+struct SessionEdgeCaseTests {
+    @Test("Session with same start and end time has zero duration")
+    func testZeroDuration() {
+        let time = Date()
+        let session = Session(startTime: time, endTime: time)
+
+        #expect(session.duration == 0)
+    }
+
+    @Test("Session with end time before start time has negative duration")
+    func testNegativeDuration() {
+        let start = Date(timeIntervalSince1970: 1000)
+        let end = Date(timeIntervalSince1970: 500)
+        let session = Session(startTime: start, endTime: end)
+
+        #expect(session.duration < 0)
+    }
+}
