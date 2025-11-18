@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import CoreData
 import Combine
+import os.log
 
 class AppViewModel: ObservableObject {
     @Published var skills: [Skill] = []
@@ -19,7 +20,7 @@ class AppViewModel: ObservableObject {
     let timerManager = TimerManager()
     let persistenceController: PersistenceController
 
-    private var cancellables = Set<AnyCancellable>()
+    private let logger = Logger(subsystem: "com.tenthousand.app", category: "AppViewModel")
 
     init(persistenceController: PersistenceController = .shared) {
         self.persistenceController = persistenceController
@@ -35,7 +36,7 @@ class AppViewModel: ObservableObject {
         do {
             skills = try persistenceController.container.viewContext.fetch(request)
         } catch {
-            print("Failed to fetch skills: \(error)")
+            logger.error("Failed to fetch skills: \(error.localizedDescription)")
         }
     }
 
@@ -127,7 +128,7 @@ class AppViewModel: ObservableObject {
                 total + session.durationSeconds
             }
         } catch {
-            print("Failed to fetch today's sessions: \(error)")
+            logger.error("Failed to fetch today's sessions: \(error.localizedDescription)")
             return 0
         }
     }
@@ -144,7 +145,7 @@ class AppViewModel: ObservableObject {
             let uniqueSkills = Set(sessions.compactMap { $0.skill })
             return uniqueSkills.count
         } catch {
-            print("Failed to fetch today's sessions: \(error)")
+            logger.error("Failed to fetch today's sessions: \(error.localizedDescription)")
             return 0
         }
     }
@@ -158,7 +159,9 @@ class AppViewModel: ObservableObject {
         var data: [[Int64]] = Array(repeating: Array(repeating: 0, count: 7), count: weeksBack)
 
         let request: NSFetchRequest<Session> = Session.fetchRequest()
-        let startDate = calendar.date(byAdding: .day, value: -(weeksBack * 7), to: today)!
+        guard let startDate = calendar.date(byAdding: .day, value: -(weeksBack * 7), to: today) else {
+            return data
+        }
         request.predicate = NSPredicate(format: "startTime >= %@", startDate as NSDate)
 
         do {
@@ -176,7 +179,7 @@ class AppViewModel: ObservableObject {
                 }
             }
         } catch {
-            print("Failed to fetch heatmap data: \(error)")
+            logger.error("Failed to fetch heatmap data: \(error.localizedDescription)")
         }
 
         return data
