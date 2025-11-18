@@ -9,11 +9,6 @@ import SwiftUI
 
 // MARK: - Colors
 
-enum ColorConstants {
-    // Private initializer to prevent instantiation
-    private init() {}
-}
-
 extension Color {
     // Light Mode Neutrals
     static let pureWhite = Color(hex: "FFFFFF")
