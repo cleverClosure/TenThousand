@@ -62,22 +62,13 @@ struct SkillRowView: View {
                 .help("Delete skill")
             }
 
-            // Progress bar
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    // Background
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(nsColor: .separatorColor).opacity(0.3))
-                        .frame(height: 8)
-
-                    // Progress
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(skill.color)
-                        .frame(width: geometry.size.width * CGFloat(min(skill.percentComplete / 100.0, 1.0)), height: 8)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: skill.percentComplete)
-                }
-            }
-            .frame(height: 8)
+            // Cool retro text-based progress bar
+            AnimatedTextProgressBar(
+                progress: skill.percentComplete,
+                totalBlocks: 20,
+                showPercentage: true,
+                accentColor: skill.color
+            )
 
             // Current session (if tracking)
             if let currentSessionTime = skill.formattedCurrentSession() {
@@ -91,16 +82,14 @@ struct SkillRowView: View {
                 }
             }
 
-            // Stats row
+            // Stats row - hours progress
             HStack {
-                Text(skill.formattedPercentage())
-                    .font(.system(size: 11, weight: .medium))
+                Image(systemName: "clock.fill")
+                    .font(.system(size: 10))
                     .foregroundColor(.secondary)
 
-                Spacer()
-
                 Text("\(skill.formattedTotalTime()) / \(skill.formattedGoal())")
-                    .font(.system(size: 11))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.secondary)
             }
 

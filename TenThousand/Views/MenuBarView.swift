@@ -21,6 +21,17 @@ struct MenuBarView: View {
 
             Divider()
 
+            // Overall Progress Dashboard (only show if skills exist)
+            if !data.skills.isEmpty {
+                VStack(spacing: 0) {
+                    OverallProgressView(data: data)
+                        .padding(.horizontal, Constants.panelPadding)
+                        .padding(.vertical, 12)
+                }
+
+                Divider()
+            }
+
             // Time Remaining Section
             TimeRemainingView()
                 .padding(.horizontal, Constants.panelPadding)
