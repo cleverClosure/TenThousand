@@ -13,53 +13,71 @@ struct TimeRemainingView: View {
     private let timer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Time Remaining")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.primary)
+        VStack(alignment: .leading, spacing: Constants.spacing_md) {
+            // Section title with clock icon
+            HStack(spacing: 6) {
+                Text("⏰")
+                    .font(.system(size: 14))
+                Text("Time Remaining")
+                    .font(.system(size: Constants.fontSize_body, weight: .semibold))
+                    .foregroundColor(.primary)
+            }
 
-            VStack(alignment: .leading, spacing: 4) {
+            // Time display rows in a card-like container
+            VStack(alignment: .leading, spacing: Constants.spacing_sm) {
                 timeRemainingRow(
-                    icon: "sun.max.fill",
-                    text: timeLeftToday(),
-                    color: .orange
+                    label: "Today",
+                    time: timeLeftToday()
                 )
 
-                timeRemainingRow(
-                    icon: "calendar",
-                    text: timeLeftThisWeek(),
-                    color: .blue
-                )
+                Divider()
+                    .padding(.vertical, 2)
 
                 timeRemainingRow(
-                    icon: "calendar.badge.clock",
-                    text: timeLeftThisMonth(),
-                    color: .purple
+                    label: "This Week",
+                    time: timeLeftThisWeek()
                 )
 
+                Divider()
+                    .padding(.vertical, 2)
+
                 timeRemainingRow(
-                    icon: "calendar.circle.fill",
-                    text: timeLeftThisYear(),
-                    color: .green
+                    label: "This Month",
+                    time: timeLeftThisMonth()
+                )
+
+                Divider()
+                    .padding(.vertical, 2)
+
+                timeRemainingRow(
+                    label: "This Year",
+                    time: timeLeftThisYear()
                 )
             }
+            .padding(Constants.spacing_lg)
+            .background(
+                RoundedRectangle(cornerRadius: Constants.radius_md)
+                    .fill(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+            )
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, Constants.spacing_sm)
         .onReceive(timer) { _ in
             currentDate = Date()
         }
     }
 
-    private func timeRemainingRow(icon: String, text: String, color: Color) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 11))
-                .foregroundColor(color)
-                .frame(width: 16)
-
-            Text(text)
-                .font(.system(size: 12))
+    private func timeRemainingRow(label: String, time: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: Constants.fontSize_callout))
                 .foregroundColor(.secondary)
+
+            Spacer()
+
+            Text(time)
+                .font(.system(size: Constants.fontSize_callout, weight: .medium))
+                .foregroundColor(.primary)
+                .monospacedDigit()
         }
     }
 
@@ -67,24 +85,27 @@ struct TimeRemainingView: View {
 
     private func timeLeftToday() -> String {
         let endOfDay = currentDate.endOfDay
-        return currentDate.timeRemaining(until: endOfDay) + " left today"
+        return currentDate.timeRemaining(until: endOfDay)
     }
 
     private func timeLeftThisWeek() -> String {
         let endOfWeek = currentDate.endOfWeek
-        return currentDate.timeRemaining(until: endOfWeek) + " left this week"
+        let days = Calendar.current.dateComponents([.day], from: currentDate, to: endOfWeek).day ?? 0
+        let hours = Calendar.current.dateComponents([.hour], from: currentDate, to: endOfWeek).hour ?? 0
+        let remainingHours = hours % 24
+        return "\(days)d \(remainingHours)h"
     }
 
     private func timeLeftThisMonth() -> String {
         let endOfMonth = currentDate.endOfMonth
         let days = Calendar.current.dateComponents([.day], from: currentDate, to: endOfMonth).day ?? 0
-        return "\(days)d left this month"
+        return "\(days)d"
     }
 
     private func timeLeftThisYear() -> String {
         let endOfYear = currentDate.endOfYear
         let days = Calendar.current.dateComponents([.day], from: currentDate, to: endOfYear).day ?? 0
-        return "\(days)d left this year"
+        return "\(days)d"
     }
 }
 

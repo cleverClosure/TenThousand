@@ -12,16 +12,8 @@ import Combine
 class SkillTrackerData: ObservableObject {
     @Published var skills: [Skill] = []
 
-    private let skillColors = [
-        "#FF6B6B", // Red
-        "#4ECDC4", // Teal
-        "#45B7D1", // Blue
-        "#FFA07A", // Orange
-        "#98D8C8", // Mint
-        "#F7DC6F", // Yellow
-        "#BB8FCE", // Purple
-        "#85C1E2"  // Light Blue
-    ]
+    // Use the updated color palette from Constants
+    private let skillColors = Constants.skillColors
 
     private var updateTimer: Timer?
     private var autosaveTimer: Timer?
