@@ -1,0 +1,46 @@
+//
+//  TodaysSummaryView.swift
+//  TenThousand
+//
+//  Today's tracking summary
+//
+
+import SwiftUI
+
+struct TodaysSummaryView: View {
+    let totalSeconds: Int64
+    let skillCount: Int
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Today")
+                    .font(Typography.body)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+
+                Text("\(skillCount) skill\(skillCount == 1 ? "" : "s") tracked")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Text(totalSeconds.formattedShortTime())
+                .font(Typography.timeDisplay)
+                .foregroundColor(.primary)
+        }
+        .padding(Spacing.loose)
+        .frame(height: Dimensions.todaySummaryHeight)
+        .background(
+            Rectangle()
+                .fill(Color.primary.opacity(0.02))
+        )
+        .overlay(
+            Rectangle()
+                .fill(Color.primary.opacity(0.05))
+                .frame(height: 1),
+            alignment: .top
+        )
+    }
+}
