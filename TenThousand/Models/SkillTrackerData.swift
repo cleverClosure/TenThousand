@@ -63,6 +63,13 @@ class SkillTrackerData: ObservableObject {
         saveSkills()
     }
 
+    func updateSkillHours(skill: Skill, totalSeconds: Double) {
+        if let index = skills.firstIndex(where: { $0.id == skill.id }) {
+            skills[index].totalSeconds = totalSeconds
+            saveSkills()
+        }
+    }
+
     // MARK: - Time Tracking
 
     func startTracking(skill: Skill) {
