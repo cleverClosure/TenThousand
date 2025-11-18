@@ -9,9 +9,16 @@ import SwiftUI
 
 @main
 struct TenThousandApp: App {
+    @StateObject private var data = SkillTrackerData()
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        MenuBarExtra {
+            MenuBarView(data: data)
+        } label: {
+            Image(systemName: data.currentlyTrackingSkill != nil ? "timer" : "clock")
+                .symbolRenderingMode(.hierarchical)
+                .foregroundColor(data.currentlyTrackingSkill != nil ? .green : .primary)
         }
+        .menuBarExtraStyle(.window)
     }
 }
