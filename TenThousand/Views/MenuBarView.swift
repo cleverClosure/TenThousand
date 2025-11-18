@@ -11,6 +11,8 @@ struct MenuBarView: View {
     @ObservedObject var data: SkillTrackerData
     @State private var showAddSkill = false
     @State private var showSettings = false
+    @State private var showEditSkill = false
+    @State private var skillToEdit: Skill?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -45,6 +47,11 @@ struct MenuBarView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
+        .sheet(isPresented: $showEditSkill) {
+            if let skill = skillToEdit {
+                EditSkillView(data: data, skill: skill)
+            }
+        }
     }
 
     // MARK: - Header
@@ -71,23 +78,50 @@ struct MenuBarView: View {
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "chart.bar.fill")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-                .padding(.top, 30)
+        VStack(spacing: 16) {
+            Image(systemName: "star.fill")
+                .font(.system(size: 52))
+                .foregroundColor(.orange)
+                .padding(.top, 24)
+                .symbolEffect(.bounce, value: showAddSkill)
 
-            Text("No skills yet.")
-                .font(.system(size: 14, weight: .medium))
+            Text("Master Any Skill")
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.primary)
 
-            Text("Click \"+ Add Skill\" to get started!")
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+            VStack(spacing: 6) {
+                Text("Track your path to 10,000 hours")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+
+                Text("of deliberate practice.")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+            }
+            .multilineTextAlignment(.center)
+
+            Text("\"Mastery requires 10,000 hours of practice\"")
+                .font(.system(size: 11))
+                .italic()
+                .foregroundColor(.secondary.opacity(0.8))
                 .padding(.horizontal, 40)
+                .multilineTextAlignment(.center)
+                .padding(.top, 8)
+
+            Button(action: { showAddSkill = true }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 14))
+                    Text("Add Your First Skill")
+                        .font(.system(size: 13, weight: .medium))
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.top, 8)
         }
-        .frame(height: 200)
+        .frame(height: 280)
     }
 
     // MARK: - Skills List
@@ -103,6 +137,10 @@ struct MenuBarView: View {
                         },
                         onDelete: {
                             data.deleteSkill(skill)
+                        },
+                        onEdit: {
+                            skillToEdit = skill
+                            showEditSkill = true
                         }
                     )
                 }

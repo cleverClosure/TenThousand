@@ -109,6 +109,22 @@ struct Skill: Codable, Identifiable {
     func formattedPercentage() -> String {
         String(format: "%.1f%%", percentComplete)
     }
+
+    func formattedCurrentSession() -> String? {
+        guard let session = currentSession else { return nil }
+        let duration = session.duration
+        let hours = Int(duration / 3600)
+        let minutes = Int((duration.truncatingRemainder(dividingBy: 3600)) / 60)
+        let seconds = Int(duration.truncatingRemainder(dividingBy: 60))
+
+        if hours > 0 {
+            return "\(hours)h \(minutes)m \(seconds)s"
+        } else if minutes > 0 {
+            return "\(minutes)m \(seconds)s"
+        } else {
+            return "\(seconds)s"
+        }
+    }
 }
 
 // MARK: - Color Extension

@@ -23,7 +23,9 @@ class SkillTrackerData: ObservableObject {
         "#85C1E2"  // Light Blue
     ]
 
-    private var timer: Timer?
+    private var updateTimer: Timer?
+    private var autosaveTimer: Timer?
+    private let updateInterval: TimeInterval = 1.0 // Update UI every second when tracking
     private let autosaveInterval: TimeInterval = 60.0 // Auto-save every 60 seconds
 
     // UserDefaults keys
@@ -35,7 +37,8 @@ class SkillTrackerData: ObservableObject {
     }
 
     deinit {
-        timer?.invalidate()
+        updateTimer?.invalidate()
+        autosaveTimer?.invalidate()
     }
 
     // MARK: - Skill Management
@@ -45,6 +48,14 @@ class SkillTrackerData: ObservableObject {
         let newSkill = Skill(name: name, goalHours: goalHours, colorHex: colorHex)
         skills.append(newSkill)
         saveSkills()
+    }
+
+    func updateSkill(_ skill: Skill, name: String, goalHours: Double) {
+        if let index = skills.firstIndex(where: { $0.id == skill.id }) {
+            skills[index].name = name
+            skills[index].goalHours = goalHours
+            saveSkills()
+        }
     }
 
     func deleteSkill(_ skill: Skill) {
@@ -62,6 +73,7 @@ class SkillTrackerData: ObservableObject {
         if let index = skills.firstIndex(where: { $0.id == skill.id }) {
             skills[index].startTracking()
             saveSkills()
+            startUpdateTimer()
         }
     }
 
@@ -69,6 +81,7 @@ class SkillTrackerData: ObservableObject {
         if let index = skills.firstIndex(where: { $0.id == skill.id }) {
             skills[index].pauseTracking()
             saveSkills()
+            stopUpdateTimer()
         }
     }
 
@@ -120,12 +133,26 @@ class SkillTrackerData: ObservableObject {
         }
     }
 
-    // MARK: - Auto-save Timer
+    // MARK: - Timers
 
     private func startAutosaveTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: autosaveInterval, repeats: true) { [weak self] _ in
+        autosaveTimer = Timer.scheduledTimer(withTimeInterval: autosaveInterval, repeats: true) { [weak self] _ in
             self?.saveSkills()
+        }
+    }
+
+    private func startUpdateTimer() {
+        // Stop existing timer if any
+        updateTimer?.invalidate()
+
+        // Start 1-second timer for real-time updates
+        updateTimer = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { [weak self] _ in
             self?.updateTrackingTime()
         }
+    }
+
+    private func stopUpdateTimer() {
+        updateTimer?.invalidate()
+        updateTimer = nil
     }
 }
