@@ -1,0 +1,419 @@
+═════════════════════════════════════════════════════════════════════════════
+                         CODEBASE FILE INVENTORY
+═════════════════════════════════════════════════════════════════════════════
+
+VIEWS & UI COMPONENTS (8 files)
+─────────────────────────────────────────────────────────────────────────────
+
+📱 MenuBarIconView.swift (80 lines)
+   Purpose:    MenuBar icon display with idle/active states
+   Status:     ✅ COMPLETE
+   Features:   
+     • Hollow circle when idle
+     • Filled circle + time display when active
+     • Pulse animation (2s, repeating)
+       - Scale: 0.3 → 1.0
+       - Opacity: 0.8 → 0.0
+       - Easing: cubic-bezier(0.4, 0, 0.2, 1)
+     • Auto-stops on pause/stop
+     • System accent color (blue)
+
+📄 DropdownPanelView.swift (160 lines)
+   Purpose:    Main dropdown panel combining all components
+   Status:     ✅ COMPLETE (except keyboard shortcuts removed)
+   Features:
+     • 280pt wide, 12pt corner radius
+     • Visual effect blur background
+     • Dynamic layout:
+       - If tracking: Show ActiveSessionView
+       - If idle: Show skill list + AddSkillView
+     • Today's summary section
+     • Weekly heatmap section
+     • Floating shadow (24pt radius, 8pt offset)
+     • Previously had full keyboard navigation (removed)
+     • Dividers between sections
+
+📋 ActiveSessionView.swift (80 lines)
+   Purpose:    Display currently active tracking session
+   Status:     ✅ COMPLETE
+   Features:
+     • Skill name (display font)
+     • Status: "Currently tracking" or "Paused"
+     • Large time display (20pt monospaced)
+     • Pause/Resume button with play/pause icon
+     • Stop button with stop icon
+     • Background color animation:
+       - Blue tint (5%) when active
+       - Gray tint (8%) when paused
+     • Smooth 200ms transition
+     • Icon button styling with hover effects
+
+🎯 SkillRowView.swift (102 lines)
+   Purpose:    Individual skill row in selector
+   Status:     ✅ COMPLETE
+   Features:
+     • Color dot (8 color rotation)
+     • Skill name (display font)
+     • Total accumulated time (caption, right-aligned)
+     • Hover state with light background (5% opacity)
+     • Flash animation on tap:
+       - Blue flash (20% opacity)
+       - 200ms total (100ms in, 100ms out)
+       - Linear easing
+     • Highlight animation after session:
+       - Yellow glow (#FFD60A, 30% opacity)
+       - 1 second display duration
+       - countUp timing (400ms cubic-bezier)
+     • Computed totalSeconds from CoreData sessions
+
+➕ AddSkillView.swift (104 lines)
+   Purpose:    Inline skill creation form
+   Status:     ✅ COMPLETE
+   Features:
+     • TextField with auto-focus on appear
+     • Character limit enforcement (30 max)
+     • Real-time validation:
+       - Check for empty names
+       - Prevent duplicate names (case-insensitive)
+       - Display red error text
+     • Checkmark button appears when text entered
+     • Submit on Enter key press
+     • Cancel on Escape key press
+     • Gray placeholder dot (color not yet assigned)
+     • Input clearing on successful creation
+
+📊 TodaysSummaryView.swift (50 lines)
+   Purpose:    Display today's tracking statistics
+   Status:     ✅ COMPLETE
+   Features:
+     • "Today" label (body font, medium weight)
+     • Skill count text: "X skill(s) tracked"
+     • Total time (formatted: 2h 15m, 45m, <1m)
+     • Light background (2% opacity)
+     • Top border separator (5% opacity)
+     • Proper spacing per design system
+
+🔥 HeatmapView.swift (122 lines)
+   Purpose:    4-week activity heatmap visualization
+   Status:     ✅ COMPLETE
+   Features:
+     • 4-week (28-day) heatmap
+     • Grid: 4 rows (weeks) × 7 columns (days)
+     • Day labels: S, M, T, W, T, F, S
+     • Cell sizing: 32pt wide × 16pt tall
+     • Cell radius: 4pt, 2pt gaps between cells
+     • 7 intensity levels based on minutes:
+       0: Empty (5% opacity)
+       1: <15 min (10% opacity)
+       2: 15-29 min (25% opacity)
+       3: 30-59 min (40% opacity)
+       4: 60-119 min (60% opacity)
+       5: 120-179 min (80% opacity)
+       6: 180+ min (100% opacity)
+     • Hover effects:
+       - Border stroke (3% opacity)
+       - Scale effect (1.05x)
+       - 150ms animation (hoverState)
+     • Tooltips on hover:
+       - Formatted date
+       - Duration or "No activity"
+     • Accurate date calculation for each cell
+
+🎨 ContentView.swift (20 lines)
+   Purpose:    Placeholder content view
+   Status:     ⚠️ UNUSED
+   Features:   Just "Hello, World!" - not used in app
+   Note:       Can be removed, app uses MenuBarExtra
+
+────────────────────────────────────────────────────────────────────────────
+
+STATE MANAGEMENT (1 file)
+─────────────────────────────────────────────────────────────────────────────
+
+🎛️ AppViewModel.swift (210 lines)
+   Purpose:    Central state management and business logic
+   Status:     ✅ COMPLETE
+   Published:
+     • skills: [Skill] - All created skills
+     • activeSkill: Skill? - Currently tracking skill
+     • currentSession: Session? - Active session object
+     • isAddingSkill: Bool - Add skill mode toggle
+     • justUpdatedSkillId: UUID? - Highlight trigger
+   
+   Skill Management:
+     • fetchSkills() - Load from CoreData
+     • createSkill(name:) - Create with validation
+     • deleteSkill(_:) - Remove skill and cascade
+   
+   Session Management:
+     • startTracking(skill:) - Begin tracking
+     • pauseTracking() - Pause active session
+     • resumeTracking() - Resume paused session
+     • stopTracking() - End session, save, trigger highlight
+   
+   Statistics:
+     • todaysTotalSeconds() -> Int64 - Today's total
+     • todaysSkillCount() -> Int - Unique skills today
+   
+   Heatmap:
+     • heatmapData(weeksBack:) -> [[Int64]] - Grid data
+     • heatmapLevel(for:) -> Int - Intensity level (0-6)
+   
+   Features:
+     • CoreData integration
+     • Error logging via os.log
+     • Automatic skill highlighting (1s duration)
+     • Proper state transitions
+
+────────────────────────────────────────────────────────────────────────────
+
+DATA MODELS (4 files)
+─────────────────────────────────────────────────────────────────────────────
+
+📦 Skill+CoreDataClass.swift (12 lines)
+   Purpose:    Skill entity class (CoreData generated)
+   Status:     ✅ COMPLETE
+   Content:    Minimal class stub (@objc for Objective-C compatibility)
+
+📦 Skill+CoreDataProperties.swift (57 lines)
+   Purpose:    Skill entity properties and methods
+   Status:     ✅ COMPLETE
+   Attributes:
+     • id: UUID - Unique identifier
+     • name: String - Skill name (max 30 chars)
+     • colorIndex: Int16 - Color selection (0-7)
+     • createdAt: Date - Creation timestamp
+     • sessions: NSSet? - One-to-many relationship
+   
+   Methods:
+     • fetchRequest() - Create NSFetchRequest
+     • addToSessions(_:) / removeFromSessions(_:)
+     • Cascade relationship management
+   
+   Computed:
+     • totalSeconds: Int64 - Sum of all session durations
+   
+   Init:
+     • convenience init(context:, name:, colorIndex:)
+     • Sets UUID, name, colorIndex, createdAt
+   
+   Conformance: Identifiable (for ForEach)
+
+📦 Session+CoreDataClass.swift (12 lines)
+   Purpose:    Session entity class (CoreData generated)
+   Status:     ✅ COMPLETE
+   Content:    Minimal class stub (@objc for Objective-C compatibility)
+
+📦 Session+CoreDataProperties.swift (40 lines)
+   Purpose:    Session entity properties and methods
+   Status:     ✅ COMPLETE
+   Attributes:
+     • id: UUID - Unique identifier
+     • startTime: Date - Session start
+     • endTime: Date? - Session end (null while active)
+     • pausedDuration: Int64 - Total paused seconds
+     • skill: Skill? - Many-to-1 relationship
+   
+   Methods:
+     • fetchRequest() - Create NSFetchRequest
+   
+   Computed:
+     • durationSeconds: Int64
+       = (endTime ?? Date()) - startTime - pausedDuration
+   
+   Init:
+     • convenience init(context:, skill:)
+     • Sets UUID, startTime, pausedDuration, skill
+   
+   Conformance: Identifiable (for ForEach)
+
+────────────────────────────────────────────────────────────────────────────
+
+CORE SYSTEMS (3 files)
+─────────────────────────────────────────────────────────────────────────────
+
+⏱️ TimerManager.swift (96 lines)
+   Purpose:    Combine-based timer with pause/resume support
+   Status:     ✅ COMPLETE
+   Published:
+     • elapsedSeconds: Int64 - Current elapsed time
+     • isRunning: Bool - Timer state
+     • isPaused: Bool - Pause state
+   
+   Methods:
+     • start() - Begin tracking
+     • pause() - Pause timer
+     • resume() - Resume from pause
+     • stop() -> Int64 - Stop and return duration
+     • getPausedDuration() -> Int64 - Query pause total
+   
+   Implementation:
+     • Uses Timer.publish with 1.0s intervals
+     • Tracks startTime, pauseStartTime, totalPausedDuration
+     • Updates elapsedSeconds every second
+     • Handles pause duration accumulation
+   
+   Extensions:
+     • formattedTime() -> String - M:SS or H:MM:SS
+     • formattedShortTime() -> String - "2h 15m", "45m", "<1m"
+
+💾 Persistence.swift (49 lines)
+   Purpose:    CoreData stack initialization and saving
+   Status:     ✅ COMPLETE
+   Features:
+     • Singleton: PersistenceController.shared
+     • Lazy-loads NSPersistentContainer ("TenThousand")
+     • In-memory option for testing
+     • Error handling:
+       - Logs errors without crashing
+       - Falls back to in-memory storage
+     • Merge policy: NSMergeByPropertyObjectTrumpMergePolicy
+       - Handles concurrent access gracefully
+     • automaticallyMergesChangesFromParent = true
+     • save() method:
+       - Checks for unsaved changes
+       - Attempts to commit to persistent store
+       - Logs errors on failure
+
+🎨 DesignSystem.swift (204 lines)
+   Purpose:    Centralized design tokens and styling
+   Status:     ✅ COMPLETE
+   Sections:
+   
+   1. Colors
+      • Light mode neutrals (8 shades)
+      • Dark mode neutrals (7 shades)
+      • Accent colors (Blue #0071E3 + 8 skill colors)
+      • Adaptive colors (system colors)
+      • Custom hex() initializer
+   
+   2. Typography
+      • 5 font styles with metrics
+      • Display: 16pt Medium -0.3px
+      • Body: 13pt Regular -0.08px
+      • Caption: 11pt Regular 0px
+      • TimeDisplay: 14pt Medium Mono +0.5px
+      • LargeTimeDisplay: 20pt Medium Mono +0.5px
+      • View modifiers for each
+   
+   3. Spacing
+      • 8pt grid system
+      • Atomic (2pt) → Chunk (24pt)
+   
+   4. Dimensions
+      • Panel, rows, cells, corners
+      • Consistent 12pt corner radius
+   
+   5. Animations
+      • 4 timing curves
+      • All use cubic-bezier(0.4, 0, 0.2, 1)
+      • Durations: 150ms - 400ms
+   
+   6. Shadows
+      • Floating shadow definition
+      • Used for panel drop shadow
+
+────────────────────────────────────────────────────────────────────────────
+
+UI STYLES (1 file)
+─────────────────────────────────────────────────────────────────────────────
+
+🔘 ButtonStyles.swift (42 lines)
+   Purpose:    Custom button styles for the app
+   Status:     ✅ COMPLETE
+   
+   IconButtonStyle:
+     • Used for pause/resume/stop buttons
+     • Hover effect: Scale 1.0 → 1.05x
+     • Press effect: Scale 1.0 → 0.98x
+     • Hover animation: hoverState (150ms)
+     • Press animation: microInteraction (200ms)
+   
+   PanelButtonStyle:
+     • Used for skill rows and add button
+     • Hover effect: Background color (5% opacity)
+     • Press effect: Scale 1.0 → 0.98x
+     • Same animation timings as IconButtonStyle
+
+────────────────────────────────────────────────────────────────────────────
+
+DATA SCHEMA (1 directory)
+─────────────────────────────────────────────────────────────────────────────
+
+📦 TenThousand.xcdatamodeld/TenThousand.xcdatamodel/contents (XML)
+   Purpose:    CoreData data model definition
+   Status:     ✅ COMPLETE
+   
+   Entity: Skill
+     Attributes:
+       • colorIndex: Integer 16, default 0
+       • createdAt: Date
+       • id: UUID
+       • name: String (maxLength: 30)
+     Relationships:
+       • sessions: To-many Session (inverse)
+       • Deletion Rule: Cascade
+   
+   Entity: Session
+     Attributes:
+       • endTime: Date (optional)
+       • id: UUID
+       • pausedDuration: Integer 64, default 0
+       • startTime: Date
+     Relationships:
+       • skill: To-one Skill (inverse)
+       • Deletion Rule: Nullify
+
+────────────────────────────────────────────────────────────────────────────
+
+APP ENTRY POINT (1 file)
+─────────────────────────────────────────────────────────────────────────────
+
+🚀 TenThousandApp.swift (23 lines)
+   Purpose:    App entry point
+   Status:     ✅ COMPLETE
+   Features:
+     • @main struct TenThousandApp
+     • Uses MenuBarExtra (macOS 13+)
+     • Window-style menu bar extra
+     • Manages AppViewModel lifecycle
+     • Shows DropdownPanelView on activation
+     • Shows MenuBarIconView as label
+
+════════════════════════════════════════════════════════════════════════════
+
+FILE STATISTICS
+─────────────────────────────────────────────────────────────────────────────
+
+Total Swift Files:       20
+Total Lines of Code:     ~2,500
+Lines by Category:
+  • Views:               ~600 (8 files)
+  • State Management:    ~210 (1 file)
+  • Data Models:         ~120 (4 files)
+  • Core Systems:        ~350 (3 files)
+  • Styles:             ~42 (1 file)
+  • App Entry:          ~23 (1 file)
+  • Design System:      ~204 (1 file)
+
+File Size Summary:
+  • Largest:  DesignSystem.swift (204 lines)
+  • Largest:  AppViewModel.swift (210 lines)
+  • Smallest: TenThousandApp.swift (23 lines)
+
+════════════════════════════════════════════════════════════════════════════
+
+DEPENDENCIES
+─────────────────────────────────────────────────────────────────────────────
+
+Standard Framework Dependencies:
+  • SwiftUI     - UI framework
+  • Foundation  - Core utilities
+  • CoreData    - Data persistence
+  • Combine     - Reactive programming
+  • AppKit      - macOS-specific (NSVisualEffectView)
+  • os.log      - System logging
+
+No external package dependencies - Pure native Apple frameworks
+
+════════════════════════════════════════════════════════════════════════════
