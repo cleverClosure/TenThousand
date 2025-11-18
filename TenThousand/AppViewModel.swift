@@ -16,6 +16,7 @@ class AppViewModel: ObservableObject {
     @Published var activeSkill: Skill?
     @Published var currentSession: Session?
     @Published var isAddingSkill = false
+    @Published var justUpdatedSkillId: UUID? = nil
 
     let timerManager = TimerManager()
     let persistenceController: PersistenceController
@@ -96,7 +97,7 @@ class AppViewModel: ObservableObject {
     }
 
     func stopTracking() {
-        guard let session = currentSession else { return }
+        guard let session = currentSession, let skill = session.skill else { return }
 
         let finalSeconds = timerManager.stop()
         let pausedDuration = timerManager.getPausedDuration()
@@ -106,11 +107,19 @@ class AppViewModel: ObservableObject {
 
         persistenceController.save()
 
+        // Store the skill ID that was just updated for animation
+        justUpdatedSkillId = skill.id
+
         currentSession = nil
         activeSkill = nil
 
         // Refresh to update total times
         fetchSkills()
+
+        // Clear the highlight after 1 second
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.justUpdatedSkillId = nil
+        }
     }
 
     // MARK: - Statistics

@@ -16,11 +16,13 @@ struct TodaysSummaryView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Today")
                     .font(Typography.body)
+                    .kerning(Typography.bodyKerning)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
 
                 Text("\(skillCount) skill\(skillCount == 1 ? "" : "s") tracked")
                     .font(Typography.caption)
+                    .kerning(Typography.captionKerning)
                     .foregroundColor(.secondary)
             }
 
@@ -28,6 +30,8 @@ struct TodaysSummaryView: View {
 
             Text(totalSeconds.formattedShortTime())
                 .font(Typography.timeDisplay)
+                .kerning(Typography.timeDisplayKerning)
+                .monospacedDigit()
                 .foregroundColor(.primary)
         }
         .padding(Spacing.loose)

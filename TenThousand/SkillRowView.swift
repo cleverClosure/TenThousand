@@ -9,12 +9,26 @@ import SwiftUI
 
 struct SkillRowView: View {
     let skill: Skill
+    var isSelected: Bool = false
+    var isHighlighted: Bool = false
     let onTap: () -> Void
 
     @State private var isHovered = false
+    @State private var isFlashing = false
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: {
+            // Flash animation
+            withAnimation(.linear(duration: 0.1)) {
+                isFlashing = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.linear(duration: 0.1)) {
+                    isFlashing = false
+                }
+            }
+            onTap()
+        }) {
             HStack(spacing: Spacing.loose) {
                 // Color dot
                 Circle()
@@ -24,6 +38,7 @@ struct SkillRowView: View {
                 // Skill name
                 Text(skill.name ?? "Untitled")
                     .font(Typography.display)
+                    .kerning(Typography.displayKerning)
                     .foregroundColor(.primary)
                     .lineLimit(1)
 
@@ -38,8 +53,27 @@ struct SkillRowView: View {
             .padding(.vertical, Dimensions.skillRowPaddingVertical)
             .frame(height: Dimensions.skillRowHeight)
             .background(
-                RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                    .fill(isHovered ? Color.primary.opacity(0.05) : Color.clear)
+                ZStack {
+                    // Base background
+                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
+                        .fill(
+                            isSelected ? Color.trackingBlue.opacity(0.10) :
+                            isHovered ? Color.primary.opacity(0.05) : Color.clear
+                        )
+
+                    // Flash overlay (blue when tapped)
+                    if isFlashing {
+                        RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
+                            .fill(Color.trackingBlue.opacity(0.20))
+                    }
+
+                    // Highlight glow (yellow when just updated)
+                    if isHighlighted {
+                        RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
+                            .fill(Color(hex: "FFD60A").opacity(0.30))
+                            .transition(.opacity)
+                    }
+                }
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -48,6 +82,7 @@ struct SkillRowView: View {
                 isHovered = hovering
             }
         }
+        .animation(.countUp, value: isHighlighted)
     }
 
     private func colorForIndex(_ index: Int16) -> Color {
