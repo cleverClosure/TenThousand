@@ -20,10 +20,12 @@ struct ActiveSessionView: View {
                 VStack(alignment: .leading, spacing: Spacing.tight) {
                     Text(skill.name ?? "Untitled")
                         .font(Typography.display)
+                        .kerning(Typography.displayKerning)
                         .foregroundColor(.primary)
 
                     Text(timerManager.isPaused ? "Paused" : "Currently tracking")
                         .font(Typography.caption)
+                        .kerning(Typography.captionKerning)
                         .foregroundColor(.secondary)
                         .opacity(timerManager.isPaused ? 0.6 : 1.0)
                 }
@@ -32,6 +34,8 @@ struct ActiveSessionView: View {
 
                 Text(timerManager.elapsedSeconds.formattedTime())
                     .font(Typography.largeTimeDisplay)
+                    .kerning(Typography.largeTimeDisplayKerning)
+                    .monospacedDigit()
                     .foregroundColor(.primary)
                     .opacity(timerManager.isPaused ? 0.6 : 1.0)
             }
@@ -68,7 +72,8 @@ struct ActiveSessionView: View {
         .frame(height: Dimensions.activeSessionHeight)
         .background(
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                .fill(Color.trackingBlue.opacity(timerManager.isPaused ? 0.03 : 0.05))
+                .fill(timerManager.isPaused ? Color.secondary.opacity(0.08) : Color.trackingBlue.opacity(0.05))
         )
+        .animation(.microInteraction, value: timerManager.isPaused)
     }
 }
