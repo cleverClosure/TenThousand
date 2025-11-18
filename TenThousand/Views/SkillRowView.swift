@@ -11,6 +11,7 @@ struct SkillRowView: View {
     let skill: Skill
     let onPlayPause: () -> Void
     let onDelete: () -> Void
+    var onEdit: (() -> Void)? = nil
 
     @State private var showDeleteConfirmation = false
 
@@ -35,9 +36,21 @@ struct SkillRowView: View {
                     Image(systemName: skill.isTracking ? "pause.circle.fill" : "play.circle.fill")
                         .font(.system(size: 20))
                         .foregroundColor(skill.isTracking ? .orange : .green)
+                        .symbolEffect(.pulse, isActive: skill.isTracking)
                 }
                 .buttonStyle(.plain)
                 .help(skill.isTracking ? "Pause tracking" : "Start tracking")
+
+                // Edit button
+                if let editAction = onEdit {
+                    Button(action: editAction) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 12))
+                            .foregroundColor(.blue)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Edit skill")
+                }
 
                 // Delete button
                 Button(action: { showDeleteConfirmation = true }) {
@@ -54,16 +67,29 @@ struct SkillRowView: View {
                 ZStack(alignment: .leading) {
                     // Background
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.2))
+                        .fill(Color(nsColor: .separatorColor).opacity(0.3))
                         .frame(height: 8)
 
                     // Progress
                     RoundedRectangle(cornerRadius: 4)
                         .fill(skill.color)
                         .frame(width: geometry.size.width * CGFloat(min(skill.percentComplete / 100.0, 1.0)), height: 8)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: skill.percentComplete)
                 }
             }
             .frame(height: 8)
+
+            // Current session (if tracking)
+            if let currentSessionTime = skill.formattedCurrentSession() {
+                HStack {
+                    Image(systemName: "timer")
+                        .font(.system(size: 10))
+                        .foregroundColor(.orange)
+                    Text("Current session: \(currentSessionTime)")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.orange)
+                }
+            }
 
             // Stats row
             HStack {
