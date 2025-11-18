@@ -10,7 +10,6 @@ import SwiftUI
 @main
 struct TenThousandApp: App {
     @StateObject private var viewModel = AppViewModel()
-    let persistenceController = PersistenceController.shared
 
     var body: some Scene {
         MenuBarExtra {

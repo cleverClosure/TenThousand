@@ -21,9 +21,8 @@ extension Skill {
     var totalSeconds: Int64 {
         guard let sessions = sessions as? Set<Session> else { return 0 }
         return sessions.reduce(0) { total, session in
-            guard let endTime = session.endTime else { return total }
-            let duration = Int64(endTime.timeIntervalSince(session.startTime ?? Date()))
-            return total + duration - session.pausedDuration
+            // Use the session's durationSeconds property for consistency
+            return total + session.durationSeconds
         }
     }
 

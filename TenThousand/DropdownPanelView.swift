@@ -120,14 +120,6 @@ struct DropdownPanelView: View {
             x: Shadows.floating.x,
             y: Shadows.floating.y
         )
-        .onAppear {
-            setupKeyboardShortcuts()
-        }
-    }
-
-    private func setupKeyboardShortcuts() {
-        // Keyboard shortcuts are handled by SwiftUI's built-in commands
-        // Additional shortcuts can be added via the Commands scene builder
     }
 }
 

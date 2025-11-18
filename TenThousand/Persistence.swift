@@ -6,11 +6,13 @@
 //
 
 import CoreData
+import os.log
 
 struct PersistenceController {
     static let shared = PersistenceController()
 
     let container: NSPersistentContainer
+    private let logger = Logger(subsystem: "com.tenthousand.app", category: "Persistence")
 
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "TenThousand")
@@ -19,9 +21,12 @@ struct PersistenceController {
             container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
         }
 
-        container.loadPersistentStores { description, error in
+        container.loadPersistentStores { [logger] description, error in
             if let error = error {
-                fatalError("Failed to load Core Data stack: \(error)")
+                // Log error but don't crash - this allows the app to continue
+                // with in-memory storage if persistent store fails to load
+                logger.error("Failed to load Core Data stack: \(error.localizedDescription)")
+                logger.info("Falling back to in-memory storage")
             }
         }
 
@@ -36,8 +41,7 @@ struct PersistenceController {
             do {
                 try context.save()
             } catch {
-                let nsError = error as NSError
-                print("Failed to save context: \(nsError), \(nsError.userInfo)")
+                logger.error("Failed to save context: \(error.localizedDescription)")
             }
         }
     }

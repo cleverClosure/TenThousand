@@ -9,6 +9,11 @@ import SwiftUI
 
 // MARK: - Colors
 
+enum ColorConstants {
+    // Private initializer to prevent instantiation
+    private init() {}
+}
+
 extension Color {
     // Light Mode Neutrals
     static let pureWhite = Color(hex: "FFFFFF")
@@ -37,8 +42,8 @@ extension Color {
     static let primaryText = Color.primary
     static let secondaryText = Color.secondary
 
-    // Helper initializer
-    init(hex: String) {
+    // Helper initializer for hex color strings
+    fileprivate init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
@@ -66,7 +71,6 @@ extension Color {
 struct Typography {
     // Display (Skill Names, Large Numbers)
     static let display = Font.system(size: 16, weight: .medium, design: .default)
-        .leading(.tight)
 
     // Body (General Text)
     static let body = Font.system(size: 13, weight: .regular, design: .default)

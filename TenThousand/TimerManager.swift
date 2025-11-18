@@ -53,6 +53,11 @@ class TimerManager: ObservableObject {
     func stop() -> Int64 {
         guard isRunning else { return 0 }
 
+        // If currently paused, add the current pause duration to total
+        if isPaused, let pauseStart = pauseStartTime {
+            totalPausedDuration += Date().timeIntervalSince(pauseStart)
+        }
+
         let finalSeconds = elapsedSeconds
         isRunning = false
         isPaused = false
