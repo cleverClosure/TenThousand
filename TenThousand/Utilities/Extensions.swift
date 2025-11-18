@@ -8,6 +8,28 @@
 import Foundation
 import SwiftUI
 
+// MARK: - RectCorner Types
+
+struct RectCorner: OptionSet {
+    let rawValue: Int
+
+    static let topLeft = RectCorner(rawValue: 1 << 0)
+    static let topRight = RectCorner(rawValue: 1 << 1)
+    static let bottomLeft = RectCorner(rawValue: 1 << 2)
+    static let bottomRight = RectCorner(rawValue: 1 << 3)
+
+    static let allCorners: RectCorner = [.topLeft, .topRight, .bottomLeft, .bottomRight]
+}
+
+struct NSRectCorner: OptionSet {
+    let rawValue: Int
+
+    static let topLeft = NSRectCorner(rawValue: 1 << 0)
+    static let topRight = NSRectCorner(rawValue: 1 << 1)
+    static let bottomLeft = NSRectCorner(rawValue: 1 << 2)
+    static let bottomRight = NSRectCorner(rawValue: 1 << 3)
+}
+
 // MARK: - Date Extensions
 
 extension Date {
@@ -107,10 +129,10 @@ struct RoundedCorner: Shape {
     var corners: RectCorner = .allCorners
 
     func path(in rect: CGRect) -> Path {
-        let path = NSBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners.nsRectCorner,
-            cornerRadii: CGSize(width: radius, height: radius)
+        let path = NSBezierPath.roundedRectPath(
+            in: rect,
+            corners: corners.nsRectCorner,
+            radius: radius
         )
         return Path(path.cgPath)
     }
@@ -153,8 +175,8 @@ extension NSBezierPath {
         return path
     }
 
-    convenience init(roundedRect rect: CGRect, byRoundingCorners corners: NSRectCorner, cornerRadii: CGSize) {
-        self.init()
+    static func roundedRectPath(in rect: CGRect, corners: NSRectCorner, radius: CGFloat) -> NSBezierPath {
+        let path = NSBezierPath()
 
         let topLeft = rect.origin
         let topRight = CGPoint(x: rect.maxX, y: rect.minY)
@@ -162,49 +184,51 @@ extension NSBezierPath {
         let bottomLeft = CGPoint(x: rect.minX, y: rect.maxY)
 
         if corners.contains(.topLeft) {
-            move(to: CGPoint(x: topLeft.x + cornerRadii.width, y: topLeft.y))
+            path.move(to: CGPoint(x: topLeft.x + radius, y: topLeft.y))
         } else {
-            move(to: topLeft)
+            path.move(to: topLeft)
         }
 
         // Top right corner
         if corners.contains(.topRight) {
-            line(to: CGPoint(x: topRight.x - cornerRadii.width, y: topRight.y))
-            curve(to: CGPoint(x: topRight.x, y: topRight.y + cornerRadii.height),
+            path.line(to: CGPoint(x: topRight.x - radius, y: topRight.y))
+            path.curve(to: CGPoint(x: topRight.x, y: topRight.y + radius),
                   controlPoint1: topRight,
                   controlPoint2: topRight)
         } else {
-            line(to: topRight)
+            path.line(to: topRight)
         }
 
         // Bottom right corner
         if corners.contains(.bottomRight) {
-            line(to: CGPoint(x: bottomRight.x, y: bottomRight.y - cornerRadii.height))
-            curve(to: CGPoint(x: bottomRight.x - cornerRadii.width, y: bottomRight.y),
+            path.line(to: CGPoint(x: bottomRight.x, y: bottomRight.y - radius))
+            path.curve(to: CGPoint(x: bottomRight.x - radius, y: bottomRight.y),
                   controlPoint1: bottomRight,
                   controlPoint2: bottomRight)
         } else {
-            line(to: bottomRight)
+            path.line(to: bottomRight)
         }
 
         // Bottom left corner
         if corners.contains(.bottomLeft) {
-            line(to: CGPoint(x: bottomLeft.x + cornerRadii.width, y: bottomLeft.y))
-            curve(to: CGPoint(x: bottomLeft.x, y: bottomLeft.y - cornerRadii.height),
+            path.line(to: CGPoint(x: bottomLeft.x + radius, y: bottomLeft.y))
+            path.curve(to: CGPoint(x: bottomLeft.x, y: bottomLeft.y - radius),
                   controlPoint1: bottomLeft,
                   controlPoint2: bottomLeft)
         } else {
-            line(to: bottomLeft)
+            path.line(to: bottomLeft)
         }
 
         // Top left corner
         if corners.contains(.topLeft) {
-            line(to: CGPoint(x: topLeft.x, y: topLeft.y + cornerRadii.height))
-            curve(to: CGPoint(x: topLeft.x + cornerRadii.width, y: topLeft.y),
+            path.line(to: CGPoint(x: topLeft.x, y: topLeft.y + radius))
+            path.curve(to: CGPoint(x: topLeft.x + radius, y: topLeft.y),
                   controlPoint1: topLeft,
                   controlPoint2: topLeft)
         } else {
-            close()
+            path.close()
         }
+
+        return path
     }
 }
