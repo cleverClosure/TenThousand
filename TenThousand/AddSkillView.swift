@@ -30,7 +30,7 @@ struct AddSkillView: View {
                     .onSubmit {
                         createSkill()
                     }
-                    .onChange(of: skillName) { newValue in
+                    .onChange(of: skillName) { oldValue, newValue in
                         // Clear error when user types
                         errorMessage = nil
 

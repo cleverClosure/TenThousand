@@ -70,7 +70,7 @@ struct SkillRowView: View {
                     // Highlight glow (yellow when just updated)
                     if isHighlighted {
                         RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                            .fill(Color(hex: "FFD60A").opacity(0.30))
+                            .fill(Color("FFD60A").opacity(0.30))
                             .transition(.opacity)
                     }
                 }
@@ -88,13 +88,13 @@ struct SkillRowView: View {
     private func colorForIndex(_ index: Int16) -> Color {
         let colors: [Color] = [
             Color.trackingBlue,
-            Color(hex: "FF3B30"),
-            Color(hex: "FF9500"),
-            Color(hex: "FFCC00"),
-            Color(hex: "34C759"),
-            Color(hex: "00C7BE"),
-            Color(hex: "AF52DE"),
-            Color(hex: "FF2D55")
+            Color("FF3B30"),
+            Color("FF9500"),
+            Color("FFCC00"),
+            Color("34C759"),
+            Color("00C7BE"),
+            Color("AF52DE"),
+            Color("FF2D55")
         ]
         return colors[Int(index) % colors.count]
     }

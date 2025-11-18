@@ -41,14 +41,14 @@ struct MenuBarIconView: View {
                     .monospacedDigit()
             }
         }
-        .onChange(of: timerManager.isRunning) { isRunning in
+        .onChange(of: timerManager.isRunning) { _, isRunning in
             if isRunning && !timerManager.isPaused {
                 startPulseAnimation()
             } else {
                 resetPulseAnimation()
             }
         }
-        .onChange(of: timerManager.isPaused) { isPaused in
+        .onChange(of: timerManager.isPaused) { _, isPaused in
             if isPaused {
                 resetPulseAnimation()
             } else if timerManager.isRunning {

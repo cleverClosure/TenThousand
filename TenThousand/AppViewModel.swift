@@ -51,7 +51,7 @@ class AppViewModel: ObservableObject {
         }
 
         let colorIndex = Int16(skills.count % 8)
-        let skill = Skill(
+        _ = Skill(
             context: persistenceController.container.viewContext,
             name: trimmedName,
             colorIndex: colorIndex
@@ -99,7 +99,7 @@ class AppViewModel: ObservableObject {
     func stopTracking() {
         guard let session = currentSession, let skill = session.skill else { return }
 
-        let finalSeconds = timerManager.stop()
+        _ = timerManager.stop()
         let pausedDuration = timerManager.getPausedDuration()
 
         session.endTime = Date()
