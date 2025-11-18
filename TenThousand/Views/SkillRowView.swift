@@ -14,111 +14,127 @@ struct SkillRowView: View {
     var onEdit: (() -> Void)? = nil
 
     @State private var showDeleteConfirmation = false
+    @State private var isHovered = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Header with name and play/pause button
-            HStack {
+        VStack(alignment: .leading, spacing: Constants.spacing_sm) {
+            // Header Row: Color dot, skill name, play/pause button
+            HStack(spacing: Constants.spacing_sm) {
                 // Color indicator
                 Circle()
                     .fill(skill.color)
-                    .frame(width: 12, height: 12)
+                    .frame(width: 10, height: 10)
 
                 Text(skill.name)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: Constants.fontSize_body, weight: .medium))
                     .foregroundColor(.primary)
                     .lineLimit(1)
 
                 Spacer()
 
-                // Play/Pause button
+                // Edit and Delete buttons (visible on hover)
+                if isHovered {
+                    HStack(spacing: 4) {
+                        if let editAction = onEdit {
+                            Button(action: editAction) {
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(.blue)
+                            }
+                            .buttonStyle(.plain)
+                            .help("Edit skill")
+                        }
+
+                        Button(action: { showDeleteConfirmation = true }) {
+                            Image(systemName: "trash.circle.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(.red)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Delete skill")
+                    }
+                    .transition(.opacity)
+                }
+
+                // Play/Pause button (always visible)
                 Button(action: onPlayPause) {
                     Image(systemName: skill.isTracking ? "pause.circle.fill" : "play.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(skill.isTracking ? .orange : .green)
+                        .font(.system(size: 24))
+                        .foregroundColor(
+                            skill.isTracking
+                                ? Color(hex: Constants.color_paused) ?? .orange
+                                : Color(hex: Constants.color_active) ?? .green
+                        )
                         .symbolEffect(.pulse, isActive: skill.isTracking)
                 }
                 .buttonStyle(.plain)
                 .help(skill.isTracking ? "Pause tracking" : "Start tracking")
-
-                // Edit button
-                if let editAction = onEdit {
-                    Button(action: editAction) {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 12))
-                            .foregroundColor(.blue)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Edit skill")
-                }
-
-                // Delete button
-                Button(action: { showDeleteConfirmation = true }) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 12))
-                        .foregroundColor(.red)
-                }
-                .buttonStyle(.plain)
-                .help("Delete skill")
             }
 
-            // Cool retro text-based progress bar
-            AnimatedTextProgressBar(
+            // Progress Bar
+            ModernProgressBar(
                 progress: skill.percentComplete,
-                totalBlocks: 20,
+                accentColor: skill.color,
                 showPercentage: true,
-                accentColor: skill.color
+                isActive: skill.isTracking
             )
 
-            // Current session (if tracking)
+            // Stats Row
+            HStack(spacing: 4) {
+                Text("\(skill.formattedTotalTime()) / \(skill.formattedGoal())")
+                    .font(.system(size: Constants.fontSize_caption, weight: .medium))
+                    .foregroundColor(.secondary)
+
+                Text("•")
+                    .font(.system(size: Constants.fontSize_caption))
+                    .foregroundColor(.secondary)
+
+                if let completionDate = skill.projectedCompletionDate() {
+                    Text("Est: \(completionDate, style: .date)")
+                        .font(.system(size: Constants.fontSize_caption))
+                        .foregroundColor(.secondary)
+                } else {
+                    Text("Est: Start tracking")
+                        .font(.system(size: Constants.fontSize_caption))
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            // Current session timer (if tracking)
             if let currentSessionTime = skill.formattedCurrentSession() {
-                HStack {
+                HStack(spacing: 4) {
                     Image(systemName: "timer")
                         .font(.system(size: 10))
-                        .foregroundColor(.orange)
-                    Text("Current session: \(currentSessionTime)")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.orange)
-                }
-            }
+                        .foregroundColor(Color(hex: Constants.color_paused) ?? .orange)
 
-            // Stats row - hours progress
-            HStack {
-                Image(systemName: "clock.fill")
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
-
-                Text("\(skill.formattedTotalTime()) / \(skill.formattedGoal())")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-
-            // Projected completion date
-            if let completionDate = skill.projectedCompletionDate() {
-                HStack {
-                    Image(systemName: "calendar.badge.clock")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-
-                    Text("Complete: \(completionDate, style: .date)")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-                }
-            } else {
-                HStack {
-                    Image(systemName: "hourglass")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-
-                    Text("Start tracking to see projection")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
+                    Text("+\(currentSessionTime)")
+                        .font(.system(size: Constants.fontSize_caption, weight: .medium))
+                        .foregroundColor(Color(hex: Constants.color_paused) ?? .orange)
+                        .monospacedDigit()
                 }
             }
         }
-        .padding(12)
-        .background(Color(nsColor: .controlBackgroundColor))
-        .cornerRadius(8)
+        .padding(Constants.spacing_md)
+        .background(
+            RoundedRectangle(cornerRadius: Constants.radius_md)
+                .fill(
+                    skill.isTracking
+                        ? skill.color.opacity(0.08)
+                        : (isHovered ? Color(nsColor: .controlBackgroundColor).opacity(0.6) : Color.clear)
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Constants.radius_md)
+                .strokeBorder(
+                    skill.isTracking ? skill.color.opacity(0.3) : Color.clear,
+                    lineWidth: 1
+                )
+        )
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
         .alert("Delete Skill?", isPresented: $showDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {

@@ -68,71 +68,74 @@ struct MenuBarView: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack {
-            Text("Skill Tracker")
-                .font(.system(size: 17, weight: .semibold))
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(Constants.appName)
+                    .font(.system(size: Constants.fontSize_title2, weight: .semibold))
+                    .foregroundColor(.primary)
+
+                Text(Constants.appTagline)
+                    .font(.system(size: Constants.fontSize_caption))
+                    .foregroundColor(.secondary)
+            }
 
             Spacer()
 
             Button(action: { showSettings = true }) {
                 Image(systemName: "gear")
-                    .font(.system(size: 14))
+                    .font(.system(size: 20))
                     .foregroundColor(.secondary)
             }
             .buttonStyle(.plain)
             .help("Settings")
         }
         .padding(.horizontal, Constants.panelPadding)
-        .padding(.vertical, 12)
+        .padding(.vertical, Constants.spacing_lg)
     }
 
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "star.fill")
-                .font(.system(size: 52))
-                .foregroundColor(.orange)
-                .padding(.top, 24)
-                .symbolEffect(.bounce, value: showAddSkill)
+        VStack(spacing: Constants.spacing_lg) {
+            // Icon
+            Image(systemName: "target")
+                .font(.system(size: 56))
+                .foregroundColor(Color(hex: Constants.skillColors[0]) ?? .blue)
+                .padding(.top, Constants.spacing_xl)
+                .symbolEffect(.pulse)
 
-            Text("Master Any Skill")
-                .font(.system(size: 16, weight: .semibold))
+            // Title
+            Text("Start Your Journey")
+                .font(.system(size: Constants.fontSize_headline, weight: .semibold))
                 .foregroundColor(.primary)
 
-            VStack(spacing: 6) {
-                Text("Track your path to 10,000 hours")
-                    .font(.system(size: 13))
+            // Description
+            VStack(spacing: 4) {
+                Text("Add your first skill to begin tracking")
+                    .font(.system(size: Constants.fontSize_callout))
                     .foregroundColor(.secondary)
-
-                Text("of deliberate practice.")
-                    .font(.system(size: 13))
+                Text("your path to mastery")
+                    .font(.system(size: Constants.fontSize_callout))
                     .foregroundColor(.secondary)
             }
             .multilineTextAlignment(.center)
 
-            Text("\"Mastery requires 10,000 hours of practice\"")
-                .font(.system(size: 11))
-                .italic()
-                .foregroundColor(.secondary.opacity(0.8))
-                .padding(.horizontal, 40)
-                .multilineTextAlignment(.center)
-                .padding(.top, 8)
-
+            // Call to action button
             Button(action: { showAddSkill = true }) {
-                HStack(spacing: 6) {
+                HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 14))
                     Text("Add Your First Skill")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: Constants.fontSize_callout, weight: .medium))
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, Constants.buttonPaddingHorizontal)
+                .padding(.vertical, Constants.buttonPaddingVertical)
             }
             .buttonStyle(.borderedProminent)
-            .padding(.top, 8)
+            .padding(.top, Constants.spacing_sm)
         }
         .frame(height: 280)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Skills List
@@ -164,16 +167,16 @@ struct MenuBarView: View {
     // MARK: - Footer
 
     private var footer: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Constants.spacing_md) {
             Button(action: { showAddSkill = true }) {
                 HStack(spacing: 6) {
                     Image(systemName: "plus")
                         .font(.system(size: 12, weight: .semibold))
                     Text("Add Skill")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: Constants.fontSize_callout, weight: .medium))
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
+                .padding(.vertical, Constants.buttonPaddingVertical)
             }
             .buttonStyle(.borderedProminent)
             .help("Add a new skill")
@@ -182,9 +185,9 @@ struct MenuBarView: View {
                 NSApplication.shared.terminate(nil)
             }) {
                 Text("Quit")
-                    .font(.system(size: 13, weight: .medium))
-                    .frame(width: 60)
-                    .padding(.vertical, 8)
+                    .font(.system(size: Constants.fontSize_callout, weight: .medium))
+                    .frame(width: 70)
+                    .padding(.vertical, Constants.buttonPaddingVertical)
             }
             .buttonStyle(.bordered)
             .help("Quit application")
