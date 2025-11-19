@@ -7,7 +7,7 @@ on:
 jobs:
   pr-validation:
     name: PR Validation
-    runs-on: macos-14
+    runs-on: macos-latest
 
     steps:
     - name: Checkout code
@@ -60,7 +60,7 @@ jobs:
 
   code-coverage:
     name: Code Coverage Check
-    runs-on: macos-14
+    runs-on: macos-latest
 
     steps:
     - name: Checkout code

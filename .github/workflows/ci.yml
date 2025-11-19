@@ -10,7 +10,7 @@ on:
 jobs:
   test:
     name: Test and Build
-    runs-on: macos-14
+    runs-on: macos-latest
 
     steps:
     - name: Checkout code
@@ -69,7 +69,7 @@ jobs:
 
   lint:
     name: SwiftLint
-    runs-on: macos-14
+    runs-on: macos-latest
 
     steps:
     - name: Checkout code

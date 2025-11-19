@@ -88,7 +88,7 @@ swiftlint --fix
 ## GitHub Actions Requirements
 
 These workflows require:
-- **macOS runner** (macos-14 with Xcode 15.4 default, also supports 15.0-16.2)
+- **macOS runner** (macos-latest = macOS 15 with Xcode 16.4 default)
 - **No secrets required** for basic CI/CD
 - **Code signing certificates** for production releases (not included in CI)
 
@@ -111,7 +111,7 @@ When adding new workflows:
 ## Troubleshooting
 
 ### Tests failing locally but passing in CI
-- Check Xcode version matches CI (15.4 or 15.0+)
+- Check Xcode version (CI uses latest: 16.4 on macOS 15)
 - Ensure dependencies are up to date
 - Clean derived data: `rm -rf ~/Library/Developer/Xcode/DerivedData`
 
