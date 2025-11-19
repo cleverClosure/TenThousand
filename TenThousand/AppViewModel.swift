@@ -18,6 +18,7 @@ class AppViewModel: ObservableObject {
     @Published var isAddingSkill = false
     @Published var justUpdatedSkillId: UUID? = nil
     @Published var selectedSkillForDetail: Skill? = nil
+    @Published var showSettings = false
 
     let timerManager = TimerManager()
     let persistenceController: PersistenceController

@@ -24,8 +24,8 @@ private enum KeyboardShortcuts {
 
 struct DropdownPanelView: View {
     @ObservedObject var viewModel: AppViewModel
+    @ObservedObject var preferences = AppPreferences.shared
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("showMenuBarTimer") private var showMenuBarTimer = true
     @State private var selectedSkillIndex: Int? = nil
     @FocusState private var isPanelFocused: Bool
     @State private var skillToDelete: Skill? = nil
@@ -66,8 +66,10 @@ struct DropdownPanelView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // Priority: Detail view > Active session > Skill list
-            if let selectedSkill = viewModel.selectedSkillForDetail {
+            // Priority: Settings > Detail view > Active session > Skill list
+            if viewModel.showSettings {
+                settingsScreenSection
+            } else if let selectedSkill = viewModel.selectedSkillForDetail {
                 skillDetailSection(skill: selectedSkill)
             } else {
                 activeSessionSection
@@ -94,6 +96,12 @@ struct DropdownPanelView: View {
     @ViewBuilder
     private func skillDetailSection(skill: Skill) -> some View {
         SkillDetailView(skill: skill, viewModel: viewModel)
+            .transition(.opacity.combined(with: .move(edge: .trailing)))
+    }
+
+    @ViewBuilder
+    private var settingsScreenSection: some View {
+        SettingsView(preferences: preferences, viewModel: viewModel, isPresented: $viewModel.showSettings)
             .transition(.opacity.combined(with: .move(edge: .trailing)))
     }
 
@@ -200,22 +208,24 @@ struct DropdownPanelView: View {
 
     private var settingsSection: some View {
         VStack(spacing: 0) {
-            // Open Heatmap Visualization button
+            // Settings button
             Button(action: {
-                HeatmapWindowController.shared.openHeatmapWindow(viewModel: viewModel)
+                withAnimation(.panelTransition) {
+                    viewModel.showSettings = true
+                }
             }) {
                 HStack {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
+                    Image(systemName: "gear")
                         .font(.system(size: Dimensions.iconSizeSmall))
                         .foregroundColor(.secondary)
 
-                    Text("Heatmap Visualization")
+                    Text("Settings")
                         .font(Typography.body)
                         .foregroundColor(.primary)
 
                     Spacer()
 
-                    Image(systemName: "arrow.up.forward.square")
+                    Image(systemName: "chevron.right")
                         .font(.system(size: Dimensions.iconSizeSmall))
                         .foregroundColor(.secondary)
                 }
@@ -224,29 +234,6 @@ struct DropdownPanelView: View {
                 .frame(height: Dimensions.skillRowHeight)
             }
             .buttonStyle(PlainButtonStyle())
-
-            Divider()
-
-            // Show Timer in Menu Bar toggle
-            HStack {
-                Image(systemName: "clock")
-                    .font(.system(size: Dimensions.iconSizeSmall))
-                    .foregroundColor(.secondary)
-
-                Text("Show Timer in Menu Bar")
-                    .font(Typography.body)
-                    .foregroundColor(.primary)
-
-                Spacer()
-
-                Toggle("", isOn: $showMenuBarTimer)
-                    .labelsHidden()
-                    .toggleStyle(.switch)
-                    .controlSize(.small)
-            }
-            .padding(.horizontal, Spacing.base)
-            .padding(.vertical, Spacing.tight)
-            .frame(height: Dimensions.skillRowHeight)
         }
     }
 

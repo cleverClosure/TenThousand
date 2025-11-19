@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MenuBarIconView: View {
     @ObservedObject var timerManager: TimerManager
-    @AppStorage("showMenuBarTimer") private var showMenuBarTimer = true
+    @ObservedObject var preferences = AppPreferences.shared
     @State private var pulseScale: CGFloat = 0.3
     @State private var pulseOpacity: Double = 0.8
 
@@ -56,7 +56,7 @@ struct MenuBarIconView: View {
             }
 
             // Optional timer display (user-controlled)
-            if showMenuBarTimer && timerManager.isRunning {
+            if preferences.showMenuBarTimer && timerManager.isRunning {
                 Text(timerManager.elapsedSeconds.formattedTime())
                     .font(Typography.timeDisplay)
                     .kerning(Typography.timeDisplayKerning)
