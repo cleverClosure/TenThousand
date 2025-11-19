@@ -310,9 +310,11 @@ extension View {
         var view = AnyView(self)
         for numberKey in KeyboardShortcuts.numberKeys {
             view = AnyView(
-                view.onKeyPress(numberKey, modifiers: .command) { press in
-                    handleQuickSwitch(press)
-                    return .handled
+                view.onKeyPress(keys: [numberKey], phases: .down) { press in
+                    if press.modifiers.contains(.command) {
+                        return handleQuickSwitch(press) ? .handled : .ignored
+                    }
+                    return .ignored
                 }
             )
         }
@@ -324,8 +326,8 @@ extension View {
         dismiss: DismissAction
     ) -> some View {
         self
-            .onKeyPress("n", modifiers: .command) { _ in
-                if viewModel.activeSkill == nil {
+            .onKeyPress(keys: [.init("n")], phases: .down) { press in
+                if press.modifiers.contains(.command) && viewModel.activeSkill == nil {
                     withAnimation(.microInteraction) {
                         viewModel.isAddingSkill = true
                     }
@@ -333,8 +335,8 @@ extension View {
                 }
                 return .ignored
             }
-            .onKeyPress(".", modifiers: .command) { _ in
-                if viewModel.activeSkill != nil {
+            .onKeyPress(keys: [.init(".")], phases: .down) { press in
+                if press.modifiers.contains(.command) && viewModel.activeSkill != nil {
                     withAnimation(.panelTransition) {
                         viewModel.stopTracking()
                     }
