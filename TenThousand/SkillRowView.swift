@@ -19,11 +19,11 @@ struct SkillRowView: View {
     var body: some View {
         Button(action: {
             // Flash animation
-            withAnimation(.linear(duration: 0.1)) {
+            withAnimation(.linear(duration: AnimationDurations.flash)) {
                 isFlashing = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.linear(duration: 0.1)) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + AnimationDurations.flash) {
+                withAnimation(.linear(duration: AnimationDurations.flash)) {
                     isFlashing = false
                 }
             }
@@ -36,11 +36,11 @@ struct SkillRowView: View {
                     .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
                 // Skill name
-                Text(skill.name ?? "Untitled")
+                Text(skill.name ?? UIText.defaultSkillName)
                     .font(Typography.display)
                     .kerning(Typography.displayKerning)
                     .foregroundColor(.primary)
-                    .lineLimit(1)
+                    .lineLimit(LayoutConstants.skillNameLineLimit)
 
                 Spacer()
 
@@ -70,7 +70,7 @@ struct SkillRowView: View {
                     // Highlight glow (yellow when just updated)
                     if isHighlighted {
                         RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                            .fill(Color("FFD60A").opacity(Opacity.overlayStrong))
+                            .fill(Color.highlightYellow.opacity(Opacity.overlayStrong))
                             .transition(.opacity)
                     }
                 }
@@ -88,13 +88,13 @@ struct SkillRowView: View {
     private func colorForIndex(_ index: Int16) -> Color {
         let colors: [Color] = [
             Color.trackingBlue,
-            Color("FF3B30"),
-            Color("FF9500"),
-            Color("FFCC00"),
-            Color("34C759"),
-            Color("00C7BE"),
-            Color("AF52DE"),
-            Color("FF2D55")
+            Color.skillRed,
+            Color.skillOrange,
+            Color.skillYellow,
+            Color.skillGreen,
+            Color.skillTeal,
+            Color.skillPurple,
+            Color.skillPink
         ]
         return colors[Int(index) % colors.count]
     }

@@ -43,14 +43,14 @@ class AppViewModel: ObservableObject {
 
     func createSkill(name: String) {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty, trimmedName.count <= 30 else { return }
+        guard !trimmedName.isEmpty, trimmedName.count <= ValidationLimits.maxSkillNameLength else { return }
 
         // Check for duplicates
         if skills.contains(where: { $0.name == trimmedName }) {
             return
         }
 
-        let colorIndex = Int16(skills.count % 8)
+        let colorIndex = Int16(skills.count % ValidationLimits.colorPaletteSize)
         _ = Skill(
             context: persistenceController.container.viewContext,
             name: trimmedName,
@@ -116,8 +116,8 @@ class AppViewModel: ObservableObject {
         // Refresh to update total times
         fetchSkills()
 
-        // Clear the highlight after 1 second
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+        // Clear the highlight after animation duration
+        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationDurations.updateHighlight) { [weak self] in
             self?.justUpdatedSkillId = nil
         }
     }
@@ -161,14 +161,14 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Heatmap Data
 
-    func heatmapData(weeksBack: Int = 4) -> [[Int64]] {
+    func heatmapData(weeksBack: Int = CalendarConstants.defaultWeeksBack) -> [[Int64]] {
         let calendar = Calendar.current
         let today = Date()
 
-        var data: [[Int64]] = Array(repeating: Array(repeating: 0, count: 7), count: weeksBack)
+        var data: [[Int64]] = Array(repeating: Array(repeating: 0, count: CalendarConstants.daysPerWeek), count: weeksBack)
 
         let request: NSFetchRequest<Session> = Session.fetchRequest()
-        guard let startDate = calendar.date(byAdding: .day, value: -(weeksBack * 7), to: today) else {
+        guard let startDate = calendar.date(byAdding: .day, value: -(weeksBack * CalendarConstants.daysPerWeek), to: today) else {
             return data
         }
         request.predicate = NSPredicate(format: "startTime >= %@", startDate as NSDate)
@@ -180,10 +180,10 @@ class AppViewModel: ObservableObject {
                 guard let startTime = session.startTime else { continue }
 
                 let daysSinceStart = calendar.dateComponents([.day], from: startDate, to: startTime).day ?? 0
-                let weekIndex = daysSinceStart / 7
-                let dayIndex = daysSinceStart % 7
+                let weekIndex = daysSinceStart / CalendarConstants.daysPerWeek
+                let dayIndex = daysSinceStart % CalendarConstants.daysPerWeek
 
-                if weekIndex >= 0 && weekIndex < weeksBack && dayIndex >= 0 && dayIndex < 7 {
+                if weekIndex >= 0 && weekIndex < weeksBack && dayIndex >= 0 && dayIndex < CalendarConstants.daysPerWeek {
                     data[weekIndex][dayIndex] += session.durationSeconds
                 }
             }
@@ -196,14 +196,14 @@ class AppViewModel: ObservableObject {
 
     func heatmapLevel(for seconds: Int64) -> Int {
         // Convert to minutes for level calculation
-        let minutes = seconds / 60
+        let minutes = seconds / TimeConstants.secondsPerMinute
 
         if minutes == 0 { return 0 }
-        if minutes < 15 { return 1 }
-        if minutes < 30 { return 2 }
-        if minutes < 60 { return 3 }
-        if minutes < 120 { return 4 }
-        if minutes < 180 { return 5 }
+        if minutes < HeatmapThresholds.level1 { return 1 }
+        if minutes < HeatmapThresholds.level2 { return 2 }
+        if minutes < HeatmapThresholds.level3 { return 3 }
+        if minutes < HeatmapThresholds.level4 { return 4 }
+        if minutes < HeatmapThresholds.level5 { return 5 }
         return 6
     }
 }
