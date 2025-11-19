@@ -30,7 +30,7 @@ extension Color {
     static let pearl = Color(hex: "E8E8E8")
 
     // Accent Colors
-    static let trackingBlue = Color(hex: "0071E3")
+    static let trackingBlue = Color(hex: "A8D5FF")    // Sky Whisper
 
     // Adaptive Colors
     static let canvasBase = Color(nsColor: .windowBackgroundColor)
@@ -301,14 +301,14 @@ extension Color {
     // Highlight Colors
     static let highlightYellow = Color(hex: "FFD60A")
 
-    // Skill Color Palette
-    static let skillRed = Color(hex: "FF3B30")
-    static let skillOrange = Color(hex: "FF9500")
-    static let skillYellow = Color(hex: "FFCC00")
-    static let skillGreen = Color(hex: "34C759")
-    static let skillTeal = Color(hex: "00C7BE")
-    static let skillPurple = Color(hex: "AF52DE")
-    static let skillPink = Color(hex: "FF2D55")
+    // Skill Color Palette - Pastel Dreams
+    static let skillRed = Color(hex: "FFB3B0")        // Rose Petal
+    static let skillOrange = Color(hex: "FFD4A3")     // Peach Sorbet
+    static let skillYellow = Color(hex: "FFF4B3")     // Honey Glow
+    static let skillGreen = Color(hex: "B3E6C5")      // Mint Meadow
+    static let skillTeal = Color(hex: "A3E8E5")       // Ocean Mist
+    static let skillPurple = Color(hex: "E0C3FF")     // Lavender Haze
+    static let skillPink = Color(hex: "FFBDD1")       // Cherry Blossom
 }
 
 // MARK: - Animation Durations
