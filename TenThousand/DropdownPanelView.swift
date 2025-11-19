@@ -66,8 +66,10 @@ struct DropdownPanelView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // Priority: Detail view > Active session > Skill list
-            if let selectedSkill = viewModel.selectedSkillForDetail {
+            // Priority: Time Horizons > Detail view > Active session > Skill list
+            if viewModel.showingTimeHorizons {
+                timeHorizonsSection
+            } else if let selectedSkill = viewModel.selectedSkillForDetail {
                 skillDetailSection(skill: selectedSkill)
             } else {
                 activeSessionSection
@@ -93,6 +95,12 @@ struct DropdownPanelView: View {
                 quitButton
             }
         }
+    }
+
+    @ViewBuilder
+    private var timeHorizonsSection: some View {
+        TimeHorizonsView(viewModel: viewModel)
+            .transition(.opacity.combined(with: .move(edge: .trailing)))
     }
 
     @ViewBuilder
@@ -206,6 +214,35 @@ struct DropdownPanelView: View {
         VStack(spacing: 0) {
             // Goal Settings
             GoalSettingsView(viewModel: viewModel)
+
+            Divider()
+
+            // Time Horizons button
+            Button(action: {
+                withAnimation(.panelTransition) {
+                    viewModel.showingTimeHorizons = true
+                }
+            }) {
+                HStack {
+                    Image(systemName: "hourglass")
+                        .font(.system(size: Dimensions.iconSizeSmall))
+                        .foregroundColor(.secondary)
+
+                    Text("Time Horizons")
+                        .font(Typography.body)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: Dimensions.iconSizeSmall))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, Spacing.base)
+                .padding(.vertical, Spacing.tight)
+                .frame(height: Dimensions.skillRowHeight)
+            }
+            .buttonStyle(PlainButtonStyle())
 
             Divider()
 

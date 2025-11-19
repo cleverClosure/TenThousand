@@ -53,6 +53,9 @@ class AppViewModel: ObservableObject {
     /// The skill selected for detail view, or nil if showing main list.
     @Published var selectedSkillForDetail: Skill? = nil
 
+    /// Whether the Time Horizons view should be displayed.
+    @Published var showingTimeHorizons = false
+
     /// The user's goal settings (daily or weekly targets).
     @Published var goalSettings: GoalSettings?
 
