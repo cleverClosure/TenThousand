@@ -242,4 +242,117 @@ class AppViewModel: ObservableObject {
 
         return data
     }
+
+    // MARK: - Combined Heatmap Data (All Skills)
+
+    func combinedHeatmapData(daysBack: Int = 365) -> [Date: Int64] {
+        let calendar = Calendar.current
+        let today = Date()
+
+        var data: [Date: Int64] = [:]
+
+        let request: NSFetchRequest<Session> = Session.fetchRequest()
+        guard let startDate = calendar.date(byAdding: .day, value: -daysBack, to: today) else {
+            return data
+        }
+
+        request.predicate = NSPredicate(format: "startTime >= %@", startDate as NSDate)
+
+        do {
+            let sessions = try persistenceController.container.viewContext.fetch(request)
+
+            for session in sessions {
+                guard let startTime = session.startTime else { continue }
+
+                // Get the start of day for this session
+                let dayStart = calendar.startOfDay(for: startTime)
+
+                // Add session duration to that day's total
+                data[dayStart, default: 0] += session.durationSeconds
+            }
+        } catch {
+            logger.error("Failed to fetch combined heatmap data: \(error.localizedDescription)")
+        }
+
+        return data
+    }
+
+    // MARK: - Hourly Breakdown Data
+
+    /// Returns hourly breakdown for a specific date and skill
+    /// Result: Dictionary mapping hour (0-23) to seconds accumulated in that hour
+    func hourlyDataForSkill(_ skill: Skill?, date: Date) -> [Int: Int64] {
+        let calendar = Calendar.current
+        var data: [Int: Int64] = [:]
+
+        // Get start and end of the specified day
+        let dayStart = calendar.startOfDay(for: date)
+        guard let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else {
+            return data
+        }
+
+        let request: NSFetchRequest<Session> = Session.fetchRequest()
+
+        // Build predicate based on whether we're filtering by skill
+        if let skill = skill {
+            request.predicate = NSPredicate(
+                format: "skill == %@ AND startTime >= %@ AND startTime < %@",
+                skill, dayStart as NSDate, dayEnd as NSDate
+            )
+        } else {
+            request.predicate = NSPredicate(
+                format: "startTime >= %@ AND startTime < %@",
+                dayStart as NSDate, dayEnd as NSDate
+            )
+        }
+
+        do {
+            let sessions = try persistenceController.container.viewContext.fetch(request)
+
+            for session in sessions {
+                guard let startTime = session.startTime,
+                      let endTime = session.endTime else { continue }
+
+                // Calculate which hour(s) this session spans
+                var currentTime = startTime
+                let sessionEnd = min(endTime, dayEnd) // Don't go past end of day
+
+                while currentTime < sessionEnd {
+                    let hour = calendar.component(.hour, from: currentTime)
+
+                    // Calculate how much time is in this hour
+                    guard let hourEnd = calendar.date(byAdding: .hour, value: 1, to: calendar.date(bySetting: .minute, value: 0, of: calendar.date(bySetting: .second, value: 0, of: currentTime)!)!)
+                    else { break }
+
+                    let segmentEnd = min(hourEnd, sessionEnd)
+                    let secondsInHour = Int64(segmentEnd.timeIntervalSince(currentTime))
+
+                    data[hour, default: 0] += secondsInHour
+
+                    currentTime = segmentEnd
+                }
+            }
+        } catch {
+            logger.error("Failed to fetch hourly data: \(error.localizedDescription)")
+        }
+
+        return data
+    }
+
+    /// Returns hourly breakdown for the past 7 days (week view)
+    /// Result: Dictionary mapping Date to hourly data
+    func hourlyWeekDataForSkill(_ skill: Skill?) -> [Date: [Int: Int64]] {
+        let calendar = Calendar.current
+        let today = Date()
+        var data: [Date: [Int: Int64]] = [:]
+
+        for dayOffset in 0..<7 {
+            if let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) {
+                let dayStart = calendar.startOfDay(for: date)
+                data[dayStart] = hourlyDataForSkill(skill, date: dayStart)
+            }
+        }
+
+        return data
+    }
 }
