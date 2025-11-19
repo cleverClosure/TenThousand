@@ -200,6 +200,34 @@ struct DropdownPanelView: View {
 
     private var settingsSection: some View {
         VStack(spacing: 0) {
+            // Open Heatmap Visualization button
+            Button(action: {
+                HeatmapWindowController.shared.openHeatmapWindow(viewModel: viewModel)
+            }) {
+                HStack {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.system(size: Dimensions.iconSizeSmall))
+                        .foregroundColor(.secondary)
+
+                    Text("Heatmap Visualization")
+                        .font(Typography.body)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Image(systemName: "arrow.up.forward.square")
+                        .font(.system(size: Dimensions.iconSizeSmall))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, Spacing.base)
+                .padding(.vertical, Spacing.tight)
+                .frame(height: Dimensions.skillRowHeight)
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            Divider()
+
+            // Show Timer in Menu Bar toggle
             HStack {
                 Image(systemName: "clock")
                     .font(.system(size: Dimensions.iconSizeSmall))

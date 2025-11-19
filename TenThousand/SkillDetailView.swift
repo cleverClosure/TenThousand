@@ -147,11 +147,30 @@ struct SkillDetailView: View {
 
     private var heatmapSection: some View {
         VStack(spacing: Spacing.base) {
-            Text("Activity")
-                .font(Typography.body)
-                .kerning(Typography.bodyKerning)
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                Text("Activity")
+                    .font(Typography.body)
+                    .kerning(Typography.bodyKerning)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                // Button to open visualization window
+                Button(action: {
+                    HeatmapWindowController.shared.openHeatmapWindow(viewModel: viewModel)
+                }) {
+                    HStack(spacing: Spacing.tight) {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.system(size: 10))
+                        Text("Deep View")
+                            .font(Typography.caption)
+                            .kerning(Typography.captionKerning)
+                    }
+                    .foregroundColor(.trackingBlue)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             SkillHeatmapView(skill: skill, viewModel: viewModel)
                 .padding(Spacing.loose)
