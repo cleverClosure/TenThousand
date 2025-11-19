@@ -19,6 +19,7 @@ private enum KeyboardShortcuts {
 
     static let addSkill = KeyEquivalent("n")
     static let stopTracking = KeyEquivalent(".")
+    static let quit = KeyEquivalent("q")
 }
 
 struct DropdownPanelView: View {
@@ -80,6 +81,10 @@ struct DropdownPanelView: View {
                 data: viewModel.heatmapData(),
                 levelForSeconds: viewModel.heatmapLevel
             )
+
+            Divider()
+
+            quitButton
         }
     }
 
@@ -179,6 +184,32 @@ struct DropdownPanelView: View {
             }
             .buttonStyle(PlainButtonStyle())
         }
+    }
+
+    private var quitButton: some View {
+        Button(action: {
+            NSApplication.shared.terminate(nil)
+        }) {
+            HStack {
+                Image(systemName: "xmark.circle")
+                    .font(.system(size: Dimensions.iconSizeSmall))
+                    .foregroundColor(.secondary)
+
+                Text("Quit")
+                    .font(Typography.body)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                Text("⌘Q")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, Spacing.base)
+            .padding(.vertical, Spacing.tight)
+            .frame(height: Dimensions.skillRowHeight)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 
     private var backgroundView: some View {
@@ -393,6 +424,13 @@ extension View {
                     withAnimation(.panelTransition) {
                         viewModel.stopTracking()
                     }
+                    return .handled
+                }
+                return .ignored
+            }
+            .onKeyPress(keys: [KeyboardShortcuts.quit], phases: .down) { press in
+                if press.modifiers.contains(.command) {
+                    NSApplication.shared.terminate(nil)
                     return .handled
                 }
                 return .ignored
