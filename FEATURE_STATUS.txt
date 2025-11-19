@@ -46,9 +46,12 @@ UI/UX COMPONENTS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ✅ MenuBar Icon
-   └─ Idle state (hollow circle)
-   └─ Active state (filled circle + time)
-   └─ Pulse animation (2s, scale 0.3→1.0, fade 0.8→0)
+   └─ Custom drawn (18x18 canvas, 14x14 glyph, 2px padding)
+   └─ Idle state: Circle with dot in center
+   └─ Active state: Circle with animated ring (dot → ring pulse)
+   └─ Pulse animation (2s, scale 0.3→1.0, fade 0.8→0, cubic-bezier)
+   └─ Optional timer display (user-controlled via settings)
+   └─ Template image (matches system menubar icons)
    └─ 📄 MenuBarIconView.swift
 
 ✅ Dropdown Panel (280pt wide)
@@ -56,6 +59,7 @@ UI/UX COMPONENTS
    └─ 12pt border radius
    └─ Floating shadow (24pt, 8pt offset, 12% opacity)
    └─ Dynamic layout (active session OR skill list + summary + heatmap)
+   └─ Settings toggle (show/hide menubar timer)
    └─ 📄 DropdownPanelView.swift
 
 ✅ Active Session Display
