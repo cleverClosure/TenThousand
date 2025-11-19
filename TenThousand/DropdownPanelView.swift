@@ -47,7 +47,39 @@ struct DropdownPanelView: View {
                 navigateDown()
                 return .handled
             }
-            .onKeyPress(keys: [.one, .two, .three, .four, .five, .six, .seven, .eight, .nine], modifiers: .command) { press in
+            .onKeyPress(.one, modifiers: .command) { press in
+                handleQuickSwitch(press)
+                return .handled
+            }
+            .onKeyPress(.two, modifiers: .command) { press in
+                handleQuickSwitch(press)
+                return .handled
+            }
+            .onKeyPress(.three, modifiers: .command) { press in
+                handleQuickSwitch(press)
+                return .handled
+            }
+            .onKeyPress(.four, modifiers: .command) { press in
+                handleQuickSwitch(press)
+                return .handled
+            }
+            .onKeyPress(.five, modifiers: .command) { press in
+                handleQuickSwitch(press)
+                return .handled
+            }
+            .onKeyPress(.six, modifiers: .command) { press in
+                handleQuickSwitch(press)
+                return .handled
+            }
+            .onKeyPress(.seven, modifiers: .command) { press in
+                handleQuickSwitch(press)
+                return .handled
+            }
+            .onKeyPress(.eight, modifiers: .command) { press in
+                handleQuickSwitch(press)
+                return .handled
+            }
+            .onKeyPress(.nine, modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
