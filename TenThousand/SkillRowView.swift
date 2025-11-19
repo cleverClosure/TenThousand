@@ -11,7 +11,9 @@ struct SkillRowView: View {
     let skill: Skill
     var isSelected: Bool = false
     var isHighlighted: Bool = false
+    var canDelete: Bool = true
     let onTap: () -> Void
+    var onDelete: (() -> Void)? = nil
 
     @State private var isHovered = false
     @State private var isFlashing = false
@@ -77,6 +79,13 @@ struct SkillRowView: View {
             )
         }
         .buttonStyle(PlainButtonStyle())
+        .contextMenu {
+            if canDelete, let onDelete = onDelete {
+                Button(action: onDelete) {
+                    Label("Delete Skill", systemImage: "trash")
+                }
+            }
+        }
         .onHover { hovering in
             withAnimation(.hoverState) {
                 isHovered = hovering

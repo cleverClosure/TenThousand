@@ -26,6 +26,8 @@ struct DropdownPanelView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedSkillIndex: Int? = nil
     @FocusState private var isPanelFocused: Bool
+    @State private var skillToDelete: Skill? = nil
+    @State private var showingDeleteAlert = false
 
     var body: some View {
         styledContent
@@ -39,6 +41,9 @@ struct DropdownPanelView: View {
                 navigateDown: navigateDown,
                 handleQuickSwitch: handleQuickSwitch
             )
+            .alert(isPresented: $showingDeleteAlert) {
+                deleteConfirmationAlert
+            }
     }
 
     private var styledContent: some View {
@@ -135,12 +140,17 @@ struct DropdownPanelView: View {
             SkillRowView(
                 skill: skill,
                 isSelected: selectedSkillIndex == index,
-                isHighlighted: viewModel.justUpdatedSkillId == skill.id
-            ) {
-                withAnimation(.panelTransition) {
-                    viewModel.startTracking(skill: skill)
+                isHighlighted: viewModel.justUpdatedSkillId == skill.id,
+                canDelete: viewModel.activeSkill?.id != skill.id,
+                onTap: {
+                    withAnimation(.panelTransition) {
+                        viewModel.startTracking(skill: skill)
+                    }
+                },
+                onDelete: {
+                    handleDeleteSkill(skill)
                 }
-            }
+            )
         }
     }
 
@@ -186,6 +196,48 @@ struct DropdownPanelView: View {
 
     private var existingSkillNames: [String] {
         viewModel.skills.compactMap { $0.name }
+    }
+
+    // MARK: - Delete Functionality
+
+    private var deleteConfirmationAlert: Alert {
+        guard let skill = skillToDelete else {
+            return Alert(title: Text("Error"))
+        }
+
+        let sessionCount = (skill.sessions as? Set<Session>)?.count ?? 0
+        let skillName = skill.name ?? UIText.defaultSkillName
+
+        let message: String
+        if sessionCount > 0 {
+            message = "'\(skillName)' has \(sessionCount) session\(sessionCount == 1 ? "" : "s"). Deleting will permanently remove all session data."
+        } else {
+            message = "Are you sure you want to delete '\(skillName)'?"
+        }
+
+        return Alert(
+            title: Text("Delete Skill?"),
+            message: Text(message),
+            primaryButton: .destructive(Text("Delete")) {
+                if let skillToDelete = skillToDelete {
+                    withAnimation(.panelTransition) {
+                        viewModel.deleteSkill(skillToDelete)
+                    }
+                }
+            },
+            secondaryButton: .cancel()
+        )
+    }
+
+    private func handleDeleteSkill(_ skill: Skill) {
+        // Protection: Can't delete if currently tracking this skill
+        if let activeSkill = viewModel.activeSkill, activeSkill.id == skill.id {
+            // Could add a separate alert here, but for now just prevent deletion
+            return
+        }
+
+        skillToDelete = skill
+        showingDeleteAlert = true
     }
 
     // MARK: - Keyboard Handlers
