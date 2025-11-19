@@ -8,6 +8,16 @@
 import SwiftUI
 import AppKit
 
+// MARK: - Constants
+
+private enum KeyboardShortcuts {
+    static let numberKeys: [KeyEquivalent] = [
+        .init("1"), .init("2"), .init("3"),
+        .init("4"), .init("5"), .init("6"),
+        .init("7"), .init("8"), .init("9")
+    ]
+}
+
 struct DropdownPanelView: View {
     @ObservedObject var viewModel: AppViewModel
     @Environment(\.dismiss) private var dismiss
@@ -15,6 +25,20 @@ struct DropdownPanelView: View {
     @FocusState private var isPanelFocused: Bool
 
     var body: some View {
+        styledContent
+            .withKeyboardHandlers(
+                viewModel: viewModel,
+                isPanelFocused: $isPanelFocused,
+                dismiss: dismiss,
+                handleSpaceKey: handleSpaceKey,
+                handleReturnKey: handleReturnKey,
+                navigateUp: navigateUp,
+                navigateDown: navigateDown,
+                handleQuickSwitch: handleQuickSwitch
+            )
+    }
+
+    private var styledContent: some View {
         mainContent
             .frame(width: Dimensions.panelWidth)
             .background(backgroundView)
@@ -26,84 +50,6 @@ struct DropdownPanelView: View {
                 x: Shadows.floating.x,
                 y: Shadows.floating.y
             )
-            .focusable()
-            .focused($isPanelFocused)
-            .onAppear {
-                isPanelFocused = true
-            }
-            .onKeyPress(.space) {
-                handleSpaceKey()
-                return .handled
-            }
-            .onKeyPress(.return) {
-                handleReturnKey()
-                return .handled
-            }
-            .onKeyPress(.upArrow) {
-                navigateUp()
-                return .handled
-            }
-            .onKeyPress(.downArrow) {
-                navigateDown()
-                return .handled
-            }
-            .onKeyPress("1", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("2", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("3", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("4", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("5", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("6", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("7", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("8", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("9", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("n", modifiers: .command) { _ in
-                if viewModel.activeSkill == nil {
-                    withAnimation(.microInteraction) {
-                        viewModel.isAddingSkill = true
-                    }
-                    return .handled
-                }
-                return .ignored
-            }
-            .onKeyPress(".", modifiers: .command) { _ in
-                if viewModel.activeSkill != nil {
-                    withAnimation(.panelTransition) {
-                        viewModel.stopTracking()
-                    }
-                    return .handled
-                }
-                return .ignored
-            }
-            .onCommand(#selector(NSResponder.cancelOperation(_:)), perform: {
-                dismiss()
-            })
     }
 
     // MARK: - View Components
@@ -292,8 +238,8 @@ struct DropdownPanelView: View {
     }
 
     private func handleQuickSwitch(_ press: KeyPress) -> Bool {
-        let numbers: [KeyEquivalent] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-        if let index = numbers.firstIndex(of: press.key), index < viewModel.skills.count {
+        if let index = KeyboardShortcuts.numberKeys.firstIndex(of: press.key),
+           index < viewModel.skills.count {
             let skill = viewModel.skills[index]
             withAnimation(.panelTransition) {
                 viewModel.startTracking(skill: skill)
@@ -301,6 +247,104 @@ struct DropdownPanelView: View {
             return true
         }
         return false
+    }
+}
+
+// MARK: - View Extensions
+
+extension View {
+    func withKeyboardHandlers(
+        viewModel: AppViewModel,
+        isPanelFocused: FocusState<Bool>.Binding,
+        dismiss: DismissAction,
+        handleSpaceKey: @escaping () -> Bool,
+        handleReturnKey: @escaping () -> Bool,
+        navigateUp: @escaping () -> Void,
+        navigateDown: @escaping () -> Void,
+        handleQuickSwitch: @escaping (KeyPress) -> Bool
+    ) -> some View {
+        self
+            .focusable()
+            .focused(isPanelFocused)
+            .onAppear {
+                isPanelFocused.wrappedValue = true
+            }
+            .withNavigationKeys(
+                handleSpaceKey: handleSpaceKey,
+                handleReturnKey: handleReturnKey,
+                navigateUp: navigateUp,
+                navigateDown: navigateDown
+            )
+            .withNumberKeys(handleQuickSwitch: handleQuickSwitch)
+            .withCommandKeys(viewModel: viewModel, dismiss: dismiss)
+    }
+
+    private func withNavigationKeys(
+        handleSpaceKey: @escaping () -> Bool,
+        handleReturnKey: @escaping () -> Bool,
+        navigateUp: @escaping () -> Void,
+        navigateDown: @escaping () -> Void
+    ) -> some View {
+        self
+            .onKeyPress(.space) {
+                handleSpaceKey()
+                return .handled
+            }
+            .onKeyPress(.return) {
+                handleReturnKey()
+                return .handled
+            }
+            .onKeyPress(.upArrow) {
+                navigateUp()
+                return .handled
+            }
+            .onKeyPress(.downArrow) {
+                navigateDown()
+                return .handled
+            }
+    }
+
+    private func withNumberKeys(
+        handleQuickSwitch: @escaping (KeyPress) -> Bool
+    ) -> some View {
+        var view = AnyView(self)
+        for numberKey in KeyboardShortcuts.numberKeys {
+            view = AnyView(
+                view.onKeyPress(numberKey, modifiers: .command) { press in
+                    handleQuickSwitch(press)
+                    return .handled
+                }
+            )
+        }
+        return view
+    }
+
+    private func withCommandKeys(
+        viewModel: AppViewModel,
+        dismiss: DismissAction
+    ) -> some View {
+        self
+            .onKeyPress("n", modifiers: .command) { _ in
+                if viewModel.activeSkill == nil {
+                    withAnimation(.microInteraction) {
+                        viewModel.isAddingSkill = true
+                    }
+                    return .handled
+                }
+                return .ignored
+            }
+            .onKeyPress(".", modifiers: .command) { _ in
+                if viewModel.activeSkill != nil {
+                    withAnimation(.panelTransition) {
+                        viewModel.stopTracking()
+                    }
+                    return .handled
+                }
+                return .ignored
+            }
+            .onCommand(#selector(NSResponder.cancelOperation(_:)), perform: {
+                dismiss()
+            })
     }
 }
 
