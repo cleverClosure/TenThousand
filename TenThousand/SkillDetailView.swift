@@ -42,6 +42,9 @@ struct SkillDetailView: View {
                     // Skill info section
                     skillInfoSection
 
+                    // Heatmap section
+                    heatmapSection
+
                     // Statistics section
                     statsSection
 
@@ -138,6 +141,25 @@ struct SkillDetailView: View {
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
                 .fill(Color.primary.opacity(Opacity.backgroundMedium))
         )
+    }
+
+    // MARK: - Heatmap Section
+
+    private var heatmapSection: some View {
+        VStack(spacing: Spacing.base) {
+            Text("Activity")
+                .font(Typography.body)
+                .kerning(Typography.bodyKerning)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            SkillHeatmapView(skill: skill, viewModel: viewModel)
+                .padding(Spacing.loose)
+                .background(
+                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
+                        .fill(Color.primary.opacity(Opacity.backgroundMedium))
+                )
+        }
     }
 
     // MARK: - Stats Section
