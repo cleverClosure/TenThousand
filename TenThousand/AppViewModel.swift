@@ -207,4 +207,39 @@ class AppViewModel: ObservableObject {
         if minutes < HeatmapThresholds.level5 { return 5 }
         return 6
     }
+
+    // MARK: - Skill-Specific Heatmap Data
+
+    func heatmapDataForSkill(_ skill: Skill, daysBack: Int = 365) -> [Date: Int64] {
+        let calendar = Calendar.current
+        let today = Date()
+
+        var data: [Date: Int64] = [:]
+
+        let request: NSFetchRequest<Session> = Session.fetchRequest()
+        guard let startDate = calendar.date(byAdding: .day, value: -daysBack, to: today) else {
+            return data
+        }
+
+        // Filter sessions by skill and date range
+        request.predicate = NSPredicate(format: "skill == %@ AND startTime >= %@", skill, startDate as NSDate)
+
+        do {
+            let sessions = try persistenceController.container.viewContext.fetch(request)
+
+            for session in sessions {
+                guard let startTime = session.startTime else { continue }
+
+                // Get the start of day for this session
+                let dayStart = calendar.startOfDay(for: startTime)
+
+                // Add session duration to that day's total
+                data[dayStart, default: 0] += session.durationSeconds
+            }
+        } catch {
+            logger.error("Failed to fetch skill heatmap data: \(error.localizedDescription)")
+        }
+
+        return data
+    }
 }
