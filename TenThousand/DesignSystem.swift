@@ -226,8 +226,15 @@ struct Opacity {
 
 // MARK: - Shadows
 
+struct Shadow {
+    let radius: CGFloat
+    let x: CGFloat
+    let y: CGFloat
+    let opacity: Double
+}
+
 struct Shadows {
-    static let floating: (radius: CGFloat, x: CGFloat, y: CGFloat, opacity: Double) = (
+    static let floating = Shadow(
         radius: 24,
         x: 0,
         y: 8,

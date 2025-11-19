@@ -51,6 +51,6 @@ extension Skill {
     @NSManaged public func removeFromSessions(_ values: NSSet)
 }
 
-extension Skill : Identifiable {
+extension Skill: Identifiable {
 
 }
