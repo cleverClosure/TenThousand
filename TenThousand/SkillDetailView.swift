@@ -45,6 +45,9 @@ struct SkillDetailView: View {
                     // Heatmap section
                     heatmapSection
 
+                    // Progress Charts section
+                    progressChartsSection
+
                     // Statistics section
                     statsSection
 
@@ -179,6 +182,12 @@ struct SkillDetailView: View {
                         .fill(Color.primary.opacity(Opacity.backgroundMedium))
                 )
         }
+    }
+
+    // MARK: - Progress Charts Section
+
+    private var progressChartsSection: some View {
+        ProgressChartsView(skill: skill, viewModel: viewModel)
     }
 
     // MARK: - Stats Section
