@@ -23,7 +23,7 @@ struct AddSkillView: View {
                     .fill(Color.secondary.opacity(Opacity.overlayStrong))
                     .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
-                TextField("Skill name...", text: $skillName)
+                TextField(UIText.skillNamePlaceholder, text: $skillName)
                     .font(Typography.display)
                     .textFieldStyle(PlainTextFieldStyle())
                     .focused($isFocused)
@@ -34,9 +34,9 @@ struct AddSkillView: View {
                         // Clear error when user types
                         errorMessage = nil
 
-                        // Limit to 30 characters
-                        if newValue.count > 30 {
-                            skillName = String(newValue.prefix(30))
+                        // Limit to max skill name length
+                        if newValue.count > ValidationLimits.maxSkillNameLength {
+                            skillName = String(newValue.prefix(ValidationLimits.maxSkillNameLength))
                         }
                     }
 
@@ -80,12 +80,12 @@ struct AddSkillView: View {
 
         // Validation
         if trimmed.isEmpty {
-            errorMessage = "Skill name cannot be empty"
+            errorMessage = UIText.errorEmptySkillName
             return
         }
 
         if existingSkillNames.contains(where: { $0.lowercased() == trimmed.lowercased() }) {
-            errorMessage = "A skill with this name already exists"
+            errorMessage = UIText.errorDuplicateSkillName
             return
         }
 

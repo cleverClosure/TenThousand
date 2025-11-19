@@ -71,7 +71,7 @@ class TimerManager: ObservableObject {
     }
 
     private func startTimer() {
-        timerCancellable = Timer.publish(every: 1.0, on: .main, in: .common)
+        timerCancellable = Timer.publish(every: TimeConstants.timerUpdateInterval, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 self?.updateElapsedTime()
@@ -98,31 +98,31 @@ class TimerManager: ObservableObject {
 
 extension Int64 {
     func formattedTime() -> String {
-        let hours = self / 3600
-        let minutes = (self % 3600) / 60
-        let seconds = self % 60
+        let hours = self / TimeConstants.secondsPerHour
+        let minutes = (self % TimeConstants.secondsPerHour) / TimeConstants.secondsPerMinute
+        let seconds = self % TimeConstants.secondsPerMinute
 
         if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+            return String(format: FormatStrings.timeWithHours, hours, minutes, seconds)
         } else {
-            return String(format: "%d:%02d", minutes, seconds)
+            return String(format: FormatStrings.timeWithoutHours, minutes, seconds)
         }
     }
 
     func formattedShortTime() -> String {
-        let hours = self / 3600
-        let minutes = (self % 3600) / 60
+        let hours = self / TimeConstants.secondsPerHour
+        let minutes = (self % TimeConstants.secondsPerHour) / TimeConstants.secondsPerMinute
 
         if hours > 0 {
             if minutes > 0 {
-                return "\(hours)h \(minutes)m"
+                return "\(hours)\(UIText.hoursSeparator)\(minutes)\(UIText.minutesSuffix)"
             } else {
-                return "\(hours)h"
+                return "\(hours)\(UIText.hoursSuffix)"
             }
         } else if minutes > 0 {
-            return "\(minutes)m"
+            return "\(minutes)\(UIText.minutesSuffix)"
         } else {
-            return "<1m"
+            return UIText.lessThanOneMinute
         }
     }
 }

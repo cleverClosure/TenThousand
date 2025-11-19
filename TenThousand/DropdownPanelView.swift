@@ -97,7 +97,7 @@ struct DropdownPanelView: View {
                 }
             )
             .padding(Spacing.base)
-            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            .transition(.opacity.combined(with: .scale(scale: ScaleValues.dismissScale)))
         }
     }
 
@@ -112,7 +112,7 @@ struct DropdownPanelView: View {
                 }
                 .padding(Spacing.base)
             }
-            .frame(maxHeight: 200)
+            .frame(maxHeight: LayoutConstants.maxSkillListHeight)
         }
     }
 
@@ -154,10 +154,10 @@ struct DropdownPanelView: View {
             }) {
                 HStack {
                     Image(systemName: "plus.circle")
-                        .font(.system(size: 14))
+                        .font(.system(size: Dimensions.iconSizeSmall))
                         .foregroundColor(.secondary)
 
-                    Text("Add skill")
+                    Text(UIText.addSkillLabel)
                         .font(Typography.body)
                         .foregroundColor(.secondary)
 
@@ -177,7 +177,7 @@ struct DropdownPanelView: View {
 
     private var overlayBorder: some View {
         RoundedRectangle(cornerRadius: Dimensions.panelCornerRadius)
-            .stroke(Color.primary.opacity(Opacity.backgroundMedium), lineWidth: 1)
+            .stroke(Color.primary.opacity(Opacity.backgroundMedium), lineWidth: LayoutConstants.borderWidth)
     }
 
     private var shadowColor: Color {

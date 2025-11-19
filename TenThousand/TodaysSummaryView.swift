@@ -13,14 +13,14 @@ struct TodaysSummaryView: View {
 
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Today")
+            VStack(alignment: .leading, spacing: Spacing.atomic) {
+                Text(UIText.todayLabel)
                     .font(Typography.body)
                     .kerning(Typography.bodyKerning)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
 
-                Text("\(skillCount) skill\(skillCount == 1 ? "" : "s") tracked")
+                Text("\(skillCount) \(skillCount == 1 ? UIText.skillTrackedSingular : UIText.skillTrackedPlural)")
                     .font(Typography.caption)
                     .kerning(Typography.captionKerning)
                     .foregroundColor(.secondary)

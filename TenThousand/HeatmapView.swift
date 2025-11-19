@@ -11,14 +11,14 @@ struct HeatmapView: View {
     let data: [[Int64]]
     let levelForSeconds: (Int64) -> Int
 
-    private let dayLabels = ["S", "M", "T", "W", "T", "F", "S"]
+    private let dayLabels = CalendarConstants.dayLabels
     @State private var hoveredCell: (week: Int, day: Int)? = nil
 
     var body: some View {
         VStack(spacing: Spacing.base) {
             // Day labels
             HStack(spacing: Dimensions.heatmapGap) {
-                ForEach(0..<7, id: \.self) { dayIndex in
+                ForEach(0..<CalendarConstants.daysPerWeek, id: \.self) { dayIndex in
                     Text(dayLabels[dayIndex])
                         .font(.system(size: 9, weight: .regular))
                         .foregroundColor(.secondary)
@@ -30,7 +30,7 @@ struct HeatmapView: View {
             VStack(spacing: Dimensions.heatmapGap) {
                 ForEach(0..<data.count, id: \.self) { weekIndex in
                     HStack(spacing: Dimensions.heatmapGap) {
-                        ForEach(0..<7, id: \.self) { dayIndex in
+                        ForEach(0..<CalendarConstants.daysPerWeek, id: \.self) { dayIndex in
                             let seconds = data[weekIndex][dayIndex]
                             let level = levelForSeconds(seconds)
                             let isHovered = hoveredCell?.week == weekIndex && hoveredCell?.day == dayIndex
@@ -40,9 +40,9 @@ struct HeatmapView: View {
                                 .frame(width: Dimensions.heatmapCellWidth, height: Dimensions.heatmapCellHeight)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: Dimensions.heatmapCellRadius)
-                                        .stroke(Color.primary.opacity(Opacity.borderSubtle), lineWidth: isHovered ? 1 : 0)
+                                        .stroke(Color.primary.opacity(Opacity.borderSubtle), lineWidth: isHovered ? LayoutConstants.borderWidth : 0)
                                 )
-                                .scaleEffect(isHovered ? 1.05 : 1.0)
+                                .scaleEffect(isHovered ? ScaleValues.hoverGrow : ScaleValues.normal)
                                 .animation(.hoverState, value: isHovered)
                                 .onHover { hovering in
                                     if hovering {
@@ -98,9 +98,9 @@ struct HeatmapView: View {
 
         // Calculate the date for this cell
         // Heatmap shows the last 4 weeks, with most recent at bottom
-        let totalDaysBack = (data.count - 1 - weekIndex) * 7 + (6 - dayIndex)
+        let totalDaysBack = (data.count - 1 - weekIndex) * CalendarConstants.daysPerWeek + (CalendarConstants.daysPerWeek - 1 - dayIndex)
         guard let date = calendar.date(byAdding: .day, value: -totalDaysBack, to: today) else {
-            return "No data"
+            return UIText.noDataText
         }
 
         // Format date
@@ -113,7 +113,7 @@ struct HeatmapView: View {
         let durationString = seconds.formattedShortTime()
 
         if seconds == 0 {
-            return "\(dateString)\nNo activity"
+            return "\(dateString)\n\(UIText.noActivityText)"
         } else {
             return "\(dateString)\n\(durationString)"
         }

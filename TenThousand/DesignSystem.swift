@@ -234,3 +234,112 @@ struct Shadows {
         opacity: 0.12
     )
 }
+
+// MARK: - Scale Values
+
+struct ScaleValues {
+    static let normal: CGFloat = 1.0
+    static let hoverGrow: CGFloat = 1.05
+    static let pressedShrink: CGFloat = 0.98
+    static let dismissScale: CGFloat = 0.95
+}
+
+// MARK: - Time Constants
+
+struct TimeConstants {
+    static let secondsPerMinute: Int64 = 60
+    static let secondsPerHour: Int64 = 3600
+    static let timerUpdateInterval: TimeInterval = 1.0
+}
+
+// MARK: - Validation Limits
+
+struct ValidationLimits {
+    static let maxSkillNameLength = 30
+    static let colorPaletteSize = 8
+}
+
+// MARK: - UI Text
+
+struct UIText {
+    // Placeholders
+    static let skillNamePlaceholder = "Skill name..."
+    static let defaultSkillName = "Untitled"
+
+    // Labels
+    static let todayLabel = "Today"
+    static let addSkillLabel = "Add skill"
+
+    // Error Messages
+    static let errorEmptySkillName = "Skill name cannot be empty"
+    static let errorDuplicateSkillName = "A skill with this name already exists"
+
+    // Status Text
+    static let noDataText = "No data"
+    static let lessThanOneMinute = "<1m"
+    static let noActivityText = "No activity"
+    static let skillTrackedSingular = "skill tracked"
+    static let skillTrackedPlural = "skills tracked"
+
+    // Time Units
+    static let hoursSuffix = "h"
+    static let minutesSuffix = "m"
+    static let hoursSeparator = "h "
+    static let minutesSeparator = "m"
+}
+
+// MARK: - Format Strings
+
+struct FormatStrings {
+    static let timeWithHours = "%d:%02d:%02d"
+    static let timeWithoutHours = "%d:%02d"
+}
+
+// MARK: - Additional Colors
+
+extension Color {
+    // Highlight Colors
+    static let highlightYellow = Color(hex: "FFD60A")
+
+    // Skill Color Palette
+    static let skillRed = Color(hex: "FF3B30")
+    static let skillOrange = Color(hex: "FF9500")
+    static let skillYellow = Color(hex: "FFCC00")
+    static let skillGreen = Color(hex: "34C759")
+    static let skillTeal = Color(hex: "00C7BE")
+    static let skillPurple = Color(hex: "AF52DE")
+    static let skillPink = Color(hex: "FF2D55")
+}
+
+// MARK: - Animation Durations
+
+struct AnimationDurations {
+    static let flash: Double = 0.1
+    static let updateHighlight: Double = 1.0
+}
+
+// MARK: - Calendar Constants
+
+struct CalendarConstants {
+    static let daysPerWeek = 7
+    static let defaultWeeksBack = 4
+    static let dayLabels = ["S", "M", "T", "W", "T", "F", "S"]
+}
+
+// MARK: - Heatmap Thresholds (in minutes)
+
+struct HeatmapThresholds {
+    static let level1 = 15
+    static let level2 = 30
+    static let level3 = 60
+    static let level4 = 120
+    static let level5 = 180
+}
+
+// MARK: - Layout Constants
+
+struct LayoutConstants {
+    static let maxSkillListHeight: CGFloat = 200
+    static let skillNameLineLimit = 1
+    static let borderWidth: CGFloat = 1
+}

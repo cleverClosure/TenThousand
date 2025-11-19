@@ -12,8 +12,8 @@ struct IconButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(isHovered ? 1.05 : 1.0)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .scaleEffect(isHovered ? ScaleValues.hoverGrow : ScaleValues.normal)
+            .scaleEffect(configuration.isPressed ? ScaleValues.pressedShrink : ScaleValues.normal)
             .animation(.hoverState, value: isHovered)
             .animation(.microInteraction, value: configuration.isPressed)
             .onHover { hovering in
@@ -31,7 +31,7 @@ struct PanelButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
                     .fill(isHovered ? Color.primary.opacity(Opacity.backgroundMedium) : Color.clear)
             )
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .scaleEffect(configuration.isPressed ? ScaleValues.pressedShrink : ScaleValues.normal)
             .animation(.hoverState, value: isHovered)
             .animation(.microInteraction, value: configuration.isPressed)
             .onHover { hovering in
