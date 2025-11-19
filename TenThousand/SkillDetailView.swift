@@ -106,10 +106,13 @@ struct SkillDetailView: View {
 
             VStack(alignment: .leading, spacing: Spacing.tight) {
                 if isEditingName {
-                    TextField("Skill name", text: $editedName, onCommit: saveSkillName)
+                    TextField("Skill name", text: $editedName)
                         .textFieldStyle(PlainTextFieldStyle())
                         .font(Typography.display)
                         .kerning(Typography.displayKerning)
+                        .onSubmit {
+                            saveSkillName()
+                        }
                 } else {
                     Text(skill.name ?? "Untitled")
                         .font(Typography.display)

@@ -326,7 +326,7 @@ struct ProgressChartsView: View {
         .padding(Spacing.base)
         .background(
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                .fill(Color.primary.opacity(Opacity.backgroundHigh))
+                .fill(Color.primary.opacity(Opacity.backgroundDark))
                 .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
         )
         .padding(Spacing.base)
