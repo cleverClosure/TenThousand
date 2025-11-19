@@ -15,9 +15,6 @@ jobs:
       with:
         fetch-depth: 0 # Fetch all history for better diff analysis
 
-    - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
-
     - name: Install SwiftLint
       run: brew install swiftlint
 
@@ -68,9 +65,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
 
     - name: Run tests with coverage
       run: |
