@@ -161,7 +161,7 @@ struct Dimensions {
     static let skillRowHeight: CGFloat = 36
     static let skillRowPaddingHorizontal: CGFloat = 8
     static let skillRowPaddingVertical: CGFloat = 6
-    static let colorDotSize: CGFloat = 8
+    static let colorDotSize: CGFloat = 20
 
     // Active Session
     static let activeSessionHeight: CGFloat = 64
