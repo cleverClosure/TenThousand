@@ -47,39 +47,39 @@ struct DropdownPanelView: View {
                 navigateDown()
                 return .handled
             }
-            .onKeyPress(.one, modifiers: .command) { press in
+            .onKeyPress("1", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
-            .onKeyPress(.two, modifiers: .command) { press in
+            .onKeyPress("2", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
-            .onKeyPress(.three, modifiers: .command) { press in
+            .onKeyPress("3", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
-            .onKeyPress(.four, modifiers: .command) { press in
+            .onKeyPress("4", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
-            .onKeyPress(.five, modifiers: .command) { press in
+            .onKeyPress("5", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
-            .onKeyPress(.six, modifiers: .command) { press in
+            .onKeyPress("6", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
-            .onKeyPress(.seven, modifiers: .command) { press in
+            .onKeyPress("7", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
-            .onKeyPress(.eight, modifiers: .command) { press in
+            .onKeyPress("8", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
-            .onKeyPress(.nine, modifiers: .command) { press in
+            .onKeyPress("9", modifiers: .command) { press in
                 handleQuickSwitch(press)
                 return .handled
             }
@@ -292,7 +292,7 @@ struct DropdownPanelView: View {
     }
 
     private func handleQuickSwitch(_ press: KeyPress) -> Bool {
-        let numbers: [KeyEquivalent] = [.one, .two, .three, .four, .five, .six, .seven, .eight, .nine]
+        let numbers: [KeyEquivalent] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
         if let index = numbers.firstIndex(of: press.key), index < viewModel.skills.count {
             let skill = viewModel.skills[index]
             withAnimation(.panelTransition) {
