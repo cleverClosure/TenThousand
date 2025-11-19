@@ -11,20 +11,70 @@ import CoreData
 import Combine
 import os.log
 
+/// The main view model coordinating all app state and business logic.
+///
+/// AppViewModel follows the MVVM pattern, managing the application's state through
+/// published properties that SwiftUI views observe. It coordinates between the
+/// TimerManager, CoreData persistence layer, and provides computed statistics.
+///
+/// ## Responsibilities
+/// - Skill CRUD operations
+/// - Session tracking lifecycle
+/// - Statistics calculation (today's totals, heatmap data)
+/// - Goal management
+/// - Chart data generation
+///
+/// ## Usage Example
+/// ```swift
+/// let viewModel = AppViewModel()
+/// viewModel.createSkill(name: "Swift Programming")
+/// viewModel.startTracking(skill: mySkill)
+/// ```
 class AppViewModel: ObservableObject {
+
+    // MARK: - Published Properties
+
+    /// All skills stored in the database, sorted by creation date.
     @Published var skills: [Skill] = []
+
+    /// The skill currently being tracked, or nil if no active session.
     @Published var activeSkill: Skill?
+
+    /// The current tracking session, or nil if not tracking.
     @Published var currentSession: Session?
+
+    /// Whether the add skill UI should be displayed.
     @Published var isAddingSkill = false
+
+    /// The ID of the skill that was just updated (for animation purposes).
+    /// Automatically cleared after animation duration.
     @Published var justUpdatedSkillId: UUID? = nil
+
+    /// The skill selected for detail view, or nil if showing main list.
     @Published var selectedSkillForDetail: Skill? = nil
+
+    /// The user's goal settings (daily or weekly targets).
     @Published var goalSettings: GoalSettings?
 
+    // MARK: - Dependencies
+
+    /// Timer manager for tracking session elapsed time.
     let timerManager = TimerManager()
+
+    /// CoreData persistence controller for database operations.
     let persistenceController: PersistenceController
 
     private let logger = Logger(subsystem: "com.tenthousand.app", category: "AppViewModel")
 
+    // MARK: - Initialization
+
+    /// Initializes the view model with the specified persistence controller.
+    ///
+    /// - Parameter persistenceController: The CoreData controller to use.
+    ///   Defaults to the shared singleton instance.
+    ///
+    /// - Note: This constructor automatically fetches all skills and goal settings
+    ///   from the database. Use `PersistenceController(inMemory: true)` for testing.
     init(persistenceController: PersistenceController = .shared) {
         self.persistenceController = persistenceController
         fetchSkills()
@@ -33,6 +83,13 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Skill Management
 
+    /// Fetches all skills from CoreData and updates the published `skills` array.
+    ///
+    /// Skills are sorted by creation date (oldest first). This method is called
+    /// automatically during initialization and after create/delete operations.
+    ///
+    /// - Note: Errors are logged but do not throw. The skills array will remain
+    ///   unchanged if the fetch fails.
     func fetchSkills() {
         let request: NSFetchRequest<Skill> = Skill.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \Skill.createdAt, ascending: true)]
@@ -44,6 +101,28 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    /// Creates a new skill with the specified name.
+    ///
+    /// The skill name is validated and processed before creation:
+    /// - Whitespace is trimmed from both ends
+    /// - Empty names are rejected
+    /// - Names longer than 30 characters are rejected
+    /// - Duplicate names (case-sensitive) are rejected
+    ///
+    /// If creation succeeds, the skill is:
+    /// - Assigned a color index based on current skill count
+    /// - Saved to CoreData
+    /// - Added to the skills array
+    /// - The `isAddingSkill` flag is reset to false
+    ///
+    /// - Parameter name: The name for the new skill (max 30 characters)
+    ///
+    /// ## Example
+    /// ```swift
+    /// viewModel.createSkill(name: "Swift Programming")  // Creates skill
+    /// viewModel.createSkill(name: "  ")                 // Rejected (empty)
+    /// viewModel.createSkill(name: "Swift Programming")  // Rejected (duplicate)
+    /// ```
     func createSkill(name: String) {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty, trimmedName.count <= ValidationLimits.maxSkillNameLength else { return }
@@ -65,6 +144,15 @@ class AppViewModel: ObservableObject {
         isAddingSkill = false
     }
 
+    /// Deletes the specified skill from CoreData.
+    ///
+    /// This operation also deletes all associated sessions due to CoreData's
+    /// cascade delete rule. The skills array is refreshed after deletion.
+    ///
+    /// - Parameter skill: The skill to delete
+    ///
+    /// - Warning: This operation cannot be undone. All session data for this
+    ///   skill will be permanently deleted.
     func deleteSkill(_ skill: Skill) {
         persistenceController.container.viewContext.delete(skill)
         persistenceController.save()
@@ -73,6 +161,25 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Session Management
 
+    /// Starts tracking time for the specified skill.
+    ///
+    /// This method performs the following actions:
+    /// 1. Stops any currently active session
+    /// 2. Sets the specified skill as active
+    /// 3. Creates a new CoreData Session entity
+    /// 4. Starts the timer
+    ///
+    /// - Parameter skill: The skill to start tracking
+    ///
+    /// - Note: If a session is already running for a different skill, it will be
+    ///   stopped and saved before starting the new session.
+    ///
+    /// ## Example
+    /// ```swift
+    /// let skill = viewModel.skills.first!
+    /// viewModel.startTracking(skill: skill)
+    /// // Timer starts, session created
+    /// ```
     func startTracking(skill: Skill) {
         // Stop any active session first
         if timerManager.isRunning {
@@ -91,14 +198,37 @@ class AppViewModel: ObservableObject {
         timerManager.start()
     }
 
+    /// Pauses the current tracking session without ending it.
+    ///
+    /// The timer is paused and pause duration is tracked. Call `resumeTracking()`
+    /// to continue the session. Pause time is excluded from the final session duration.
+    ///
+    /// - Note: This method does nothing if no session is active.
     func pauseTracking() {
         timerManager.pause()
     }
 
+    /// Resumes a paused tracking session.
+    ///
+    /// The timer continues from where it was paused. The pause duration is tracked
+    /// and will be excluded from the final session duration.
+    ///
+    /// - Note: This method does nothing if the session is not paused.
     func resumeTracking() {
         timerManager.resume()
     }
 
+    /// Stops the current tracking session and saves it to CoreData.
+    ///
+    /// This method performs the following actions:
+    /// 1. Stops the timer and retrieves final elapsed time
+    /// 2. Records the end time and pause duration on the session
+    /// 3. Saves the session to CoreData
+    /// 4. Sets `justUpdatedSkillId` for animation (cleared after 1 second)
+    /// 5. Clears the active session and skill
+    /// 6. Refreshes the skills array to update total times
+    ///
+    /// - Note: If no session is active, this method does nothing.
     func stopTracking() {
         guard let session = currentSession, let skill = session.skill else { return }
 
@@ -127,6 +257,12 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Statistics
 
+    /// Calculates the total seconds tracked today across all skills.
+    ///
+    /// - Returns: Total seconds tracked today, or 0 if fetch fails or no sessions exist.
+    ///
+    /// - Note: "Today" is determined by the calendar's start of day (midnight).
+    ///   Active sessions in progress are included in the calculation.
     func todaysTotalSeconds() -> Int64 {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
@@ -145,6 +281,13 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    /// Counts the number of unique skills practiced today.
+    ///
+    /// - Returns: Number of unique skills with at least one session today,
+    ///   or 0 if fetch fails or no sessions exist.
+    ///
+    /// - Note: "Today" is determined by the calendar's start of day (midnight).
+    ///   Multiple sessions for the same skill count as one.
     func todaysSkillCount() -> Int {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
@@ -164,6 +307,26 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Heatmap Data
 
+    /// Generates heatmap data for the specified number of weeks.
+    ///
+    /// The heatmap is a 2D array where:
+    /// - First dimension: weeks (0 = oldest, last = most recent)
+    /// - Second dimension: days (0 = Sunday, 6 = Saturday)
+    /// - Values: total seconds tracked on that day
+    ///
+    /// - Parameter weeksBack: Number of weeks to include (default: 4)
+    /// - Returns: 2D array of seconds tracked per day, organized by week
+    ///
+    /// ## Example
+    /// ```swift
+    /// let heatmap = viewModel.heatmapData(weeksBack: 4)
+    /// // Returns: [[week1_day0, week1_day1, ...], [week2_day0, ...], ...]
+    /// // heatmap[0][0] = seconds tracked on Sunday of oldest week
+    /// // heatmap[3][6] = seconds tracked on Saturday of most recent week
+    /// ```
+    ///
+    /// - Note: Days with no tracking are represented as 0.
+    ///   Use `heatmapLevel(for:)` to convert seconds to intensity levels.
     func heatmapData(weeksBack: Int = CalendarConstants.defaultWeeksBack) -> [[Int64]] {
         let calendar = Calendar.current
         let today = Date()
@@ -197,6 +360,27 @@ class AppViewModel: ObservableObject {
         return data
     }
 
+    /// Converts seconds into a heatmap intensity level (0-6).
+    ///
+    /// Intensity levels are based on activity duration:
+    /// - **Level 0**: 0 minutes (no activity)
+    /// - **Level 1**: < 15 minutes
+    /// - **Level 2**: 15-29 minutes
+    /// - **Level 3**: 30-59 minutes
+    /// - **Level 4**: 60-119 minutes (1-2 hours)
+    /// - **Level 5**: 120-179 minutes (2-3 hours)
+    /// - **Level 6**: 180+ minutes (3+ hours)
+    ///
+    /// - Parameter seconds: Total seconds of activity
+    /// - Returns: Intensity level from 0 to 6
+    ///
+    /// ## Example
+    /// ```swift
+    /// viewModel.heatmapLevel(for: 0)      // Returns: 0
+    /// viewModel.heatmapLevel(for: 600)    // Returns: 1 (10 minutes)
+    /// viewModel.heatmapLevel(for: 1800)   // Returns: 3 (30 minutes)
+    /// viewModel.heatmapLevel(for: 10800)  // Returns: 6 (3 hours)
+    /// ```
     func heatmapLevel(for seconds: Int64) -> Int {
         // Convert to minutes for level calculation
         let minutes = seconds / TimeConstants.secondsPerMinute
@@ -212,6 +396,27 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Skill-Specific Heatmap Data
 
+    /// Generates heatmap data for a specific skill over a date range.
+    ///
+    /// Returns a dictionary mapping dates (normalized to start of day) to total
+    /// seconds tracked on that date for the specified skill. Days with no activity
+    /// are not included in the dictionary.
+    ///
+    /// - Parameters:
+    ///   - skill: The skill to generate heatmap data for
+    ///   - daysBack: Number of days to include (default: 365)
+    ///
+    /// - Returns: Dictionary mapping dates to total seconds tracked
+    ///
+    /// ## Example
+    /// ```swift
+    /// let data = viewModel.heatmapDataForSkill(mySkill, daysBack: 90)
+    /// // Returns: [2024-01-01: 3600, 2024-01-03: 7200, ...]
+    /// // Note: 2024-01-02 not in dict (no activity that day)
+    /// ```
+    ///
+    /// - Note: This performs a CoreData fetch and may be expensive for large date ranges.
+    ///   Consider caching results if calling frequently.
     func heatmapDataForSkill(_ skill: Skill, daysBack: Int = 365) -> [Date: Int64] {
         let calendar = Calendar.current
         let today = Date()
