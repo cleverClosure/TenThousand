@@ -427,5 +427,5 @@ struct TimeHorizonsView: View {
 }
 
 #Preview {
-    TimeHorizonsView(viewModel: AppViewModel(persistenceController: .preview))
+    TimeHorizonsView(viewModel: AppViewModel(persistenceController: PersistenceController(inMemory: true)))
 }
