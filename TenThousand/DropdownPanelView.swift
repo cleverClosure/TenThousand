@@ -8,6 +8,16 @@
 import SwiftUI
 import AppKit
 
+// MARK: - Constants
+
+private enum KeyboardShortcuts {
+    static let numberKeys: [KeyEquivalent] = [
+        .init("1"), .init("2"), .init("3"),
+        .init("4"), .init("5"), .init("6"),
+        .init("7"), .init("8"), .init("9")
+    ]
+}
+
 struct DropdownPanelView: View {
     @ObservedObject var viewModel: AppViewModel
     @Environment(\.dismiss) private var dismiss
@@ -228,8 +238,8 @@ struct DropdownPanelView: View {
     }
 
     private func handleQuickSwitch(_ press: KeyPress) -> Bool {
-        let numbers: [KeyEquivalent] = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-        if let index = numbers.firstIndex(of: press.key), index < viewModel.skills.count {
+        if let index = KeyboardShortcuts.numberKeys.firstIndex(of: press.key),
+           index < viewModel.skills.count {
             let skill = viewModel.skills[index]
             withAnimation(.panelTransition) {
                 viewModel.startTracking(skill: skill)
@@ -297,43 +307,16 @@ extension View {
     private func withNumberKeys(
         handleQuickSwitch: @escaping (KeyPress) -> Bool
     ) -> some View {
-        self
-            .onKeyPress("1", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("2", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("3", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("4", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("5", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("6", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("7", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("8", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
-            .onKeyPress("9", modifiers: .command) { press in
-                handleQuickSwitch(press)
-                return .handled
-            }
+        var view = AnyView(self)
+        for numberKey in KeyboardShortcuts.numberKeys {
+            view = AnyView(
+                view.onKeyPress(numberKey, modifiers: .command) { press in
+                    handleQuickSwitch(press)
+                    return .handled
+                }
+            )
+        }
+        return view
     }
 
     private func withCommandKeys(
