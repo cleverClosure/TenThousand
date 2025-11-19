@@ -82,6 +82,10 @@ struct DropdownPanelView: View {
 
                 Divider()
 
+                GoalProgressView(viewModel: viewModel)
+
+                Divider()
+
                 settingsSection
 
                 Divider()
@@ -200,6 +204,11 @@ struct DropdownPanelView: View {
 
     private var settingsSection: some View {
         VStack(spacing: 0) {
+            // Goal Settings
+            GoalSettingsView(viewModel: viewModel)
+
+            Divider()
+
             // Open Heatmap Visualization button
             Button(action: {
                 HeatmapWindowController.shared.openHeatmapWindow(viewModel: viewModel)

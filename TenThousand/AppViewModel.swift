@@ -18,6 +18,7 @@ class AppViewModel: ObservableObject {
     @Published var isAddingSkill = false
     @Published var justUpdatedSkillId: UUID? = nil
     @Published var selectedSkillForDetail: Skill? = nil
+    @Published var goalSettings: GoalSettings?
 
     let timerManager = TimerManager()
     let persistenceController: PersistenceController
@@ -27,6 +28,7 @@ class AppViewModel: ObservableObject {
     init(persistenceController: PersistenceController = .shared) {
         self.persistenceController = persistenceController
         fetchSkills()
+        fetchOrCreateGoalSettings()
     }
 
     // MARK: - Skill Management
@@ -452,5 +454,131 @@ class AppViewModel: ObservableObject {
         }
 
         return result
+    }
+
+    // MARK: - Goal Management
+
+    func fetchOrCreateGoalSettings() {
+        let request: NSFetchRequest<GoalSettings> = GoalSettings.fetchRequest()
+
+        do {
+            let results = try persistenceController.container.viewContext.fetch(request)
+            if let existing = results.first {
+                goalSettings = existing
+            } else {
+                // Create default goal settings
+                let newGoal = GoalSettings(
+                    context: persistenceController.container.viewContext,
+                    goalType: "daily",
+                    targetMinutes: 60
+                )
+                persistenceController.save()
+                goalSettings = newGoal
+            }
+        } catch {
+            logger.error("Failed to fetch goal settings: \(error.localizedDescription)")
+        }
+    }
+
+    func updateGoalSettings(goalType: String, targetMinutes: Int64, isEnabled: Bool) {
+        if let goal = goalSettings {
+            goal.goalType = goalType
+            goal.targetMinutes = targetMinutes
+            goal.isEnabled = isEnabled
+        } else {
+            let newGoal = GoalSettings(
+                context: persistenceController.container.viewContext,
+                goalType: goalType,
+                targetMinutes: targetMinutes
+            )
+            newGoal.isEnabled = isEnabled
+            goalSettings = newGoal
+        }
+        persistenceController.save()
+    }
+
+    // MARK: - Goal Progress Calculations
+
+    /// Returns total seconds tracked today
+    func todaysProgress() -> Int64 {
+        return todaysTotalSeconds()
+    }
+
+    /// Returns total seconds tracked this week
+    func thisWeeksProgress() -> Int64 {
+        let calendar = Calendar.current
+        guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) else {
+            return 0
+        }
+
+        let request: NSFetchRequest<Session> = Session.fetchRequest()
+        request.predicate = NSPredicate(format: "startTime >= %@", startOfWeek as NSDate)
+
+        do {
+            let sessions = try persistenceController.container.viewContext.fetch(request)
+            return sessions.reduce(0) { total, session in
+                total + session.durationSeconds
+            }
+        } catch {
+            logger.error("Failed to fetch this week's sessions: \(error.localizedDescription)")
+            return 0
+        }
+    }
+
+    /// Check if today's/week's goal is met
+    func isGoalMet() -> Bool {
+        guard let goal = goalSettings, goal.isEnabled else { return false }
+
+        if goal.isDaily {
+            return todaysProgress() >= goal.targetSeconds
+        } else {
+            return thisWeeksProgress() >= goal.targetSeconds
+        }
+    }
+
+    /// Calculate remaining time needed to meet goal (in seconds)
+    /// Returns 0 if goal is already met or disabled
+    func remainingTimeForGoal() -> Int64 {
+        guard let goal = goalSettings, goal.isEnabled else { return 0 }
+
+        let currentProgress = goal.isDaily ? todaysProgress() : thisWeeksProgress()
+        let remaining = goal.targetSeconds - currentProgress
+
+        return max(0, remaining)
+    }
+
+    /// Calculate goal progress as a percentage (0.0 to 1.0)
+    func goalProgressPercentage() -> Double {
+        guard let goal = goalSettings, goal.isEnabled, goal.targetSeconds > 0 else { return 0.0 }
+
+        let currentProgress = goal.isDaily ? todaysProgress() : thisWeeksProgress()
+        let percentage = Double(currentProgress) / Double(goal.targetSeconds)
+
+        return min(1.0, max(0.0, percentage))
+    }
+
+    /// Format remaining time as a string (e.g., "2h 30m", "45m", "15s")
+    func formattedRemainingTime() -> String {
+        let remaining = remainingTimeForGoal()
+
+        if remaining == 0 {
+            return "Goal met!"
+        }
+
+        let hours = remaining / 3600
+        let minutes = (remaining % 3600) / 60
+        let seconds = remaining % 60
+
+        if hours > 0 {
+            if minutes > 0 {
+                return "\(hours)h \(minutes)m remaining"
+            } else {
+                return "\(hours)h remaining"
+            }
+        } else if minutes > 0 {
+            return "\(minutes)m remaining"
+        } else {
+            return "\(seconds)s remaining"
+        }
     }
 }
