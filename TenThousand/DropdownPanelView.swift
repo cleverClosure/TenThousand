@@ -77,13 +77,6 @@ struct DropdownPanelView: View {
 
             Divider()
 
-            HeatmapView(
-                data: viewModel.heatmapData(),
-                levelForSeconds: viewModel.heatmapLevel
-            )
-
-            Divider()
-
             quitButton
         }
     }
