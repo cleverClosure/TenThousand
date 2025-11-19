@@ -31,19 +31,19 @@ struct DropdownPanelView: View {
             .onAppear {
                 isPanelFocused = true
             }
-            .onKeyPress(.space) { press in
+            .onKeyPress(.space) {
                 handleSpaceKey()
                 return .handled
             }
-            .onKeyPress(.return) { press in
+            .onKeyPress(.return) {
                 handleReturnKey()
                 return .handled
             }
-            .onKeyPress(.upArrow) { press in
+            .onKeyPress(.upArrow) {
                 navigateUp()
                 return .handled
             }
-            .onKeyPress(.downArrow) { press in
+            .onKeyPress(.downArrow) {
                 navigateDown()
                 return .handled
             }
