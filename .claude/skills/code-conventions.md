@@ -244,6 +244,71 @@ grep -rn '^enum.*{' --include="*.swift" | grep -i 'const\|spacing\|dimension\|co
 - **Document non-obvious values**: `// 320px matches design spec`
 - **Be consistent**: If one dimension is a constant, all should be
 
+## Additional Conventions to Enforce
+
+Beyond magic literals, enforce these Swift/SwiftUI/Combine standards from CODE_CONVENTIONS.md:
+
+### Naming
+- **Types**: PascalCase (UserManager, NetworkError)
+- **Variables/Functions**: camelCase (userName, fetchData)
+- **Protocols**: Use -able, -ible, -ing suffixes (Cancellable, Refreshable)
+
+### SwiftUI View Structure
+```swift
+struct ContentView: View {
+    // MARK: - Properties
+    @StateObject private var viewModel: ContentViewModel
+
+    // MARK: - Body
+    var body: some View {
+        content
+    }
+
+    // MARK: - Views
+    private var content: some View {
+        VStack { }
+    }
+}
+```
+
+### Access Control
+- Default to `private` or `fileprivate`
+- Avoid force unwrapping (`!`)
+- Prefer `let` over `var`
+
+### Code Organization
+- Use MARK comments to organize sections
+- One type per file
+- File name matches type name
+
+### Combine
+- Store cancellables: `private var cancellables = Set<AnyCancellable>()`
+- Avoid retain cycles: Use `[weak self]` in closures
+- Suffix publishers: `userUpdatesPublisher`
+
+### SwiftUI Modifiers
+Apply in order:
+1. Layout (frame, padding)
+2. Visual (background, foregroundStyle)
+3. Interaction (onTapGesture)
+4. Accessibility
+
+## Common Issues to Flag
+
+1. **Magic literals** (primary focus)
+2. **Force unwrapping** (`!`) without justification
+3. **Missing MARK comments** in large files
+4. **var instead of let** when value doesn't change
+5. **Poor naming** (abbreviations, unclear intent)
+6. **Missing access control** (should be private)
+7. **Retain cycles** in Combine/closures (missing [weak self])
+
 ## Always Reference
 
-Read `/home/user/TenThousand/CODE_CONVENTIONS.md` before making recommendations.
+Read `/home/user/TenThousand/CODE_CONVENTIONS.md` before making recommendations. The file now contains:
+- Magic literals elimination (primary focus)
+- Swift/SwiftUI/Combine naming conventions
+- Architecture patterns (MVVM)
+- Code organization standards
+- Best practices for optionals, access control, error handling
+- Testing and version control guidelines

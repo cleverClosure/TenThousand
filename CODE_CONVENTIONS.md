@@ -190,3 +190,251 @@ When you find magic literals:
 3. **Add a well-named constant** with the literal value
 4. **Replace all occurrences** with the named constant
 5. **Verify the code is more readable** after the change
+
+---
+
+# Swift/SwiftUI/Combine Code Conventions
+
+## Naming Conventions
+
+### General
+- Use clear, descriptive names that reveal intent
+- Prefer clarity over brevity
+- Use American English spelling
+
+### Types
+- **Classes, Structs, Enums, Protocols**: `PascalCase`
+  ```swift
+  class UserManager { }
+  struct UserProfile { }
+  enum NetworkError { }
+  protocol DataProviding { }
+  ```
+
+### Variables & Functions
+- **Variables, constants, functions**: `camelCase`
+  ```swift
+  let userName = "John"
+  var isAuthenticated = false
+  func fetchUserData() { }
+  ```
+
+### Protocols
+- Use `-able`, `-ible`, or `-ing` suffixes for capability protocols
+  ```swift
+  protocol Cancellable { }
+  protocol Refreshable { }
+  ```
+
+## SwiftUI Conventions
+
+### View Structure
+```swift
+struct ContentView: View {
+    // MARK: - Properties
+    @StateObject private var viewModel: ContentViewModel
+    @State private var isPresented = false
+    @Environment(\.dismiss) private var dismiss
+
+    // MARK: - Body
+    var body: some View {
+        content
+    }
+
+    // MARK: - Views
+    private var content: some View {
+        VStack {
+            // Implementation
+        }
+    }
+}
+```
+
+### View Composition
+- Extract complex views into computed properties or separate view structs
+- Keep `body` simple and readable
+- Use `@ViewBuilder` for conditional view logic
+
+### State Management
+- `@State`: Local view state only
+- `@StateObject`: Own the lifecycle of ObservableObject
+- `@ObservedObject`: Passed from parent
+- `@EnvironmentObject`: Shared across view hierarchy
+- `@Environment`: System values
+
+## Combine Conventions
+
+### Publishers
+- Prefix custom publishers with `Publisher` or suffix with `Publisher`
+  ```swift
+  final class DataPublisher { }
+  var userUpdatesPublisher: AnyPublisher<User, Never>
+  ```
+
+### Subscriptions
+- Store cancellables in `Set<AnyCancellable>` or `@Published` property
+  ```swift
+  private var cancellables = Set<AnyCancellable>()
+  ```
+
+### Naming
+- Use descriptive names for publisher chains
+  ```swift
+  let validatedEmailPublisher = emailPublisher
+      .map { $0.isValidEmail }
+      .eraseToAnyPublisher()
+  ```
+
+## Architecture
+
+### MVVM Pattern
+```
+Models/          # Data structures
+ViewModels/      # Business logic, Combine publishers
+Views/           # SwiftUI views
+Services/        # API, persistence, etc.
+Utilities/       # Extensions, helpers
+```
+
+### ViewModels
+```swift
+final class ContentViewModel: ObservableObject {
+    @Published var items: [Item] = []
+    @Published var isLoading = false
+
+    private let service: DataService
+    private var cancellables = Set<AnyCancellable>()
+
+    init(service: DataService) {
+        self.service = service
+        setupBindings()
+    }
+
+    func fetchData() {
+        // Implementation
+    }
+
+    private func setupBindings() {
+        // Setup Combine pipelines
+    }
+}
+```
+
+## Code Organization
+
+### File Structure
+- One type per file
+- File name matches type name
+- Group related files in folders
+
+### MARK Comments
+Use MARK to organize code sections:
+```swift
+// MARK: - Properties
+// MARK: - Lifecycle
+// MARK: - Public Methods
+// MARK: - Private Methods
+// MARK: - Actions
+```
+
+## Swift Best Practices
+
+### Optionals
+- Avoid force unwrapping (`!`) in production code
+- Use optional binding or nil coalescing
+  ```swift
+  if let user = optionalUser { }
+  let name = user?.name ?? "Unknown"
+  ```
+
+### Access Control
+- Default to `private` or `fileprivate`
+- Mark public API explicitly
+- Use `internal` sparingly
+
+### Properties
+- Prefer `let` over `var` when possible
+- Use computed properties for derived values
+- Lazy properties for expensive initialization
+
+### Error Handling
+```swift
+enum NetworkError: LocalizedError {
+    case invalidURL
+    case noData
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL: return "Invalid URL"
+        case .noData: return "No data received"
+        }
+    }
+}
+```
+
+## SwiftUI Specific
+
+### Modifiers Order
+Apply modifiers in logical order:
+1. Layout modifiers (frame, padding)
+2. Visual modifiers (background, foregroundStyle)
+3. Interaction modifiers (onTapGesture)
+4. Accessibility modifiers
+
+### PreviewProvider
+```swift
+#Preview {
+    ContentView()
+        .environmentObject(AppState())
+}
+```
+
+## Combine Patterns
+
+### Resource Cleanup
+```swift
+cancellable?.cancel()
+cancellables.removeAll()
+```
+
+### Avoiding Retain Cycles
+```swift
+publisher
+    .sink { [weak self] value in
+        self?.handleValue(value)
+    }
+    .store(in: &cancellables)
+```
+
+### Error Handling
+```swift
+dataPublisher
+    .catch { error -> Just<DefaultValue> in
+        print("Error: \(error)")
+        return Just(defaultValue)
+    }
+    .sink { value in }
+    .store(in: &cancellables)
+```
+
+## Comments
+
+- Write self-documenting code
+- Comment "why" not "what"
+- Use `///` for documentation comments
+- Keep comments up to date
+
+## Testing
+
+- Prefix test methods with `test`
+  ```swift
+  func testUserLoginSuccess() { }
+  ```
+- Use descriptive test names
+- Follow Arrange-Act-Assert pattern
+
+## Version Control
+
+- Commit messages: Imperative mood ("Add feature" not "Added feature")
+- Keep commits atomic and focused
+- Reference issue numbers when applicable
