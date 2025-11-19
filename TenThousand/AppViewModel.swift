@@ -355,4 +355,102 @@ class AppViewModel: ObservableObject {
 
         return data
     }
+
+    // MARK: - Chart Data
+
+    /// Returns daily totals for a skill over a specified period
+    /// Result: Array of (Date, seconds) tuples sorted by date
+    func dailyTotalsForSkill(_ skill: Skill, daysBack: Int = 30) -> [(date: Date, seconds: Int64)] {
+        let calendar = Calendar.current
+        let today = Date()
+        var dailyData: [Date: Int64] = [:]
+
+        let request: NSFetchRequest<Session> = Session.fetchRequest()
+        guard let startDate = calendar.date(byAdding: .day, value: -daysBack, to: today) else {
+            return []
+        }
+
+        request.predicate = NSPredicate(format: "skill == %@ AND startTime >= %@", skill, startDate as NSDate)
+
+        do {
+            let sessions = try persistenceController.container.viewContext.fetch(request)
+
+            for session in sessions {
+                guard let startTime = session.startTime else { continue }
+                let dayStart = calendar.startOfDay(for: startTime)
+                dailyData[dayStart, default: 0] += session.durationSeconds
+            }
+        } catch {
+            logger.error("Failed to fetch daily totals: \(error.localizedDescription)")
+        }
+
+        // Fill in missing days with 0
+        var result: [(date: Date, seconds: Int64)] = []
+        for dayOffset in (0..<daysBack).reversed() {
+            if let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) {
+                let dayStart = calendar.startOfDay(for: date)
+                result.append((date: dayStart, seconds: dailyData[dayStart] ?? 0))
+            }
+        }
+
+        return result
+    }
+
+    /// Returns weekly totals for a skill
+    /// Result: Array of (week start date, seconds) tuples
+    func weeklyTotalsForSkill(_ skill: Skill, weeksBack: Int = 12) -> [(date: Date, seconds: Int64)] {
+        let calendar = Calendar.current
+        let today = Date()
+        var weeklyData: [Date: Int64] = [:]
+
+        let request: NSFetchRequest<Session> = Session.fetchRequest()
+        guard let startDate = calendar.date(byAdding: .weekOfYear, value: -weeksBack, to: today) else {
+            return []
+        }
+
+        request.predicate = NSPredicate(format: "skill == %@ AND startTime >= %@", skill, startDate as NSDate)
+
+        do {
+            let sessions = try persistenceController.container.viewContext.fetch(request)
+
+            for session in sessions {
+                guard let startTime = session.startTime else { continue }
+
+                // Get the start of the week for this session
+                var weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: startTime))!
+                weekStart = calendar.startOfDay(for: weekStart)
+
+                weeklyData[weekStart, default: 0] += session.durationSeconds
+            }
+        } catch {
+            logger.error("Failed to fetch weekly totals: \(error.localizedDescription)")
+        }
+
+        // Fill in missing weeks with 0
+        var result: [(date: Date, seconds: Int64)] = []
+        for weekOffset in (0..<weeksBack).reversed() {
+            if let date = calendar.date(byAdding: .weekOfYear, value: -weekOffset, to: today) {
+                var weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
+                weekStart = calendar.startOfDay(for: weekStart)
+                result.append((date: weekStart, seconds: weeklyData[weekStart] ?? 0))
+            }
+        }
+
+        return result
+    }
+
+    /// Returns cumulative hours over time for a skill
+    /// Result: Array of (Date, cumulative hours) tuples
+    func cumulativeHoursForSkill(_ skill: Skill, daysBack: Int = 90) -> [(date: Date, hours: Double)] {
+        let dailyTotals = dailyTotalsForSkill(skill, daysBack: daysBack)
+        var cumulative: Double = 0
+        var result: [(date: Date, hours: Double)] = []
+
+        for (date, seconds) in dailyTotals {
+            cumulative += Double(seconds) / 3600.0 // Convert to hours
+            result.append((date: date, hours: cumulative))
+        }
+
+        return result
+    }
 }
