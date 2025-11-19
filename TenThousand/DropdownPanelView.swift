@@ -65,20 +65,31 @@ struct DropdownPanelView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            activeSessionSection
-            skillListSection
+            // Priority: Detail view > Active session > Skill list
+            if let selectedSkill = viewModel.selectedSkillForDetail {
+                skillDetailSection(skill: selectedSkill)
+            } else {
+                activeSessionSection
+                skillListSection
 
-            Divider()
+                Divider()
 
-            TodaysSummaryView(
-                totalSeconds: viewModel.todaysTotalSeconds(),
-                skillCount: viewModel.todaysSkillCount()
-            )
+                TodaysSummaryView(
+                    totalSeconds: viewModel.todaysTotalSeconds(),
+                    skillCount: viewModel.todaysSkillCount()
+                )
 
-            Divider()
+                Divider()
 
-            quitButton
+                quitButton
+            }
         }
+    }
+
+    @ViewBuilder
+    private func skillDetailSection(skill: Skill) -> some View {
+        SkillDetailView(skill: skill, viewModel: viewModel)
+            .transition(.opacity.combined(with: .move(edge: .trailing)))
     }
 
     @ViewBuilder
@@ -142,7 +153,7 @@ struct DropdownPanelView: View {
                 canDelete: viewModel.activeSkill?.id != skill.id,
                 onTap: {
                     withAnimation(.panelTransition) {
-                        viewModel.startTracking(skill: skill)
+                        viewModel.selectedSkillForDetail = skill
                     }
                 },
                 onDelete: {
@@ -284,7 +295,7 @@ struct DropdownPanelView: View {
         if let index = selectedSkillIndex, index < viewModel.skills.count {
             let skill = viewModel.skills[index]
             withAnimation(.panelTransition) {
-                viewModel.startTracking(skill: skill)
+                viewModel.selectedSkillForDetail = skill
             }
             selectedSkillIndex = nil
             return true
@@ -321,7 +332,7 @@ struct DropdownPanelView: View {
            index < viewModel.skills.count {
             let skill = viewModel.skills[index]
             withAnimation(.panelTransition) {
-                viewModel.startTracking(skill: skill)
+                viewModel.selectedSkillForDetail = skill
             }
             return true
         }
