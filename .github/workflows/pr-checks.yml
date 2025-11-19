@@ -42,7 +42,8 @@ jobs:
           -enableCodeCoverage YES \
           CODE_SIGN_IDENTITY="-" \
           CODE_SIGNING_REQUIRED=YES \
-          CODE_SIGNING_ALLOWED=YES
+          CODE_SIGNING_ALLOWED=YES \
+          ENABLE_HARDENED_RUNTIME=NO
 
     - name: Check for test failures
       if: failure()
@@ -77,7 +78,8 @@ jobs:
           -resultBundlePath TestResults \
           CODE_SIGN_IDENTITY="-" \
           CODE_SIGNING_REQUIRED=YES \
-          CODE_SIGNING_ALLOWED=YES
+          CODE_SIGNING_ALLOWED=YES \
+          ENABLE_HARDENED_RUNTIME=NO
 
     - name: Check code coverage
       run: |

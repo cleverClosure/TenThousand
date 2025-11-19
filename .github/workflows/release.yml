@@ -27,7 +27,8 @@ jobs:
           -destination 'platform=macOS' \
           CODE_SIGN_IDENTITY="-" \
           CODE_SIGNING_REQUIRED=YES \
-          CODE_SIGNING_ALLOWED=YES
+          CODE_SIGNING_ALLOWED=YES \
+          ENABLE_HARDENED_RUNTIME=NO
 
     - name: Build release
       run: |
@@ -37,7 +38,8 @@ jobs:
           -archivePath ./build/TenThousand.xcarchive \
           CODE_SIGN_IDENTITY="-" \
           CODE_SIGNING_REQUIRED=YES \
-          CODE_SIGNING_ALLOWED=YES
+          CODE_SIGNING_ALLOWED=YES \
+          ENABLE_HARDENED_RUNTIME=NO
 
     - name: Export app
       run: |
