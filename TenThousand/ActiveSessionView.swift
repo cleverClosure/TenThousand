@@ -54,7 +54,7 @@ struct ActiveSessionView: View {
                     Image(systemName: timerManager.isPaused ? "play.fill" : "pause.fill")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
-                        .frame(width: 24, height: 24)
+                        .frame(width: Dimensions.iconSizeMedium, height: Dimensions.iconSizeMedium)
                 }
                 .buttonStyle(IconButtonStyle())
 
@@ -63,7 +63,7 @@ struct ActiveSessionView: View {
                     Image(systemName: "stop.fill")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
-                        .frame(width: 24, height: 24)
+                        .frame(width: Dimensions.iconSizeMedium, height: Dimensions.iconSizeMedium)
                 }
                 .buttonStyle(IconButtonStyle())
             }
@@ -72,7 +72,7 @@ struct ActiveSessionView: View {
         .frame(height: Dimensions.activeSessionHeight)
         .background(
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                .fill(timerManager.isPaused ? Color.secondary.opacity(0.08) : Color.trackingBlue.opacity(0.05))
+                .fill(timerManager.isPaused ? Color.secondary.opacity(Opacity.backgroundDark) : Color.trackingBlue.opacity(Opacity.backgroundMedium))
         )
         .animation(.microInteraction, value: timerManager.isPaused)
     }

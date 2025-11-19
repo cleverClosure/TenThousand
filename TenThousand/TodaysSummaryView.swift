@@ -38,12 +38,12 @@ struct TodaysSummaryView: View {
         .frame(height: Dimensions.todaySummaryHeight)
         .background(
             Rectangle()
-                .fill(Color.primary.opacity(0.02))
+                .fill(Color.primary.opacity(Opacity.backgroundSubtle))
         )
         .overlay(
             Rectangle()
-                .fill(Color.primary.opacity(0.05))
-                .frame(height: 1),
+                .fill(Color.primary.opacity(Opacity.backgroundMedium))
+                .frame(height: Dimensions.dividerHeight),
             alignment: .top
         )
     }

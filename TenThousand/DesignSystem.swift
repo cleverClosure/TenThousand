@@ -180,6 +180,13 @@ struct Dimensions {
     static let cornerRadiusSmall: CGFloat = 4
     static let cornerRadiusMedium: CGFloat = 8
     static let cornerRadiusLarge: CGFloat = 12
+
+    // Icon Sizes
+    static let iconSizeSmall: CGFloat = 14
+    static let iconSizeMedium: CGFloat = 24
+
+    // Dividers
+    static let dividerHeight: CGFloat = 1
 }
 
 // MARK: - Animations
@@ -189,6 +196,32 @@ extension Animation {
     static let panelTransition = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.3)
     static let countUp = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.4)
     static let hoverState = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.15)
+}
+
+// MARK: - Opacity
+
+struct Opacity {
+    // Backgrounds
+    static let backgroundSubtle: Double = 0.02
+    static let backgroundLight: Double = 0.03
+    static let backgroundMedium: Double = 0.05
+    static let backgroundDark: Double = 0.08
+
+    // Overlays & Highlights
+    static let overlayLight: Double = 0.10
+    static let overlayMedium: Double = 0.20
+    static let overlayStrong: Double = 0.30
+
+    // Heatmap levels
+    static let heatmapLevel0: Double = 0.05
+    static let heatmapLevel1: Double = 0.10
+    static let heatmapLevel2: Double = 0.25
+    static let heatmapLevel3: Double = 0.40
+    static let heatmapLevel4: Double = 0.60
+    static let heatmapLevel5: Double = 0.80
+
+    // Borders & Strokes
+    static let borderSubtle: Double = 0.30
 }
 
 // MARK: - Shadows

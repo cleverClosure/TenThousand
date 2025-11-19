@@ -40,7 +40,7 @@ struct HeatmapView: View {
                                 .frame(width: Dimensions.heatmapCellWidth, height: Dimensions.heatmapCellHeight)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: Dimensions.heatmapCellRadius)
-                                        .stroke(Color.primary.opacity(0.3), lineWidth: isHovered ? 1 : 0)
+                                        .stroke(Color.primary.opacity(Opacity.borderSubtle), lineWidth: isHovered ? 1 : 0)
                                 )
                                 .scaleEffect(isHovered ? 1.05 : 1.0)
                                 .animation(.hoverState, value: isHovered)
@@ -65,8 +65,8 @@ struct HeatmapView: View {
         )
         .overlay(
             Rectangle()
-                .fill(Color.primary.opacity(0.05))
-                .frame(height: 1),
+                .fill(Color.primary.opacity(Opacity.backgroundMedium))
+                .frame(height: Dimensions.dividerHeight),
             alignment: .top
         )
     }
@@ -74,17 +74,17 @@ struct HeatmapView: View {
     private func colorForLevel(_ level: Int) -> Color {
         switch level {
         case 0:
-            return Color.primary.opacity(0.05)
+            return Color.primary.opacity(Opacity.heatmapLevel0)
         case 1:
-            return Color.trackingBlue.opacity(0.10)
+            return Color.trackingBlue.opacity(Opacity.heatmapLevel1)
         case 2:
-            return Color.trackingBlue.opacity(0.25)
+            return Color.trackingBlue.opacity(Opacity.heatmapLevel2)
         case 3:
-            return Color.trackingBlue.opacity(0.40)
+            return Color.trackingBlue.opacity(Opacity.heatmapLevel3)
         case 4:
-            return Color.trackingBlue.opacity(0.60)
+            return Color.trackingBlue.opacity(Opacity.heatmapLevel4)
         case 5:
-            return Color.trackingBlue.opacity(0.80)
+            return Color.trackingBlue.opacity(Opacity.heatmapLevel5)
         case 6:
             return Color.trackingBlue
         default:

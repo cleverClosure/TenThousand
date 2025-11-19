@@ -20,7 +20,7 @@ struct AddSkillView: View {
         VStack(alignment: .leading, spacing: Spacing.tight) {
             HStack(spacing: Spacing.loose) {
                 Circle()
-                    .fill(Color.secondary.opacity(0.3))
+                    .fill(Color.secondary.opacity(Opacity.overlayStrong))
                     .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
                 TextField("Skill name...", text: $skillName)
@@ -54,7 +54,7 @@ struct AddSkillView: View {
             .frame(height: Dimensions.skillRowHeight)
             .background(
                 RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                    .fill(Color.primary.opacity(0.03))
+                    .fill(Color.primary.opacity(Opacity.backgroundLight))
             )
 
             // Error message

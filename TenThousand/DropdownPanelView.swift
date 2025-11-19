@@ -177,7 +177,7 @@ struct DropdownPanelView: View {
 
     private var overlayBorder: some View {
         RoundedRectangle(cornerRadius: Dimensions.panelCornerRadius)
-            .stroke(Color.primary.opacity(0.05), lineWidth: 1)
+            .stroke(Color.primary.opacity(Opacity.backgroundMedium), lineWidth: 1)
     }
 
     private var shadowColor: Color {
@@ -290,12 +290,10 @@ extension View {
     ) -> some View {
         self
             .onKeyPress(.space) {
-                handleSpaceKey()
-                return .handled
+                return handleSpaceKey() ? .handled : .ignored
             }
             .onKeyPress(.return) {
-                handleReturnKey()
-                return .handled
+                return handleReturnKey() ? .handled : .ignored
             }
             .onKeyPress(.upArrow) {
                 navigateUp()

@@ -21,7 +21,7 @@ struct MenuBarIconView: View {
                         .stroke(Color.accentColor, lineWidth: 2)
                         .scaleEffect(pulseScale)
                         .opacity(pulseOpacity)
-                        .frame(width: 14, height: 14)
+                        .frame(width: Dimensions.iconSizeSmall, height: Dimensions.iconSizeSmall)
                         .onAppear {
                             startPulseAnimation()
                         }

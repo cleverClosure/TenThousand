@@ -57,20 +57,20 @@ struct SkillRowView: View {
                     // Base background
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
                         .fill(
-                            isSelected ? Color.trackingBlue.opacity(0.10) :
-                            isHovered ? Color.primary.opacity(0.05) : Color.clear
+                            isSelected ? Color.trackingBlue.opacity(Opacity.overlayLight) :
+                            isHovered ? Color.primary.opacity(Opacity.backgroundMedium) : Color.clear
                         )
 
                     // Flash overlay (blue when tapped)
                     if isFlashing {
                         RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                            .fill(Color.trackingBlue.opacity(0.20))
+                            .fill(Color.trackingBlue.opacity(Opacity.overlayMedium))
                     }
 
                     // Highlight glow (yellow when just updated)
                     if isHighlighted {
                         RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                            .fill(Color("FFD60A").opacity(0.30))
+                            .fill(Color("FFD60A").opacity(Opacity.overlayStrong))
                             .transition(.opacity)
                     }
                 }

@@ -29,7 +29,7 @@ struct PanelButtonStyle: ButtonStyle {
         configuration.label
             .background(
                 RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                    .fill(isHovered ? Color.primary.opacity(0.05) : Color.clear)
+                    .fill(isHovered ? Color.primary.opacity(Opacity.backgroundMedium) : Color.clear)
             )
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
             .animation(.hoverState, value: isHovered)
