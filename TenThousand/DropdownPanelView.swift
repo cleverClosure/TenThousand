@@ -12,10 +12,13 @@ import AppKit
 
 private enum KeyboardShortcuts {
     static let numberKeys: [KeyEquivalent] = [
-        .init("1"), .init("2"), .init("3"),
-        .init("4"), .init("5"), .init("6"),
-        .init("7"), .init("8"), .init("9")
+        KeyEquivalent("1"), KeyEquivalent("2"), KeyEquivalent("3"),
+        KeyEquivalent("4"), KeyEquivalent("5"), KeyEquivalent("6"),
+        KeyEquivalent("7"), KeyEquivalent("8"), KeyEquivalent("9")
     ]
+
+    static let addSkill = KeyEquivalent("n")
+    static let stopTracking = KeyEquivalent(".")
 }
 
 struct DropdownPanelView: View {
@@ -326,7 +329,7 @@ extension View {
         dismiss: DismissAction
     ) -> some View {
         self
-            .onKeyPress(keys: [.init("n")], phases: .down) { press in
+            .onKeyPress(keys: [KeyboardShortcuts.addSkill], phases: .down) { press in
                 if press.modifiers.contains(.command) && viewModel.activeSkill == nil {
                     withAnimation(.microInteraction) {
                         viewModel.isAddingSkill = true
@@ -335,7 +338,7 @@ extension View {
                 }
                 return .ignored
             }
-            .onKeyPress(keys: [.init(".")], phases: .down) { press in
+            .onKeyPress(keys: [KeyboardShortcuts.stopTracking], phases: .down) { press in
                 if press.modifiers.contains(.command) && viewModel.activeSkill != nil {
                     withAnimation(.panelTransition) {
                         viewModel.stopTracking()
