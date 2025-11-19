@@ -14,9 +14,11 @@ struct SkillRowView: View {
     var canDelete: Bool = true
     let onTap: () -> Void
     var onDelete: (() -> Void)? = nil
+    var onStartTracking: (() -> Void)? = nil
 
     @State private var isHovered = false
     @State private var isFlashing = false
+    @State private var isDotHovered = false
 
     var body: some View {
         Button(action: {
@@ -32,10 +34,34 @@ struct SkillRowView: View {
             onTap()
         }) {
             HStack(spacing: Spacing.loose) {
-                // Color dot
-                Circle()
-                    .fill(colorForIndex(skill.colorIndex))
-                    .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
+                // Color dot with play button overlay
+                ZStack {
+                    Circle()
+                        .fill(colorForIndex(skill.colorIndex))
+                        .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
+
+                    // Play button overlay on hover
+                    if isDotHovered {
+                        Circle()
+                            .fill(Color.black.opacity(0.5))
+                            .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
+
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 8))
+                            .foregroundColor(.white)
+                    }
+                }
+                .onHover { hovering in
+                    withAnimation(.hoverState) {
+                        isDotHovered = hovering
+                    }
+                }
+                .contentShape(Circle())
+                .onTapGesture {
+                    if let onStartTracking = onStartTracking {
+                        onStartTracking()
+                    }
+                }
 
                 // Skill name
                 Text(skill.name ?? UIText.defaultSkillName)

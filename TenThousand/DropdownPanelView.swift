@@ -158,6 +158,9 @@ struct DropdownPanelView: View {
                 },
                 onDelete: {
                     handleDeleteSkill(skill)
+                },
+                onStartTracking: {
+                    viewModel.startTracking(skill: skill)
                 }
             )
         }
