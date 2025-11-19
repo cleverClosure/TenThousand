@@ -25,6 +25,7 @@ private enum KeyboardShortcuts {
 struct DropdownPanelView: View {
     @ObservedObject var viewModel: AppViewModel
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("showMenuBarTimer") private var showMenuBarTimer = true
     @State private var selectedSkillIndex: Int? = nil
     @FocusState private var isPanelFocused: Bool
     @State private var skillToDelete: Skill? = nil
@@ -78,6 +79,10 @@ struct DropdownPanelView: View {
                     totalSeconds: viewModel.todaysTotalSeconds(),
                     skillCount: viewModel.todaysSkillCount()
                 )
+
+                Divider()
+
+                settingsSection
 
                 Divider()
 
@@ -190,6 +195,30 @@ struct DropdownPanelView: View {
                 .frame(height: Dimensions.skillRowHeight)
             }
             .buttonStyle(PlainButtonStyle())
+        }
+    }
+
+    private var settingsSection: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Image(systemName: "clock")
+                    .font(.system(size: Dimensions.iconSizeSmall))
+                    .foregroundColor(.secondary)
+
+                Text("Show Timer in Menu Bar")
+                    .font(Typography.body)
+                    .foregroundColor(.primary)
+
+                Spacer()
+
+                Toggle("", isOn: $showMenuBarTimer)
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+            }
+            .padding(.horizontal, Spacing.base)
+            .padding(.vertical, Spacing.tight)
+            .frame(height: Dimensions.skillRowHeight)
         }
     }
 

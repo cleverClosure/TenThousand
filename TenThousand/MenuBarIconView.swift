@@ -3,38 +3,60 @@
 //  TenThousand
 //
 //  Menubar icon with idle/active states
+//  The menubar is sacred space. Our icon must earn its place through discretion and utility.
 //
 
 import SwiftUI
 
 struct MenuBarIconView: View {
     @ObservedObject var timerManager: TimerManager
+    @AppStorage("showMenuBarTimer") private var showMenuBarTimer = true
     @State private var pulseScale: CGFloat = 0.3
     @State private var pulseOpacity: Double = 0.8
+
+    // Icon dimensions: 18x18 canvas, 14x14 glyph, 2px padding
+    private let canvasSize: CGFloat = 18
+    private let glyphSize: CGFloat = 14
+    private let padding: CGFloat = 2
 
     var body: some View {
         HStack(spacing: 4) {
             ZStack {
-                // Pulse ring (only when actively tracking)
+                // Canvas boundary (18x18)
+                Color.clear
+                    .frame(width: canvasSize, height: canvasSize)
+
+                // Outer circle (14x14 glyph with 2px padding)
+                Circle()
+                    .strokeBorder(
+                        timerManager.isRunning && !timerManager.isPaused
+                            ? Color.accentColor
+                            : Color.primary,
+                        lineWidth: 1.5
+                    )
+                    .frame(width: glyphSize, height: glyphSize)
+
+                // Center element: dot (idle) or animated ring (active)
                 if timerManager.isRunning && !timerManager.isPaused {
+                    // Active state: animated ring expands from center
                     Circle()
-                        .stroke(Color.accentColor, lineWidth: 2)
+                        .strokeBorder(Color.accentColor, lineWidth: 1.5)
                         .scaleEffect(pulseScale)
                         .opacity(pulseOpacity)
-                        .frame(width: Dimensions.iconSizeSmall, height: Dimensions.iconSizeSmall)
+                        .frame(width: 4, height: 4)
                         .onAppear {
                             startPulseAnimation()
                         }
+                } else {
+                    // Idle state: solid dot in center
+                    Circle()
+                        .fill(timerManager.isRunning && timerManager.isPaused ? Color.accentColor : Color.primary)
+                        .frame(width: 4, height: 4)
                 }
-
-                // Main icon
-                Image(systemName: timerManager.isRunning && !timerManager.isPaused ? "circle.fill" : "circle")
-                    .font(.system(size: 14, weight: .medium))
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundColor(timerManager.isRunning && !timerManager.isPaused ? .accentColor : .primary)
             }
 
-            if timerManager.isRunning {
+            // Optional timer display (user-controlled)
+            if showMenuBarTimer && timerManager.isRunning {
                 Text(timerManager.elapsedSeconds.formattedTime())
                     .font(Typography.timeDisplay)
                     .kerning(Typography.timeDisplayKerning)
