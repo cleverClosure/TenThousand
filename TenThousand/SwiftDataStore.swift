@@ -75,8 +75,8 @@ final class SwiftDataStore: DataStore {
     }
 
     @discardableResult
-    func createSkill(name: String, colorIndex: Int16) -> Skill {
-        let skill = Skill(name: name, colorIndex: colorIndex)
+    func createSkill(name: String, paletteId: String, colorIndex: Int16) -> Skill {
+        let skill = Skill(name: name, paletteId: paletteId, colorIndex: colorIndex)
         modelContext.insert(skill)
         return skill
     }

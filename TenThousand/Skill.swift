@@ -9,6 +9,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Model
 final class Skill {
@@ -17,6 +18,7 @@ final class Skill {
 
     var id: UUID
     var name: String
+    var paletteId: String
     var colorIndex: Int16
     var createdAt: Date
 
@@ -32,11 +34,17 @@ final class Skill {
         }
     }
 
+    /// The resolved color for this skill based on palette and color index.
+    var color: Color {
+        ColorPaletteManager.shared.color(forPaletteId: paletteId, colorIndex: Int(colorIndex))
+    }
+
     // MARK: - Initialization
 
-    init(name: String, colorIndex: Int16 = 0) {
+    init(name: String, paletteId: String, colorIndex: Int16) {
         self.id = UUID()
         self.name = name
+        self.paletteId = paletteId
         self.colorIndex = colorIndex
         self.createdAt = Date()
     }

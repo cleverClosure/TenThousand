@@ -21,13 +21,14 @@ protocol DataStore {
     /// - Returns: Array of skills sorted by createdAt ascending.
     func fetchAllSkills() -> [Skill]
 
-    /// Creates a new skill with the given name and color index.
+    /// Creates a new skill with the given name and color assignment.
     /// - Parameters:
     ///   - name: The skill name.
-    ///   - colorIndex: The color palette index for the skill.
+    ///   - paletteId: The color palette identifier.
+    ///   - colorIndex: The color index within the palette.
     /// - Returns: The newly created skill.
     @discardableResult
-    func createSkill(name: String, colorIndex: Int16) -> Skill
+    func createSkill(name: String, paletteId: String, colorIndex: Int16) -> Skill
 
     /// Deletes the specified skill.
     /// - Parameter skill: The skill to delete.

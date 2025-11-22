@@ -15,10 +15,13 @@ struct AppViewModelTests {
 
     // MARK: - Test Helpers
 
+    static let testPaletteId = ColorPalette.summerOceanBreeze.id
+
     /// Creates a fresh AppViewModel with in-memory persistence for each test
     func makeViewModel() -> AppViewModel {
         let dataStore = SwiftDataStore.inMemory()
-        return AppViewModel(dataStore: dataStore)
+        let paletteManager = ColorPaletteManager(defaults: UserDefaults(suiteName: UUID().uuidString)!)
+        return AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
     }
 
     // MARK: - Skill Creation Behaviors
@@ -120,7 +123,7 @@ struct AppViewModelTests {
         #expect(viewModel.skills.count == 1)
     }
 
-    @Test("Creating skills assigns different color indices")
+    @Test("Creating skills assigns different colors from the same palette")
     func testCreateSkillsAssignsDifferentColors() {
         let viewModel = makeViewModel()
 
@@ -129,6 +132,11 @@ struct AppViewModelTests {
         viewModel.createSkill(name: "Skill 3")
 
         #expect(viewModel.skills.count == 3)
+        // All skills should be from the same palette
+        let firstPaletteId = viewModel.skills[0].paletteId
+        #expect(viewModel.skills[1].paletteId == firstPaletteId)
+        #expect(viewModel.skills[2].paletteId == firstPaletteId)
+        // Colors should be assigned in order
         #expect(viewModel.skills[0].colorIndex == 0)
         #expect(viewModel.skills[1].colorIndex == 1)
         #expect(viewModel.skills[2].colorIndex == 2)
@@ -289,11 +297,12 @@ struct AppViewModelTests {
     @Test("Today's skill count counts unique skills")
     func testTodaysSkillCountCountsUniqueSkills() {
         let dataStore = SwiftDataStore.inMemory()
-        let viewModel = AppViewModel(dataStore: dataStore)
+        let paletteManager = ColorPaletteManager(defaults: UserDefaults(suiteName: UUID().uuidString)!)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
 
         // Create skills via dataStore
-        let skill1 = dataStore.createSkill(name: "Swift", colorIndex: 0)
-        let skill2 = dataStore.createSkill(name: "Python", colorIndex: 1)
+        let skill1 = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        let skill2 = dataStore.createSkill(name: "Python", paletteId: Self.testPaletteId, colorIndex: 1)
 
         // Create sessions for today
         let today = Date()

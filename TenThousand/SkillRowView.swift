@@ -60,7 +60,7 @@ struct SkillRowView: View {
     private var colorDot: some View {
         ZStack {
             Circle()
-                .fill(colorForIndex(skill.colorIndex))
+                .fill(skill.color)
                 .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
             if isDotHovered {
@@ -135,19 +135,5 @@ struct SkillRowView: View {
             }
         }
         onTap()
-    }
-
-    private func colorForIndex(_ index: Int16) -> Color {
-        let colors: [Color] = [
-            Color.trackingBlue,
-            Color.skillRed,
-            Color.skillOrange,
-            Color.skillYellow,
-            Color.skillGreen,
-            Color.skillTeal,
-            Color.skillPurple,
-            Color.skillPink
-        ]
-        return colors[Int(index) % colors.count]
     }
 }

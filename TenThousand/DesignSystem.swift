@@ -40,15 +40,6 @@ extension Color {
     // Highlight Colors
     static let highlightYellow = Color(hex: "FFD60A")
 
-    // Skill Color Palette
-    static let skillRed = Color(hex: "FFB3B0")
-    static let skillOrange = Color(hex: "FFD4A3")
-    static let skillYellow = Color(hex: "FFF4B3")
-    static let skillGreen = Color(hex: "B3E6C5")
-    static let skillTeal = Color(hex: "A3E8E5")
-    static let skillPurple = Color(hex: "E0C3FF")
-    static let skillPink = Color(hex: "FFBDD1")
-
     // Helper initializer for hex color strings
     fileprivate init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
@@ -244,7 +235,7 @@ struct TimeConstants {
 
 struct ValidationLimits {
     static let maxSkillNameLength = 30
-    static let colorPaletteSize = 8
+    static let maxSkillCount = 12
 }
 
 // MARK: - UI Text
