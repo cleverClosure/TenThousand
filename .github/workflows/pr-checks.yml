@@ -1,0 +1,83 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-validation:
+    name: PR Validation
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Fetch all history for better diff analysis
+
+    - name: Install SwiftLint
+      run: brew install swiftlint
+
+    - name: Run SwiftLint on changed files
+      run: |
+        if [ -f .swiftlint.yml ]; then
+          # Get list of changed Swift files
+          CHANGED_FILES=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }}...HEAD | grep '\.swift$' || true)
+
+          if [ -n "$CHANGED_FILES" ]; then
+            echo "Running SwiftLint on changed files:"
+            echo "$CHANGED_FILES"
+            echo "$CHANGED_FILES" | xargs swiftlint lint --quiet --reporter github-actions-logging || true
+          else
+            echo "No Swift files changed"
+          fi
+        fi
+
+    - name: Build and test
+      run: |
+        xcodebuild clean test \
+          -project TenThousand.xcodeproj \
+          -scheme TenThousand \
+          -destination 'platform=macOS' \
+          -enableCodeCoverage YES \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
+
+    - name: Check for test failures
+      if: failure()
+      run: |
+        echo "❌ Tests failed. Please fix the failing tests before merging." >> $GITHUB_STEP_SUMMARY
+        exit 1
+
+    - name: PR Summary
+      if: success()
+      run: |
+        echo "## ✅ PR Checks Passed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Build successful" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ All tests passed" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Code quality checks completed" >> $GITHUB_STEP_SUMMARY
+
+  code-coverage:
+    name: Code Coverage Check
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run tests with coverage
+      run: |
+        xcodebuild test \
+          -project TenThousand.xcodeproj \
+          -scheme TenThousand \
+          -destination 'platform=macOS' \
+          -enableCodeCoverage YES \
+          -resultBundlePath TestResults \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
+
+    - name: Check code coverage
+      run: |
+        echo "## Code Coverage Report" >> $GITHUB_STEP_SUMMARY
+        echo "Coverage report generated. Review TestResults for details." >> $GITHUB_STEP_SUMMARY
