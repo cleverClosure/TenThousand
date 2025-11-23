@@ -5,20 +5,19 @@
 //  Main view model coordinating app state
 //
 
-import Foundation
-import SwiftUI
 import Combine
+import Foundation
 import os.log
+import SwiftUI
 
 class AppViewModel: ObservableObject {
-
     // MARK: - Published Properties
 
     @Published var skills: [Skill] = []
     @Published var activeSkill: Skill?
     @Published var currentSession: Session?
-    @Published var justUpdatedSkillId: UUID? = nil
-    @Published var selectedSkillForDetail: Skill? = nil
+    @Published var justUpdatedSkillId: UUID?
+    @Published var selectedSkillForDetail: Skill?
 
     // MARK: - Dependencies
 

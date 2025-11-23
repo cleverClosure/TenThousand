@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SkillDetailView: View {
-
     // MARK: - Properties
 
     let skill: Skill
@@ -28,11 +27,11 @@ struct SkillDetailView: View {
 
     private var headerSection: some View {
         HStack {
-            Button(action: {
+            Button {
                 withAnimation(.panelTransition) {
                     viewModel.selectedSkillForDetail = nil
                 }
-            }) {
+            } label: {
                 HStack(spacing: Spacing.tight) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 11, weight: .medium))

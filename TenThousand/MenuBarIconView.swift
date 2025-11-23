@@ -9,7 +9,6 @@
 import SwiftUI
 
 struct MenuBarIconView: View {
-
     // MARK: - Properties
 
     @ObservedObject var timerManager: TimerManager

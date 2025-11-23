@@ -40,7 +40,6 @@ struct ColorAssignment: Equatable {
 /// 5. Maximum 12 skills (with 3 palettes × 5 colors = 15 total colors)
 /// 6. When a skill is deleted, its color becomes available but we stay on the current palette
 final class ColorPaletteManager {
-
     // MARK: - Singleton
 
     static let shared = ColorPaletteManager()

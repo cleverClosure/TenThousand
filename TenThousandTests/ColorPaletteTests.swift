@@ -5,13 +5,12 @@
 //  Unit tests for ColorPalette and ColorPaletteManager
 //
 
-import Testing
 import Foundation
 @testable import TenThousand
+import Testing
 
 @Suite("ColorPalette Behaviors", .serialized)
 struct ColorPaletteTests {
-
     // MARK: - Palette Definition Tests
 
     @Test("Summer Ocean Breeze palette has 5 colors")
@@ -73,11 +72,12 @@ struct ColorPaletteTests {
 
 @Suite("ColorPaletteManager Behaviors", .serialized)
 struct ColorPaletteManagerTests {
-
     // MARK: - Test Helpers
 
     func makeManager() -> ColorPaletteManager {
-        let defaults = UserDefaults(suiteName: UUID().uuidString)!
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            fatalError("Failed to create test UserDefaults")
+        }
         return ColorPaletteManager(defaults: defaults)
     }
 
@@ -120,9 +120,12 @@ struct ColorPaletteManagerTests {
     func testSequentialColorsInOrder() {
         let manager = makeManager()
 
-        let color1 = manager.nextColor(usedColors: [])!
-        let color2 = manager.nextColor(usedColors: [color1])!
-        let color3 = manager.nextColor(usedColors: [color1, color2])!
+        guard let color1 = manager.nextColor(usedColors: []),
+              let color2 = manager.nextColor(usedColors: [color1]),
+              let color3 = manager.nextColor(usedColors: [color1, color2]) else {
+            Issue.record("Expected colors to be assigned")
+            return
+        }
 
         #expect(color1.colorIndex == 0)
         #expect(color2.colorIndex == 1)
@@ -133,9 +136,12 @@ struct ColorPaletteManagerTests {
     func testColorsUseSamePalette() {
         let manager = makeManager()
 
-        let color1 = manager.nextColor(usedColors: [])!
-        let color2 = manager.nextColor(usedColors: [color1])!
-        let color3 = manager.nextColor(usedColors: [color1, color2])!
+        guard let color1 = manager.nextColor(usedColors: []),
+              let color2 = manager.nextColor(usedColors: [color1]),
+              let color3 = manager.nextColor(usedColors: [color1, color2]) else {
+            Issue.record("Expected colors to be assigned")
+            return
+        }
 
         #expect(color1.paletteId == color2.paletteId)
         #expect(color2.paletteId == color3.paletteId)
@@ -204,12 +210,18 @@ struct ColorPaletteManagerTests {
         let manager = makeManager()
 
         // Create 3 skills
-        let color1 = manager.nextColor(usedColors: [])!
-        let color2 = manager.nextColor(usedColors: [color1])!
-        let color3 = manager.nextColor(usedColors: [color1, color2])!
+        guard let color1 = manager.nextColor(usedColors: []),
+              let color2 = manager.nextColor(usedColors: [color1]),
+              let color3 = manager.nextColor(usedColors: [color1, color2]) else {
+            Issue.record("Expected colors to be assigned")
+            return
+        }
 
         // "Delete" color2 by not including it in used colors
-        let color4 = manager.nextColor(usedColors: [color1, color3])!
+        guard let color4 = manager.nextColor(usedColors: [color1, color3]) else {
+            Issue.record("Expected color4 to be assigned")
+            return
+        }
 
         // color4 should be color2's slot (index 1)
         #expect(color4.colorIndex == 1)
@@ -303,7 +315,6 @@ struct ColorPaletteManagerTests {
 
 @Suite("ColorAssignment Behaviors", .serialized)
 struct ColorAssignmentTests {
-
     @Test("ColorAssignment resolves to SkillColor")
     func testColorAssignmentResolvesToSkillColor() {
         let assignment = ColorAssignment(paletteId: ColorPalette.summerOceanBreeze.id, colorIndex: 0)

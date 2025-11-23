@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SkillRowView: View {
-
     // MARK: - Properties
 
     let skill: Skill
@@ -17,8 +16,8 @@ struct SkillRowView: View {
     var isSelected: Bool = false
     var isHighlighted: Bool = false
     var canDelete: Bool = true
-    var onDelete: (() -> Void)? = nil
-    var onStartTracking: (() -> Void)? = nil
+    var onDelete: (() -> Void)?
+    var onStartTracking: (() -> Void)?
 
     // MARK: - Private State
 

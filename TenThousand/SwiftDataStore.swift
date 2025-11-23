@@ -8,12 +8,11 @@
 //
 
 import Foundation
-import SwiftData
 import os.log
+import SwiftData
 
 /// SwiftData implementation of the DataStore protocol.
 final class SwiftDataStore: DataStore {
-
     // MARK: - Properties
 
     /// Shared singleton instance for production use.

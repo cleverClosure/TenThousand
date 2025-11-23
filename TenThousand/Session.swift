@@ -12,7 +12,6 @@ import SwiftData
 
 @Model
 final class Session {
-
     // MARK: - Properties
 
     var id: UUID

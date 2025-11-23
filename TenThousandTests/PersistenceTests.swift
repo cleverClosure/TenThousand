@@ -6,14 +6,13 @@
 //  Testing behaviors, not implementations
 //
 
-import Testing
 import Foundation
 import SwiftData
 @testable import TenThousand
+import Testing
 
 @Suite("SwiftDataStore Behaviors", .serialized)
 struct PersistenceTests {
-
     // MARK: - Test Helpers
 
     static let testPaletteId = ColorPalette.summerOceanBreeze.id

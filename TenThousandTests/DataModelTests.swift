@@ -6,14 +6,13 @@
 //  Testing behaviors, not implementations
 //
 
-import Testing
 import Foundation
 import SwiftData
 @testable import TenThousand
+import Testing
 
 @Suite("Skill Model Behaviors", .serialized)
 struct SkillModelTests {
-
     // MARK: - Test Helpers
 
     static let testPaletteId = ColorPalette.summerOceanBreeze.id
@@ -138,7 +137,6 @@ struct SkillModelTests {
 
 @Suite("Session Model Behaviors", .serialized)
 struct SessionModelTests {
-
     // MARK: - Test Helpers
 
     static let testPaletteId = ColorPalette.summerOceanBreeze.id

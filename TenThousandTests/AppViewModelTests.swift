@@ -6,13 +6,12 @@
 //  Testing behaviors, not implementations
 //
 
-import Testing
 import Foundation
 @testable import TenThousand
+import Testing
 
 @Suite("AppViewModel Behaviors", .serialized)
 struct AppViewModelTests {
-
     // MARK: - Test Helpers
 
     static let testPaletteId = ColorPalette.summerOceanBreeze.id
@@ -20,7 +19,10 @@ struct AppViewModelTests {
     /// Creates a fresh AppViewModel with in-memory persistence for each test
     func makeViewModel() -> AppViewModel {
         let dataStore = SwiftDataStore.inMemory()
-        let paletteManager = ColorPaletteManager(defaults: UserDefaults(suiteName: UUID().uuidString)!)
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            fatalError("Failed to create test UserDefaults")
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
         return AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
     }
 
@@ -151,7 +153,10 @@ struct AppViewModelTests {
         viewModel.createSkill(name: "Swift")
         #expect(viewModel.skills.count == 1)
 
-        let skill = viewModel.skills.first!
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
         viewModel.deleteSkill(skill)
 
         #expect(viewModel.skills.isEmpty)
@@ -165,7 +170,10 @@ struct AppViewModelTests {
         viewModel.createSkill(name: "Python")
         viewModel.createSkill(name: "JavaScript")
 
-        let skillToDelete = viewModel.skills.first { $0.name == "Python" }!
+        guard let skillToDelete = viewModel.skills.first(where: { $0.name == "Python" }) else {
+            Issue.record("Expected Python skill to exist")
+            return
+        }
         viewModel.deleteSkill(skillToDelete)
 
         #expect(viewModel.skills.count == 2)
@@ -181,7 +189,10 @@ struct AppViewModelTests {
         let viewModel = makeViewModel()
 
         viewModel.createSkill(name: "Swift")
-        let skill = viewModel.skills.first!
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
 
         viewModel.startTracking(skill: skill)
 
@@ -197,8 +208,11 @@ struct AppViewModelTests {
         viewModel.createSkill(name: "Swift")
         viewModel.createSkill(name: "Python")
 
-        let skill1 = viewModel.skills.first { $0.name == "Swift" }!
-        let skill2 = viewModel.skills.first { $0.name == "Python" }!
+        guard let skill1 = viewModel.skills.first(where: { $0.name == "Swift" }),
+              let skill2 = viewModel.skills.first(where: { $0.name == "Python" }) else {
+            Issue.record("Expected skills to exist")
+            return
+        }
 
         viewModel.startTracking(skill: skill1)
         #expect(viewModel.activeSkill == skill1)
@@ -213,7 +227,10 @@ struct AppViewModelTests {
         let viewModel = makeViewModel()
 
         viewModel.createSkill(name: "Swift")
-        let skill = viewModel.skills.first!
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
 
         viewModel.startTracking(skill: skill)
         viewModel.pauseTracking()
@@ -226,7 +243,10 @@ struct AppViewModelTests {
         let viewModel = makeViewModel()
 
         viewModel.createSkill(name: "Swift")
-        let skill = viewModel.skills.first!
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
 
         viewModel.startTracking(skill: skill)
         viewModel.pauseTracking()
@@ -241,7 +261,10 @@ struct AppViewModelTests {
         let viewModel = makeViewModel()
 
         viewModel.createSkill(name: "Swift")
-        let skill = viewModel.skills.first!
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
 
         viewModel.startTracking(skill: skill)
         viewModel.stopTracking()
@@ -256,7 +279,10 @@ struct AppViewModelTests {
         let viewModel = makeViewModel()
 
         viewModel.createSkill(name: "Swift")
-        let skill = viewModel.skills.first!
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
 
         viewModel.startTracking(skill: skill)
         viewModel.stopTracking()
@@ -270,7 +296,10 @@ struct AppViewModelTests {
         let viewModel = makeViewModel()
 
         viewModel.createSkill(name: "Swift")
-        let skill = viewModel.skills.first!
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
 
         viewModel.startTracking(skill: skill)
         viewModel.stopTracking()
@@ -297,7 +326,11 @@ struct AppViewModelTests {
     @Test("Today's skill count counts unique skills")
     func testTodaysSkillCountCountsUniqueSkills() {
         let dataStore = SwiftDataStore.inMemory()
-        let paletteManager = ColorPaletteManager(defaults: UserDefaults(suiteName: UUID().uuidString)!)
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
         let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
 
         // Create skills via dataStore
@@ -319,5 +352,4 @@ struct AppViewModelTests {
 
         #expect(viewModel.todaysSkillCount() == 2) // Only 2 unique skills
     }
-
 }

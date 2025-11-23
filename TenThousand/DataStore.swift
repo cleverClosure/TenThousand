@@ -14,7 +14,6 @@ import Foundation
 /// This abstraction allows swapping between different persistence implementations
 /// (CoreData, SwiftData, etc.) without modifying the consuming code.
 protocol DataStore {
-
     // MARK: - Skill Operations
 
     /// Fetches all skills sorted by creation date.

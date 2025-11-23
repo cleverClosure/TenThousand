@@ -13,7 +13,6 @@ import SwiftUI
 
 @Model
 final class Skill {
-
     // MARK: - Properties
 
     var id: UUID
