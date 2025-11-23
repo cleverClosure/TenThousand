@@ -263,7 +263,7 @@ struct UIText {
 
 struct FormatStrings {
     static let timeWithHours = "%d:%02d:%02d"
-    static let timeWithoutHours = "%d:%02d"
+    static let timeWithoutHours = "%02d:%02d"
 }
 
 // MARK: - Animation Durations

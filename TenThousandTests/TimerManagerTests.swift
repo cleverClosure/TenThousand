@@ -224,23 +224,23 @@ struct TimerManagerTests {
 
 @Suite("Time Formatting Behaviors")
 struct TimeFormattingTests {
-    @Test("Zero seconds formats as 0:00")
+    @Test("Zero seconds formats as 00:00")
     func testZeroSecondsFormat() {
         let formatted = Int64(0).formattedTime()
-        #expect(formatted == "0:00")
+        #expect(formatted == "00:00")
     }
 
-    @Test("Seconds only formats as M:SS")
+    @Test("Seconds only formats as MM:SS")
     func testSecondsOnlyFormat() {
-        #expect(Int64(5).formattedTime() == "0:05")
-        #expect(Int64(30).formattedTime() == "0:30")
-        #expect(Int64(59).formattedTime() == "0:59")
+        #expect(Int64(5).formattedTime() == "00:05")
+        #expect(Int64(30).formattedTime() == "00:30")
+        #expect(Int64(59).formattedTime() == "00:59")
     }
 
-    @Test("Minutes and seconds format as M:SS")
+    @Test("Minutes and seconds format as MM:SS")
     func testMinutesAndSecondsFormat() {
-        #expect(Int64(60).formattedTime() == "1:00")
-        #expect(Int64(90).formattedTime() == "1:30")
+        #expect(Int64(60).formattedTime() == "01:00")
+        #expect(Int64(90).formattedTime() == "01:30")
         #expect(Int64(600).formattedTime() == "10:00")
         #expect(Int64(3599).formattedTime() == "59:59")
     }
@@ -314,11 +314,11 @@ struct TimeFormattingTests {
     @Test("Boundary values format correctly")
     func testBoundaryValues() {
         // Just under one minute
-        #expect(Int64(59).formattedTime() == "0:59")
+        #expect(Int64(59).formattedTime() == "00:59")
         #expect(Int64(59).formattedShortTime() == "<1m")
 
         // Exactly one minute
-        #expect(Int64(60).formattedTime() == "1:00")
+        #expect(Int64(60).formattedTime() == "01:00")
         #expect(Int64(60).formattedShortTime() == "1m")
 
         // Just under one hour
