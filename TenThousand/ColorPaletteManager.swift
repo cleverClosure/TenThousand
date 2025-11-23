@@ -11,7 +11,7 @@ import SwiftUI
 // MARK: - Color Assignment Result
 
 /// Represents a color assignment for a new skill.
-struct ColorAssignment: Equatable {
+struct ColorAssignment: Equatable, Hashable {
     let paletteId: String
     let colorIndex: Int
 

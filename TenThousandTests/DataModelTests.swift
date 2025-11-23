@@ -32,8 +32,9 @@ struct SkillModelTests {
         #expect(skill.name == "Swift")
         #expect(skill.paletteId == Self.testPaletteId)
         #expect(skill.colorIndex == 3)
-        #expect(skill.id != nil)
-        #expect(skill.createdAt != nil)
+        // Verify id and createdAt are set (non-optional types)
+        _ = skill.id
+        _ = skill.createdAt
     }
 
     @Test("Creating a skill generates unique IDs")
@@ -155,8 +156,9 @@ struct SessionModelTests {
         let session = store.createSession(for: skill)
 
         #expect(session.skill === skill)
-        #expect(session.id != nil)
-        #expect(session.startTime != nil)
+        // Verify id and startTime are set (non-optional types)
+        _ = session.id
+        _ = session.startTime
         #expect(session.pausedDuration == 0)
         #expect(session.endTime == nil)
     }

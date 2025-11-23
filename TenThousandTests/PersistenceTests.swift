@@ -27,7 +27,8 @@ struct PersistenceTests {
     func testInMemoryStoreCreation() {
         let store = makeStore()
 
-        #expect(store.modelContext != nil)
+        // Verify modelContext is accessible (non-optional type)
+        _ = store.modelContext
     }
 
     // MARK: - Save Behaviors
@@ -88,7 +89,7 @@ struct PersistenceTests {
         let store = makeStore()
 
         let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
-        let session = store.createSession(for: skill)
+        _ = store.createSession(for: skill)
         store.save()
 
         let sessions = store.fetchSessions(from: Date.distantPast)
@@ -153,7 +154,7 @@ struct PersistenceTests {
         let store1 = makeStore()
         let store2 = makeStore()
 
-        store1.createSkill(name: "Swift", colorIndex: 0)
+        store1.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         store1.save()
 
         let results1 = store1.fetchAllSkills()
