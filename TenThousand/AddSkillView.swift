@@ -53,18 +53,28 @@ struct AddSkillView: View {
     }
 
     private var textField: some View {
-        TextField(UIText.skillNamePlaceholder, text: $skillName)
-            .font(Typography.display)
-            .textFieldStyle(PlainTextFieldStyle())
-            .onSubmit {
-                createSkill()
+        ZStack(alignment: .leading) {
+            // Custom placeholder with matching kerning to prevent microjump
+            if skillName.isEmpty {
+                Text(UIText.skillNamePlaceholder)
+                    .font(Typography.display)
+                    .kerning(Typography.displayKerning)
+                    .foregroundColor(.secondary)
             }
-            .onChange(of: skillName) { _, newValue in
-                errorMessage = nil
-                if newValue.count > ValidationLimits.maxSkillNameLength {
-                    skillName = String(newValue.prefix(ValidationLimits.maxSkillNameLength))
+            TextField("", text: $skillName)
+                .font(Typography.display)
+                .kerning(Typography.displayKerning)
+                .textFieldStyle(PlainTextFieldStyle())
+                .onSubmit {
+                    createSkill()
                 }
-            }
+                .onChange(of: skillName) { _, newValue in
+                    errorMessage = nil
+                    if newValue.count > ValidationLimits.maxSkillNameLength {
+                        skillName = String(newValue.prefix(ValidationLimits.maxSkillNameLength))
+                    }
+                }
+        }
     }
 
     private var submitButton: some View {
