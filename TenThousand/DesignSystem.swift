@@ -172,6 +172,9 @@ struct Dimensions {
     static let iconSizeSmall: CGFloat = 14
     static let iconSizeMedium: CGFloat = 24
 
+    // Menubar
+    static let menubarTimerWidth: CGFloat = 52
+
     // Dividers
     static let dividerHeight: CGFloat = 1
 }
