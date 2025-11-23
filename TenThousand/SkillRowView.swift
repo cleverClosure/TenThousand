@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SkillRowView: View {
-
     // MARK: - Properties
 
     let skill: Skill
@@ -17,8 +16,8 @@ struct SkillRowView: View {
     var isSelected: Bool = false
     var isHighlighted: Bool = false
     var canDelete: Bool = true
-    var onDelete: (() -> Void)? = nil
-    var onStartTracking: (() -> Void)? = nil
+    var onDelete: (() -> Void)?
+    var onStartTracking: (() -> Void)?
 
     // MARK: - Private State
 
@@ -60,7 +59,7 @@ struct SkillRowView: View {
     private var colorDot: some View {
         ZStack {
             Circle()
-                .fill(colorForIndex(skill.colorIndex))
+                .fill(skill.color)
                 .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
             if isDotHovered {
@@ -135,19 +134,5 @@ struct SkillRowView: View {
             }
         }
         onTap()
-    }
-
-    private func colorForIndex(_ index: Int16) -> Color {
-        let colors: [Color] = [
-            Color.trackingBlue,
-            Color.skillRed,
-            Color.skillOrange,
-            Color.skillYellow,
-            Color.skillGreen,
-            Color.skillTeal,
-            Color.skillPurple,
-            Color.skillPink
-        ]
-        return colors[Int(index) % colors.count]
     }
 }

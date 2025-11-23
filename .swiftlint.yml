@@ -3,7 +3,6 @@
 
 # Rules to enable
 opt_in_rules:
-  - explicit_type_interface
   - force_unwrapping
   - private_outlet
   - private_action

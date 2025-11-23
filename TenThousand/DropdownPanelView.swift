@@ -5,13 +5,12 @@
 //  Main dropdown panel combining all components
 //
 
-import SwiftUI
 import AppKit
+import SwiftUI
 
 // MARK: - DropdownPanelView
 
 struct DropdownPanelView: View {
-
     // MARK: - Properties
 
     @ObservedObject var viewModel: AppViewModel
@@ -19,8 +18,8 @@ struct DropdownPanelView: View {
 
     // MARK: - Private State
 
-    @State private var selectedSkillIndex: Int? = nil
-    @State private var skillToDelete: Skill? = nil
+    @State private var selectedSkillIndex: Int?
+    @State private var skillToDelete: Skill?
     @State private var showingDeleteAlert = false
     @FocusState private var isPanelFocused: Bool
 
@@ -28,7 +27,7 @@ struct DropdownPanelView: View {
 
     var body: some View {
         styledContent
-            .withKeyboardHandlers(
+            .withKeyboardHandlers(KeyboardHandlerConfig(
                 viewModel: viewModel,
                 isPanelFocused: $isPanelFocused,
                 dismiss: dismiss,
@@ -36,7 +35,7 @@ struct DropdownPanelView: View {
                 navigateUp: navigateUp,
                 navigateDown: navigateDown,
                 handleQuickSwitch: handleQuickSwitch
-            )
+            ))
             .alert(isPresented: $showingDeleteAlert) {
                 deleteConfirmationAlert
             }
@@ -53,8 +52,8 @@ struct DropdownPanelView: View {
             .shadow(
                 color: shadowColor,
                 radius: Shadows.floating.radius,
-                x: Shadows.floating.x,
-                y: Shadows.floating.y
+                x: Shadows.floating.xOffset,
+                y: Shadows.floating.yOffset
             )
     }
 
@@ -80,12 +79,9 @@ struct DropdownPanelView: View {
         ScrollView {
             VStack(spacing: Spacing.tight) {
                 skillRows
-                AddSkillView(
-                    existingSkillNames: existingSkillNames,
-                    onCreate: { name in
-                        viewModel.createSkill(name: name)
-                    }
-                )
+                AddSkillView(existingSkillNames: existingSkillNames) { name in
+                    viewModel.createSkill(name: name)
+                }
             }
             .padding(Spacing.base)
         }
@@ -117,9 +113,9 @@ struct DropdownPanelView: View {
     }
 
     private var quitButton: some View {
-        Button(action: {
+        Button {
             NSApplication.shared.terminate(nil)
-        }) {
+        } label: {
             HStack {
                 Image(systemName: "xmark.circle")
                     .font(.system(size: Dimensions.iconSizeSmall))
@@ -257,32 +253,36 @@ private enum KeyboardShortcuts {
     static let quit = KeyEquivalent("q")
 }
 
+// MARK: - Keyboard Handler Configuration
+
+private struct KeyboardHandlerConfig {
+    let viewModel: AppViewModel
+    let isPanelFocused: FocusState<Bool>.Binding
+    let dismiss: DismissAction
+    let handleReturnKey: () -> Bool
+    let navigateUp: () -> Void
+    let navigateDown: () -> Void
+    let handleQuickSwitch: (KeyPress) -> Bool
+}
+
 // MARK: - Keyboard Handlers Extension
 
 private extension View {
-    func withKeyboardHandlers(
-        viewModel: AppViewModel,
-        isPanelFocused: FocusState<Bool>.Binding,
-        dismiss: DismissAction,
-        handleReturnKey: @escaping () -> Bool,
-        navigateUp: @escaping () -> Void,
-        navigateDown: @escaping () -> Void,
-        handleQuickSwitch: @escaping (KeyPress) -> Bool
-    ) -> some View {
+    func withKeyboardHandlers(_ config: KeyboardHandlerConfig) -> some View {
         self
             .focusable()
             .focusEffectDisabled()
-            .focused(isPanelFocused)
+            .focused(config.isPanelFocused)
             .onAppear {
-                isPanelFocused.wrappedValue = true
+                config.isPanelFocused.wrappedValue = true
             }
             .withNavigationKeys(
-                handleReturnKey: handleReturnKey,
-                navigateUp: navigateUp,
-                navigateDown: navigateDown
+                handleReturnKey: config.handleReturnKey,
+                navigateUp: config.navigateUp,
+                navigateDown: config.navigateDown
             )
-            .withNumberKeys(handleQuickSwitch: handleQuickSwitch)
-            .withCommandKeys(viewModel: viewModel, dismiss: dismiss)
+            .withNumberKeys(handleQuickSwitch: config.handleQuickSwitch)
+            .withCommandKeys(viewModel: config.viewModel, dismiss: config.dismiss)
     }
 
     private func withNavigationKeys(
@@ -333,9 +333,9 @@ private extension View {
                 }
                 return .ignored
             }
-            .onCommand(#selector(NSResponder.cancelOperation(_:)), perform: {
+            .onCommand(#selector(NSResponder.cancelOperation(_:))) {
                 dismiss()
-            })
+            }
     }
 }
 

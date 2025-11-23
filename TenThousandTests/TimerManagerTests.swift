@@ -6,12 +6,11 @@
 //  Testing behaviors, not implementations
 //
 
-import Testing
 @testable import TenThousand
+import Testing
 
 @Suite("TimerManager Behaviors", .serialized)
 struct TimerManagerTests {
-
     // MARK: - Timer State Transition Behaviors
 
     @Test("Starting a timer transitions to running state")
@@ -225,7 +224,6 @@ struct TimerManagerTests {
 
 @Suite("Time Formatting Behaviors")
 struct TimeFormattingTests {
-
     @Test("Zero seconds formats as 0:00")
     func testZeroSecondsFormat() {
         let formatted = Int64(0).formattedTime()

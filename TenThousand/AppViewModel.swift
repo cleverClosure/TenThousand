@@ -5,33 +5,42 @@
 //  Main view model coordinating app state
 //
 
-import Foundation
-import SwiftUI
 import Combine
+import Foundation
 import os.log
+import SwiftUI
 
 class AppViewModel: ObservableObject {
-
     // MARK: - Published Properties
 
     @Published var skills: [Skill] = []
     @Published var activeSkill: Skill?
     @Published var currentSession: Session?
-    @Published var justUpdatedSkillId: UUID? = nil
-    @Published var selectedSkillForDetail: Skill? = nil
+    @Published var justUpdatedSkillId: UUID?
+    @Published var selectedSkillForDetail: Skill?
 
     // MARK: - Dependencies
 
     let timerManager = TimerManager()
     let dataStore: DataStore
+    let colorPaletteManager: ColorPaletteManager
 
     private let logger = Logger(subsystem: "com.tenthousand.app", category: "AppViewModel")
 
     // MARK: - Initialization
 
-    init(dataStore: DataStore = SwiftDataStore.shared) {
+    init(dataStore: DataStore = SwiftDataStore.shared, colorPaletteManager: ColorPaletteManager = .shared) {
         self.dataStore = dataStore
+        self.colorPaletteManager = colorPaletteManager
         fetchSkills()
+        recalculatePaletteState()
+    }
+
+    // MARK: - Palette State
+
+    private func recalculatePaletteState() {
+        let usedColors = skills.map { $0.colorAssignment }
+        colorPaletteManager.recalculateState(usedColors: usedColors)
     }
 
     // MARK: - Skill Management
@@ -48,8 +57,16 @@ class AppViewModel: ObservableObject {
             return
         }
 
-        let colorIndex = Int16(skills.count % ValidationLimits.colorPaletteSize)
-        dataStore.createSkill(name: trimmedName, colorIndex: colorIndex)
+        // Check skill limit
+        guard skills.count < ValidationLimits.maxSkillCount else { return }
+
+        // Get next available color from palette manager
+        let usedColors = skills.map { $0.colorAssignment }
+        guard let colorAssignment = colorPaletteManager.nextColor(usedColors: usedColors) else {
+            return
+        }
+
+        dataStore.createSkill(name: trimmedName, paletteId: colorAssignment.paletteId, colorIndex: Int16(colorAssignment.colorIndex))
         dataStore.save()
         fetchSkills()
     }
@@ -58,6 +75,7 @@ class AppViewModel: ObservableObject {
         dataStore.deleteSkill(skill)
         dataStore.save()
         fetchSkills()
+        recalculatePaletteState()
     }
 
     // MARK: - Session Management

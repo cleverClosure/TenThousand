@@ -10,7 +10,6 @@ import SwiftUI
 // MARK: - IconButtonStyle
 
 struct IconButtonStyle: ButtonStyle {
-
     @State private var isHovered = false
 
     func makeBody(configuration: Configuration) -> some View {
@@ -28,7 +27,6 @@ struct IconButtonStyle: ButtonStyle {
 // MARK: - PanelButtonStyle
 
 struct PanelButtonStyle: ButtonStyle {
-
     @State private var isHovered = false
 
     func makeBody(configuration: Configuration) -> some View {

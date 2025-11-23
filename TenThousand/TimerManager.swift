@@ -5,8 +5,8 @@
 //  Timer system using Combine
 //
 
-import Foundation
 import Combine
+import Foundation
 
 /// A Combine-based timer manager that tracks elapsed time with pause/resume support.
 ///
@@ -33,7 +33,6 @@ import Combine
 /// let total = timer.stop()         // Returns 15 (10 + 5, pause time excluded)
 /// ```
 class TimerManager: ObservableObject {
-
     // MARK: - Published Properties
 
     /// Current elapsed seconds (excluding paused time).

@@ -40,35 +40,26 @@ extension Color {
     // Highlight Colors
     static let highlightYellow = Color(hex: "FFD60A")
 
-    // Skill Color Palette
-    static let skillRed = Color(hex: "FFB3B0")
-    static let skillOrange = Color(hex: "FFD4A3")
-    static let skillYellow = Color(hex: "FFF4B3")
-    static let skillGreen = Color(hex: "B3E6C5")
-    static let skillTeal = Color(hex: "A3E8E5")
-    static let skillPurple = Color(hex: "E0C3FF")
-    static let skillPink = Color(hex: "FFBDD1")
-
     // Helper initializer for hex color strings
     fileprivate init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
+        let alpha, red, green, blue: UInt64
         switch hex.count {
         case 6:
-            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+            (alpha, red, green, blue) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
         case 8:
-            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+            (alpha, red, green, blue) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
         default:
-            (a, r, g, b) = (255, 0, 0, 0)
+            (alpha, red, green, blue) = (255, 0, 0, 0)
         }
         self.init(
             .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
+            red: Double(red) / 255,
+            green: Double(green) / 255,
+            blue: Double(blue) / 255,
+            opacity: Double(alpha) / 255
         )
     }
 }
@@ -214,13 +205,15 @@ struct Opacity {
 
 // MARK: - Shadows
 
+struct ShadowConfig {
+    let radius: CGFloat
+    let xOffset: CGFloat
+    let yOffset: CGFloat
+    let opacity: Double
+}
+
 struct Shadows {
-    static let floating: (radius: CGFloat, x: CGFloat, y: CGFloat, opacity: Double) = (
-        radius: 24,
-        x: 0,
-        y: 8,
-        opacity: 0.12
-    )
+    static let floating = ShadowConfig(radius: 24, xOffset: 0, yOffset: 8, opacity: 0.12)
 }
 
 // MARK: - Scale Values
@@ -244,7 +237,7 @@ struct TimeConstants {
 
 struct ValidationLimits {
     static let maxSkillNameLength = 30
-    static let colorPaletteSize = 8
+    static let maxSkillCount = 12
 }
 
 // MARK: - UI Text

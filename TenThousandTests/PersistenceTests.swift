@@ -6,15 +6,16 @@
 //  Testing behaviors, not implementations
 //
 
-import Testing
 import Foundation
 import SwiftData
 @testable import TenThousand
+import Testing
 
 @Suite("SwiftDataStore Behaviors", .serialized)
 struct PersistenceTests {
-
     // MARK: - Test Helpers
+
+    static let testPaletteId = ColorPalette.summerOceanBreeze.id
 
     func makeStore() -> SwiftDataStore {
         SwiftDataStore.inMemory()
@@ -26,7 +27,8 @@ struct PersistenceTests {
     func testInMemoryStoreCreation() {
         let store = makeStore()
 
-        #expect(store.modelContext != nil)
+        // Verify modelContext is accessible (non-optional type)
+        _ = store.modelContext
     }
 
     // MARK: - Save Behaviors
@@ -45,7 +47,7 @@ struct PersistenceTests {
     func testSaveWithChanges() {
         let store = makeStore()
 
-        store.createSkill(name: "Swift", colorIndex: 0)
+        store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         #expect(store.modelContext.hasChanges)
 
@@ -58,7 +60,7 @@ struct PersistenceTests {
     func testSavedDataCanBeFetched() {
         let store = makeStore()
 
-        store.createSkill(name: "Swift", colorIndex: 0)
+        store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         store.save()
 
         let results = store.fetchAllSkills()
@@ -71,10 +73,10 @@ struct PersistenceTests {
     func testMultipleSaves() {
         let store = makeStore()
 
-        store.createSkill(name: "Swift", colorIndex: 0)
+        store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         store.save()
 
-        store.createSkill(name: "Python", colorIndex: 1)
+        store.createSkill(name: "Python", paletteId: Self.testPaletteId, colorIndex: 1)
         store.save()
 
         let results = store.fetchAllSkills()
@@ -86,8 +88,8 @@ struct PersistenceTests {
     func testSavePreservesRelationships() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
-        let session = store.createSession(for: skill)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        _ = store.createSession(for: skill)
         store.save()
 
         let sessions = store.fetchSessions(from: Date.distantPast)
@@ -102,7 +104,7 @@ struct PersistenceTests {
     func testDeleteAndSave() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         store.save()
 
         store.deleteSkill(skill)
@@ -117,7 +119,7 @@ struct PersistenceTests {
     func testUpdateAndSave() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         store.save()
 
         skill.name = "Python"
@@ -132,7 +134,7 @@ struct PersistenceTests {
     func testCascadeDelete() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         store.createSession(for: skill)
         store.createSession(for: skill)
         store.save()
@@ -152,7 +154,7 @@ struct PersistenceTests {
         let store1 = makeStore()
         let store2 = makeStore()
 
-        store1.createSkill(name: "Swift", colorIndex: 0)
+        store1.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         store1.save()
 
         let results1 = store1.fetchAllSkills()
@@ -177,7 +179,7 @@ struct PersistenceTests {
     func testFetchWithPredicate() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         // Create session for yesterday
         let session1 = store.createSession(for: skill)
@@ -199,13 +201,13 @@ struct PersistenceTests {
     func testFetchWithSortDescriptor() {
         let store = makeStore()
 
-        let skill1 = store.createSkill(name: "Zebra", colorIndex: 0)
+        let skill1 = store.createSkill(name: "Zebra", paletteId: Self.testPaletteId, colorIndex: 0)
         skill1.createdAt = Date().addingTimeInterval(-100)
 
-        let skill2 = store.createSkill(name: "Apple", colorIndex: 1)
+        let skill2 = store.createSkill(name: "Apple", paletteId: Self.testPaletteId, colorIndex: 1)
         skill2.createdAt = Date().addingTimeInterval(-50)
 
-        let skill3 = store.createSkill(name: "Mango", colorIndex: 2)
+        let skill3 = store.createSkill(name: "Mango", paletteId: Self.testPaletteId, colorIndex: 2)
         skill3.createdAt = Date()
 
         store.save()

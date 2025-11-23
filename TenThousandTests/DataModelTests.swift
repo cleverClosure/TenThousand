@@ -6,15 +6,16 @@
 //  Testing behaviors, not implementations
 //
 
-import Testing
 import Foundation
 import SwiftData
 @testable import TenThousand
+import Testing
 
 @Suite("Skill Model Behaviors", .serialized)
 struct SkillModelTests {
-
     // MARK: - Test Helpers
+
+    static let testPaletteId = ColorPalette.summerOceanBreeze.id
 
     func makeStore() -> SwiftDataStore {
         SwiftDataStore.inMemory()
@@ -26,27 +27,22 @@ struct SkillModelTests {
     func testSkillCreationSetsProperties() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 3)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 3)
 
         #expect(skill.name == "Swift")
+        #expect(skill.paletteId == Self.testPaletteId)
         #expect(skill.colorIndex == 3)
-        #expect(skill.id != nil)
-        #expect(skill.createdAt != nil)
-    }
-
-    @Test("Creating a skill without color index defaults to 0")
-    func testSkillCreationDefaultColorIndex() {
-        let skill = Skill(name: "Swift")
-
-        #expect(skill.colorIndex == 0)
+        // Verify id and createdAt are set (non-optional types)
+        _ = skill.id
+        _ = skill.createdAt
     }
 
     @Test("Creating a skill generates unique IDs")
     func testSkillCreationGeneratesUniqueIds() {
         let store = makeStore()
 
-        let skill1 = store.createSkill(name: "Swift", colorIndex: 0)
-        let skill2 = store.createSkill(name: "Python", colorIndex: 1)
+        let skill1 = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        let skill2 = store.createSkill(name: "Python", paletteId: Self.testPaletteId, colorIndex: 1)
 
         #expect(skill1.id != skill2.id)
     }
@@ -55,7 +51,7 @@ struct SkillModelTests {
     func testSkillCreationSetsTimestamp() {
         let beforeCreation = Date()
 
-        let skill = Skill(name: "Swift")
+        let skill = Skill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let afterCreation = Date()
 
@@ -67,7 +63,7 @@ struct SkillModelTests {
 
     @Test("Skill with no sessions has zero total seconds")
     func testSkillTotalSecondsNoSessions() {
-        let skill = Skill(name: "Swift")
+        let skill = Skill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         #expect(skill.totalSeconds == 0)
     }
@@ -76,7 +72,7 @@ struct SkillModelTests {
     func testSkillTotalSecondsOneSession() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         let session = store.createSession(for: skill)
         session.startTime = Date()
         session.endTime = Date().addingTimeInterval(3600) // 1 hour
@@ -89,7 +85,7 @@ struct SkillModelTests {
     func testSkillTotalSecondsMultipleSessions() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session1 = store.createSession(for: skill)
         session1.startTime = Date()
@@ -108,7 +104,7 @@ struct SkillModelTests {
     func testSkillTotalSecondsExcludesPausedDuration() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         let session = store.createSession(for: skill)
         session.startTime = Date()
         session.endTime = Date().addingTimeInterval(3600) // 1 hour
@@ -121,7 +117,7 @@ struct SkillModelTests {
     func testSkillTotalSecondsMultipleSessionsWithPauses() {
         let store = makeStore()
 
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session1 = store.createSession(for: skill)
         session1.startTime = Date()
@@ -142,8 +138,9 @@ struct SkillModelTests {
 
 @Suite("Session Model Behaviors", .serialized)
 struct SessionModelTests {
-
     // MARK: - Test Helpers
+
+    static let testPaletteId = ColorPalette.summerOceanBreeze.id
 
     func makeStore() -> SwiftDataStore {
         SwiftDataStore.inMemory()
@@ -154,13 +151,14 @@ struct SessionModelTests {
     @Test("Creating a session sets all required properties")
     func testSessionCreationSetsProperties() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session = store.createSession(for: skill)
 
         #expect(session.skill === skill)
-        #expect(session.id != nil)
-        #expect(session.startTime != nil)
+        // Verify id and startTime are set (non-optional types)
+        _ = session.id
+        _ = session.startTime
         #expect(session.pausedDuration == 0)
         #expect(session.endTime == nil)
     }
@@ -168,7 +166,7 @@ struct SessionModelTests {
     @Test("Creating a session generates unique IDs")
     func testSessionCreationGeneratesUniqueIds() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session1 = store.createSession(for: skill)
         let session2 = store.createSession(for: skill)
@@ -179,7 +177,7 @@ struct SessionModelTests {
     @Test("Creating a session sets start time to now")
     func testSessionCreationSetsStartTime() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
         let beforeCreation = Date()
 
         let session = store.createSession(for: skill)
@@ -195,7 +193,7 @@ struct SessionModelTests {
     @Test("Session without end time uses current time for duration")
     func testSessionDurationWithoutEndTime() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session = store.createSession(for: skill)
         session.startTime = Date().addingTimeInterval(-3600) // Started 1 hour ago
@@ -211,7 +209,7 @@ struct SessionModelTests {
     @Test("Session with end time calculates exact duration")
     func testSessionDurationWithEndTime() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session = store.createSession(for: skill)
         let startTime = Date()
@@ -225,7 +223,7 @@ struct SessionModelTests {
     @Test("Session duration excludes paused time")
     func testSessionDurationExcludesPausedTime() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session = store.createSession(for: skill)
         let startTime = Date()
@@ -239,7 +237,7 @@ struct SessionModelTests {
     @Test("Session with only paused time returns correct duration")
     func testSessionDurationOnlyPausedTime() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session = store.createSession(for: skill)
         let startTime = Date()
@@ -253,7 +251,7 @@ struct SessionModelTests {
     @Test("Session duration is never negative")
     func testSessionDurationNeverNegative() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session = store.createSession(for: skill)
         let startTime = Date()
@@ -268,7 +266,7 @@ struct SessionModelTests {
     @Test("Session duration calculations are consistent")
     func testSessionDurationConsistency() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session = store.createSession(for: skill)
         let startTime = Date()
@@ -289,7 +287,7 @@ struct SessionModelTests {
     @Test("Session belongs to the correct skill")
     func testSessionBelongsToSkill() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session = store.createSession(for: skill)
 
@@ -299,7 +297,7 @@ struct SessionModelTests {
     @Test("Skill contains its sessions")
     func testSkillContainsSessions() {
         let store = makeStore()
-        let skill = store.createSkill(name: "Swift", colorIndex: 0)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
         let session1 = store.createSession(for: skill)
         let session2 = store.createSession(for: skill)
@@ -312,8 +310,8 @@ struct SessionModelTests {
     @Test("Multiple skills can have different sessions")
     func testMultipleSkillsHaveDifferentSessions() {
         let store = makeStore()
-        let skill1 = store.createSkill(name: "Swift", colorIndex: 0)
-        let skill2 = store.createSkill(name: "Python", colorIndex: 1)
+        let skill1 = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        let skill2 = store.createSkill(name: "Python", paletteId: Self.testPaletteId, colorIndex: 1)
 
         let session1 = store.createSession(for: skill1)
         let session2 = store.createSession(for: skill2)

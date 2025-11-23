@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct AddSkillView: View {
-
     // MARK: - Properties
 
     let existingSkillNames: [String]
@@ -17,7 +16,7 @@ struct AddSkillView: View {
     // MARK: - Private State
 
     @State private var skillName = ""
-    @State private var errorMessage: String? = nil
+    @State private var errorMessage: String?
 
     // MARK: - Body
 
