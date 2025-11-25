@@ -24,14 +24,8 @@ struct MenuBarIconView: View {
             if showMenuBarTimer && timerManager.isRunning {
                 Text(timerManager.elapsedSeconds.formattedTime())
                     .monospacedDigit()
-                    .frame(
-                        width: Dimensions.menubarTimerWidth,
-                        alignment: .leading
-                    )
-                    .fixedSize(horizontal: true, vertical: false)
             }
         }
-        .fixedSize()
     }
 
     // MARK: - Private Computed Properties
