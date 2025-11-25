@@ -172,6 +172,9 @@ struct Dimensions {
     static let iconSizeSmall: CGFloat = 14
     static let iconSizeMedium: CGFloat = 24
 
+    // Menubar
+    static let menubarTimerWidth: CGFloat = 52
+
     // Dividers
     static let dividerHeight: CGFloat = 1
 }
@@ -260,7 +263,7 @@ struct UIText {
 
 struct FormatStrings {
     static let timeWithHours = "%d:%02d:%02d"
-    static let timeWithoutHours = "%d:%02d"
+    static let timeWithoutHours = "%02d:%02d"
 }
 
 // MARK: - Animation Durations

@@ -9,14 +9,20 @@ import SwiftUI
 
 @main
 struct TenThousandApp: App {
-    @StateObject private var viewModel = AppViewModel()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        MenuBarExtra {
-            DropdownPanelView(viewModel: viewModel)
-        } label: {
-            MenuBarIconView(timerManager: viewModel.timerManager)
+        Settings {
+            EmptyView()
         }
-        .menuBarExtraStyle(.window)
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    private var statusBarController: StatusBarController?
+    private let viewModel = AppViewModel()
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        statusBarController = StatusBarController(viewModel: viewModel)
     }
 }
