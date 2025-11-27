@@ -352,4 +352,148 @@ struct AppViewModelTests {
 
         #expect(viewModel.todaysSkillCount() == 2) // Only 2 unique skills
     }
+
+    // MARK: - Statistics Edge Case Behaviors
+
+    @Test("Today's total seconds accumulates multiple sessions for same skill")
+    func testTodaysTotalSecondsAccumulatesMultipleSessions() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        // Create three 60-second sessions
+        let now = Date()
+        for i in 0..<3 {
+            let session = dataStore.createSession(for: skill)
+            session.startTime = now.addingTimeInterval(Double(i * 100))
+            dataStore.completeSession(session, endTime: session.startTime.addingTimeInterval(60), pausedDuration: 0)
+        }
+        dataStore.save()
+
+        #expect(viewModel.todaysTotalSeconds() == 180) // 3 × 60 seconds
+    }
+
+    @Test("Today's total seconds excludes paused duration")
+    func testTodaysTotalSecondsExcludesPausedDuration() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        // Create a 120-second session with 30 seconds paused
+        let now = Date()
+        let session = dataStore.createSession(for: skill)
+        session.startTime = now
+        dataStore.completeSession(session, endTime: now.addingTimeInterval(120), pausedDuration: 30)
+        dataStore.save()
+
+        #expect(viewModel.todaysTotalSeconds() == 90) // 120 - 30 = 90 seconds
+    }
+
+    @Test("Today's total seconds excludes yesterday's sessions")
+    func testTodaysTotalSecondsExcludesYesterday() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+
+        // Yesterday's session (should be excluded)
+        let yesterdaySession = dataStore.createSession(for: skill)
+        yesterdaySession.startTime = startOfToday.addingTimeInterval(-3600) // 1 hour before midnight
+        dataStore.completeSession(yesterdaySession, endTime: yesterdaySession.startTime.addingTimeInterval(1000), pausedDuration: 0)
+
+        // Today's session (should be included)
+        let todaySession = dataStore.createSession(for: skill)
+        todaySession.startTime = startOfToday.addingTimeInterval(3600) // 1 hour after midnight
+        dataStore.completeSession(todaySession, endTime: todaySession.startTime.addingTimeInterval(60), pausedDuration: 0)
+
+        dataStore.save()
+
+        #expect(viewModel.todaysTotalSeconds() == 60) // Only today's 60 seconds
+    }
+
+    @Test("Today's skill count excludes yesterday's sessions")
+    func testTodaysSkillCountExcludesYesterday() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill1 = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        let skill2 = dataStore.createSkill(name: "Python", paletteId: Self.testPaletteId, colorIndex: 1)
+
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+
+        // Yesterday's session for skill1 (should be excluded)
+        let yesterdaySession = dataStore.createSession(for: skill1)
+        yesterdaySession.startTime = startOfToday.addingTimeInterval(-3600)
+        dataStore.completeSession(yesterdaySession, endTime: yesterdaySession.startTime.addingTimeInterval(60), pausedDuration: 0)
+
+        // Today's session for skill2 (should be included)
+        let todaySession = dataStore.createSession(for: skill2)
+        todaySession.startTime = startOfToday.addingTimeInterval(3600)
+        dataStore.completeSession(todaySession, endTime: todaySession.startTime.addingTimeInterval(60), pausedDuration: 0)
+
+        dataStore.save()
+
+        #expect(viewModel.todaysSkillCount() == 1) // Only skill2 practiced today
+    }
+
+    @Test("Today's total seconds handles sessions across multiple skills")
+    func testTodaysTotalSecondsAcrossMultipleSkills() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill1 = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        let skill2 = dataStore.createSkill(name: "Python", paletteId: Self.testPaletteId, colorIndex: 1)
+        let skill3 = dataStore.createSkill(name: "Rust", paletteId: Self.testPaletteId, colorIndex: 2)
+
+        let now = Date()
+
+        // Create sessions for each skill
+        let session1 = dataStore.createSession(for: skill1)
+        session1.startTime = now
+        dataStore.completeSession(session1, endTime: now.addingTimeInterval(100), pausedDuration: 0)
+
+        let session2 = dataStore.createSession(for: skill2)
+        session2.startTime = now.addingTimeInterval(200)
+        dataStore.completeSession(session2, endTime: session2.startTime.addingTimeInterval(200), pausedDuration: 50)
+
+        let session3 = dataStore.createSession(for: skill3)
+        session3.startTime = now.addingTimeInterval(500)
+        dataStore.completeSession(session3, endTime: session3.startTime.addingTimeInterval(300), pausedDuration: 0)
+
+        dataStore.save()
+
+        // 100 + (200 - 50) + 300 = 550 seconds
+        #expect(viewModel.todaysTotalSeconds() == 550)
+    }
 }

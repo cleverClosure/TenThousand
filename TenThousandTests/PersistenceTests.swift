@@ -219,4 +219,113 @@ struct PersistenceTests {
         #expect(results[1].name == "Apple")
         #expect(results[2].name == "Mango")
     }
+
+    // MARK: - Date Boundary Behaviors
+
+    @Test("Session exactly at midnight is included in today's fetch")
+    func testSessionAtMidnightIncluded() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+
+        let session = store.createSession(for: skill)
+        session.startTime = startOfToday // Exactly midnight
+        store.save()
+
+        let results = store.fetchSessions(from: startOfToday)
+
+        #expect(results.count == 1)
+    }
+
+    @Test("Session one second before midnight is excluded from today's fetch")
+    func testSessionBeforeMidnightExcluded() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+        let oneSecondBeforeMidnight = startOfToday.addingTimeInterval(-1)
+
+        let session = store.createSession(for: skill)
+        session.startTime = oneSecondBeforeMidnight
+        store.save()
+
+        let results = store.fetchSessions(from: startOfToday)
+
+        #expect(results.isEmpty)
+    }
+
+    @Test("Multiple sessions across day boundary are filtered correctly")
+    func testMultipleSessionsAcrossDayBoundary() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+
+        // Yesterday's sessions (should be excluded)
+        let yesterdaySession1 = store.createSession(for: skill)
+        yesterdaySession1.startTime = startOfToday.addingTimeInterval(-86400) // 24 hours ago
+
+        let yesterdaySession2 = store.createSession(for: skill)
+        yesterdaySession2.startTime = startOfToday.addingTimeInterval(-1) // 1 second before midnight
+
+        // Today's sessions (should be included)
+        let todaySession1 = store.createSession(for: skill)
+        todaySession1.startTime = startOfToday // Exactly midnight
+
+        let todaySession2 = store.createSession(for: skill)
+        todaySession2.startTime = startOfToday.addingTimeInterval(3600) // 1 hour after midnight
+
+        let todaySession3 = store.createSession(for: skill)
+        todaySession3.startTime = Date() // Now
+
+        store.save()
+
+        let results = store.fetchSessions(from: startOfToday)
+
+        #expect(results.count == 3)
+    }
+
+    @Test("Session started yesterday but ending today is excluded based on start time")
+    func testSessionSpanningMidnightUsesStartTime() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+
+        // Session started yesterday, ended today
+        let session = store.createSession(for: skill)
+        session.startTime = startOfToday.addingTimeInterval(-3600) // 1 hour before midnight
+        session.endTime = startOfToday.addingTimeInterval(3600)    // 1 hour after midnight
+        store.save()
+
+        let results = store.fetchSessions(from: startOfToday)
+
+        // Session should NOT be included because startTime is before today
+        #expect(results.isEmpty)
+    }
+
+    @Test("Fetching from distant past returns all sessions")
+    func testFetchFromDistantPastReturnsAll() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+
+        // Create sessions across multiple days
+        for dayOffset in 0..<5 {
+            let session = store.createSession(for: skill)
+            session.startTime = startOfToday.addingTimeInterval(Double(-dayOffset * 86400))
+        }
+        store.save()
+
+        let results = store.fetchSessions(from: Date.distantPast)
+
+        #expect(results.count == 5)
+    }
 }

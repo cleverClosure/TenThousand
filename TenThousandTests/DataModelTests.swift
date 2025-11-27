@@ -321,4 +321,100 @@ struct SessionModelTests {
         #expect(skill1.sessions.contains { $0 === session1 })
         #expect(skill2.sessions.contains { $0 === session2 })
     }
+
+    // MARK: - Duration Edge Case Behaviors
+
+    @Test("Long-running open session calculates duration correctly")
+    func testLongRunningOpenSession() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let session = store.createSession(for: skill)
+        // Session started 7 days ago and still running
+        session.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
+        session.pausedDuration = 0
+
+        let expectedSeconds: Int64 = 7 * 24 * 3600
+        let duration = session.durationSeconds
+
+        // Should be approximately 7 days worth of seconds
+        #expect(duration >= expectedSeconds - 10)
+        #expect(duration <= expectedSeconds + 10)
+    }
+
+    @Test("Very large completed session duration is accurate")
+    func testVeryLargeDuration() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let session = store.createSession(for: skill)
+        let startTime = Date()
+        // Simulate a 30-day session
+        let thirtyDaysInSeconds: Int64 = 30 * 24 * 3600
+        session.startTime = startTime
+        session.endTime = startTime.addingTimeInterval(Double(thirtyDaysInSeconds))
+        session.pausedDuration = 0
+
+        #expect(session.durationSeconds == thirtyDaysInSeconds)
+    }
+
+    @Test("Session with very large paused duration is clamped to zero")
+    func testVeryLargePausedDuration() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let session = store.createSession(for: skill)
+        let startTime = Date()
+        session.startTime = startTime
+        session.endTime = startTime.addingTimeInterval(3600) // 1 hour
+        session.pausedDuration = Int64.max // Extreme edge case
+
+        // Should clamp to 0, not overflow to negative
+        #expect(session.durationSeconds == 0)
+    }
+
+    @Test("Very short session (sub-second precision) calculates correctly")
+    func testSubSecondSession() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let session = store.createSession(for: skill)
+        let startTime = Date()
+        // Session lasting 0.5 seconds
+        session.startTime = startTime
+        session.endTime = startTime.addingTimeInterval(0.5)
+        session.pausedDuration = 0
+
+        // Int64 truncation should round down to 0
+        #expect(session.durationSeconds == 0)
+    }
+
+    @Test("Session of exactly one second")
+    func testExactlyOneSecondSession() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let session = store.createSession(for: skill)
+        let startTime = Date()
+        session.startTime = startTime
+        session.endTime = startTime.addingTimeInterval(1.0)
+        session.pausedDuration = 0
+
+        #expect(session.durationSeconds == 1)
+    }
+
+    @Test("Session duration with fractional seconds truncates correctly")
+    func testFractionalSecondsTruncation() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let session = store.createSession(for: skill)
+        let startTime = Date()
+        // 3.9 seconds should truncate to 3
+        session.startTime = startTime
+        session.endTime = startTime.addingTimeInterval(3.9)
+        session.pausedDuration = 0
+
+        #expect(session.durationSeconds == 3)
+    }
 }
