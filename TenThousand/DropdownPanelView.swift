@@ -113,29 +113,15 @@ struct DropdownPanelView: View {
     }
 
     private var quitButton: some View {
-        Button {
+        PanelButton(
+            "Quit",
+            icon: "xmark.circle",
+            alignment: .leading,
+            shortcut: "⌘Q"
+        ) {
             NSApplication.shared.terminate(nil)
-        } label: {
-            HStack {
-                Image(systemName: "xmark.circle")
-                    .font(.system(size: Dimensions.iconSizeSmall))
-                    .foregroundColor(.secondary)
-
-                Text("Quit")
-                    .font(Typography.body)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-
-                Text("⌘Q")
-                    .font(Typography.caption)
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, Spacing.base)
-            .padding(.vertical, Spacing.tight)
-            .frame(height: Dimensions.skillRowHeight)
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal, Spacing.base)
     }
 
     private var backgroundView: some View {

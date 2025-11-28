@@ -72,6 +72,11 @@ class AppViewModel: ObservableObject {
     }
 
     func deleteSkill(_ skill: Skill) {
+        // Clear selection before triggering view updates to avoid
+        // SwiftUI rendering with a reference to the deleted object
+        if selectedSkillForDetail?.id == skill.id {
+            selectedSkillForDetail = nil
+        }
         dataStore.deleteSkill(skill)
         dataStore.save()
         fetchSkills()

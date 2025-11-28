@@ -182,6 +182,43 @@ struct AppViewModelTests {
         #expect(viewModel.skills.contains { $0.name == "JavaScript" })
     }
 
+    @Test("Deleting selected skill clears selection")
+    func testDeleteSkillClearsSelectionWhenDeletingSelectedSkill() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.selectedSkillForDetail = skill
+        #expect(viewModel.selectedSkillForDetail != nil)
+
+        viewModel.deleteSkill(skill)
+
+        #expect(viewModel.selectedSkillForDetail == nil)
+    }
+
+    @Test("Deleting non-selected skill keeps selection intact")
+    func testDeleteSkillKeepsSelectionWhenDeletingOtherSkill() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        viewModel.createSkill(name: "Python")
+
+        guard let swiftSkill = viewModel.skills.first(where: { $0.name == "Swift" }),
+              let pythonSkill = viewModel.skills.first(where: { $0.name == "Python" }) else {
+            Issue.record("Expected both skills to exist")
+            return
+        }
+
+        viewModel.selectedSkillForDetail = swiftSkill
+        viewModel.deleteSkill(pythonSkill)
+
+        #expect(viewModel.selectedSkillForDetail?.id == swiftSkill.id)
+    }
+
     // MARK: - Session Management Behaviors
 
     @Test("Starting tracking creates an active session")
