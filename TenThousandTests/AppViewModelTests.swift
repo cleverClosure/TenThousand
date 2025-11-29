@@ -344,6 +344,132 @@ struct AppViewModelTests {
         #expect(viewModel.justUpdatedSkillId == skill.id)
     }
 
+    @Test("Pausing without active tracking is a no-op")
+    func testPauseWithoutActiveTrackingIsNoOp() {
+        let viewModel = makeViewModel()
+
+        viewModel.pauseTracking()
+
+        #expect(!viewModel.timerManager.isPaused)
+        #expect(!viewModel.timerManager.isRunning)
+    }
+
+    @Test("Resuming without being paused is a no-op")
+    func testResumeWithoutPauseIsNoOp() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+        // Not paused, try to resume
+        viewModel.resumeTracking()
+
+        #expect(viewModel.timerManager.isRunning)
+        #expect(!viewModel.timerManager.isPaused)
+    }
+
+    @Test("Stopping without active tracking is a no-op")
+    func testStopWithoutActiveTrackingIsNoOp() {
+        let viewModel = makeViewModel()
+
+        viewModel.stopTracking()
+
+        #expect(viewModel.activeSkill == nil)
+        #expect(viewModel.currentSession == nil)
+    }
+
+    @Test("Multiple pause calls are idempotent")
+    func testMultiplePauseCallsAreIdempotent() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+        viewModel.pauseTracking()
+        viewModel.pauseTracking()
+        viewModel.pauseTracking()
+
+        #expect(viewModel.timerManager.isPaused)
+        #expect(viewModel.timerManager.isRunning)
+    }
+
+    @Test("Pause and resume cycle maintains active skill")
+    func testPauseResumeCycleMaintainsActiveSkill() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+        #expect(viewModel.activeSkill?.id == skill.id)
+
+        viewModel.pauseTracking()
+        #expect(viewModel.activeSkill?.id == skill.id)
+
+        viewModel.resumeTracking()
+        #expect(viewModel.activeSkill?.id == skill.id)
+
+        viewModel.pauseTracking()
+        #expect(viewModel.activeSkill?.id == skill.id)
+
+        viewModel.resumeTracking()
+        #expect(viewModel.activeSkill?.id == skill.id)
+    }
+
+    @Test("Stopping while paused clears active session")
+    func testStopWhilePausedClearsSession() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+        viewModel.pauseTracking()
+        #expect(viewModel.timerManager.isPaused)
+
+        viewModel.stopTracking()
+
+        #expect(viewModel.activeSkill == nil)
+        #expect(viewModel.currentSession == nil)
+        #expect(!viewModel.timerManager.isRunning)
+        #expect(!viewModel.timerManager.isPaused)
+    }
+
+    @Test("Starting same skill while tracking restarts the session")
+    func testStartSameSkillWhileTrackingRestartsSession() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+        let firstSession = viewModel.currentSession
+
+        viewModel.startTracking(skill: skill)
+        let secondSession = viewModel.currentSession
+
+        #expect(viewModel.activeSkill?.id == skill.id)
+        #expect(firstSession?.id != secondSession?.id)
+        #expect(skill.sessions.count == 2) // First session was saved, second is active
+    }
+
     // MARK: - Statistics Behaviors
 
     @Test("Today's total seconds is zero with no sessions")

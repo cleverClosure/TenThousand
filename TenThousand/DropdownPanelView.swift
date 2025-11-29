@@ -59,7 +59,9 @@ struct DropdownPanelView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            if let selectedSkill = viewModel.selectedSkillForDetail {
+            if let activeSkill = viewModel.activeSkill {
+                activeTrackingSection(skill: activeSkill)
+            } else if let selectedSkill = viewModel.selectedSkillForDetail {
                 skillDetailSection(skill: selectedSkill)
             } else {
                 skillListSection
@@ -67,6 +69,21 @@ struct DropdownPanelView: View {
                 quitButton
             }
         }
+    }
+
+    @ViewBuilder
+    private func activeTrackingSection(skill: Skill) -> some View {
+        ActiveTrackingView(
+            skill: skill,
+            viewModel: viewModel,
+            timerManager: viewModel.timerManager,
+            onShowAllSkills: {
+                withAnimation(.panelTransition) {
+                    viewModel.stopTracking()
+                }
+            }
+        )
+        .transition(.opacity.combined(with: .scale(scale: ScaleValues.dismissScale)))
     }
 
     @ViewBuilder
