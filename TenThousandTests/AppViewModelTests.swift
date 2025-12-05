@@ -470,6 +470,129 @@ struct AppViewModelTests {
         #expect(skill.sessions.count == 2) // First session was saved, second is active
     }
 
+    @Test("Session is added to skill.sessions immediately on creation")
+    func testSessionAddedToSkillSessionsOnCreation() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        #expect(skill.sessions.isEmpty)
+
+        viewModel.startTracking(skill: skill)
+
+        #expect(skill.sessions.count == 1)
+        #expect(skill.sessions.first?.id == viewModel.currentSession?.id)
+    }
+
+    @Test("Skill totalSeconds accumulates after completing session")
+    func testSkillTotalSecondsAccumulatesAfterSession() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        dataStore.save()
+        viewModel.fetchSkills()
+
+        // Create and complete a 60-second session
+        let session = dataStore.createSession(for: skill)
+        let startTime = Date()
+        session.startTime = startTime
+        dataStore.completeSession(session, endTime: startTime.addingTimeInterval(60), pausedDuration: 0)
+        dataStore.save()
+
+        #expect(skill.totalSeconds == 60)
+    }
+
+    @Test("Multiple sessions accumulate in skill totalSeconds")
+    func testMultipleSessionsAccumulateInTotalSeconds() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        dataStore.save()
+        viewModel.fetchSkills()
+
+        let now = Date()
+
+        // First session: 60 seconds
+        let session1 = dataStore.createSession(for: skill)
+        session1.startTime = now
+        dataStore.completeSession(session1, endTime: now.addingTimeInterval(60), pausedDuration: 0)
+
+        // Second session: 120 seconds
+        let session2 = dataStore.createSession(for: skill)
+        session2.startTime = now.addingTimeInterval(100)
+        dataStore.completeSession(session2, endTime: session2.startTime.addingTimeInterval(120), pausedDuration: 0)
+
+        // Third session: 30 seconds
+        let session3 = dataStore.createSession(for: skill)
+        session3.startTime = now.addingTimeInterval(300)
+        dataStore.completeSession(session3, endTime: session3.startTime.addingTimeInterval(30), pausedDuration: 0)
+
+        dataStore.save()
+
+        #expect(skill.totalSeconds == 210) // 60 + 120 + 30
+    }
+
+    @Test("Skill totalSeconds excludes paused duration")
+    func testSkillTotalSecondsExcludesPausedDuration() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        dataStore.save()
+        viewModel.fetchSkills()
+
+        // Create a 100-second session with 40 seconds paused
+        let session = dataStore.createSession(for: skill)
+        let startTime = Date()
+        session.startTime = startTime
+        dataStore.completeSession(session, endTime: startTime.addingTimeInterval(100), pausedDuration: 40)
+        dataStore.save()
+
+        #expect(skill.totalSeconds == 60) // 100 - 40
+    }
+
+    @Test("Session bidirectional relationship is maintained")
+    func testSessionBidirectionalRelationship() {
+        let dataStore = SwiftDataStore.inMemory()
+        guard let defaults = UserDefaults(suiteName: UUID().uuidString) else {
+            Issue.record("Failed to create test UserDefaults")
+            return
+        }
+        let paletteManager = ColorPaletteManager(defaults: defaults)
+        let viewModel = AppViewModel(dataStore: dataStore, colorPaletteManager: paletteManager)
+
+        let skill = dataStore.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+        dataStore.save()
+
+        let session = dataStore.createSession(for: skill)
+        dataStore.save()
+
+        // Verify bidirectional relationship
+        #expect(session.skill?.id == skill.id)
+        #expect(skill.sessions.contains { $0.id == session.id })
+    }
+
     // MARK: - Statistics Behaviors
 
     @Test("Today's total seconds is zero with no sessions")

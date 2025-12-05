@@ -89,6 +89,7 @@ final class SwiftDataStore: DataStore {
     @discardableResult
     func createSession(for skill: Skill) -> Session {
         let session = Session(skill: skill)
+        skill.sessions.append(session)
         modelContext.insert(session)
         return session
     }

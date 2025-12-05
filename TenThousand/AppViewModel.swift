@@ -106,8 +106,8 @@ class AppViewModel: ObservableObject {
     func stopTracking() {
         guard let session = currentSession, let skill = session.skill else { return }
 
-        _ = timerManager.stop()
         let pausedDuration = timerManager.getPausedDuration()
+        _ = timerManager.stop()
 
         dataStore.completeSession(session, endTime: Date(), pausedDuration: pausedDuration)
         dataStore.save()
