@@ -159,3 +159,11 @@ struct LayoutConstants {
     static let skillNameLineLimit = 1
     static let borderWidth: CGFloat = 1
 }
+
+// MARK: - Mastery Constants
+
+struct MasteryConstants {
+    /// The 10,000 hour rule for mastery
+    static let masteryHours: Int64 = 10_000
+    static let masterySeconds: Int64 = masteryHours * TimeConstants.secondsPerHour
+}

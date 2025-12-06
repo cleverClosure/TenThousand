@@ -44,15 +44,25 @@ struct SkillRowView: View {
     // MARK: - View Components
 
     private var rowContent: some View {
-        HStack(spacing: Spacing.loose) {
-            colorDot
-            skillName
-            Spacer()
-            totalTime
+        VStack(spacing: 0) {
+            HStack(spacing: Spacing.loose) {
+                colorDot
+                skillName
+                Spacer()
+                totalTime
+            }
+            .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
+            .padding(.vertical, Dimensions.skillRowPaddingVertical)
+
+            // Progress bar
+            ProgressBarView(
+                progress: skill.masteryProgress,
+                color: skill.color,
+                height: 2
+            )
+            .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
+            .padding(.bottom, Spacing.tight)
         }
-        .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
-        .padding(.vertical, Dimensions.skillRowPaddingVertical)
-        .frame(height: Dimensions.skillRowHeight)
         .background(backgroundColor, in: RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall))
     }
 

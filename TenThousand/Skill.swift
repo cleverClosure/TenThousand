@@ -33,6 +33,26 @@ final class Skill {
         }
     }
 
+    /// Total hours tracked (decimal).
+    var totalHours: Double {
+        Double(totalSeconds) / Double(TimeConstants.secondsPerHour)
+    }
+
+    /// Progress toward 10,000 hours mastery (0.0 to 1.0).
+    var masteryProgress: Double {
+        min(Double(totalSeconds) / Double(MasteryConstants.masterySeconds), 1.0)
+    }
+
+    /// Progress percentage (0 to 100).
+    var masteryPercentage: Double {
+        masteryProgress * 100
+    }
+
+    /// Hours remaining to reach 10,000 hours.
+    var hoursRemaining: Int64 {
+        max(MasteryConstants.masteryHours - Int64(totalHours), 0)
+    }
+
     /// The resolved color for this skill based on palette and color index.
     var color: Color {
         ColorPaletteManager.shared.color(forPaletteId: paletteId, colorIndex: Int(colorIndex))
