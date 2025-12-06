@@ -18,25 +18,44 @@ class AppViewModel: ObservableObject {
     @Published var currentSession: Session?
     @Published var justUpdatedSkillId: UUID?
 
+    // MARK: - Timer State (bound from TimerManager)
+
+    @Published private(set) var elapsedSeconds: Int64 = 0
+    @Published private(set) var isTimerRunning = false
+    @Published private(set) var isTimerPaused = false
+
     // MARK: - Navigation State
 
     @Published var panelRoute: PanelRoute = .skillList
 
     // MARK: - Dependencies
 
-    let timerManager = TimerManager()
+    private let timerManager = TimerManager()
     let dataStore: DataStore
     let colorPaletteManager: ColorPaletteManager
 
     private let logger = Logger(subsystem: "com.tenthousand.app", category: "AppViewModel")
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
 
     init(dataStore: DataStore = SwiftDataStore.shared, colorPaletteManager: ColorPaletteManager = .shared) {
         self.dataStore = dataStore
         self.colorPaletteManager = colorPaletteManager
+        bindTimerState()
         fetchSkills()
         recalculatePaletteState()
+    }
+
+    // MARK: - Timer State Binding
+
+    private func bindTimerState() {
+        timerManager.$elapsedSeconds
+            .assign(to: &$elapsedSeconds)
+        timerManager.$isRunning
+            .assign(to: &$isTimerRunning)
+        timerManager.$isPaused
+            .assign(to: &$isTimerPaused)
     }
 
     // MARK: - Palette State
@@ -151,10 +170,6 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Navigation
 
-    func navigate(to route: PanelRoute) {
-        panelRoute = route
-    }
-
     func showSkillList() {
         panelRoute = .skillList
     }
@@ -166,20 +181,5 @@ class AppViewModel: ObservableObject {
     func showActiveTracking() {
         guard activeSkill != nil else { return }
         panelRoute = .activeTracking
-    }
-
-    /// Whether the user can navigate away from the current route
-    var canNavigateBack: Bool {
-        switch panelRoute {
-        case .skillList:
-            return false
-        case .skillDetail, .activeTracking:
-            return true
-        }
-    }
-
-    /// Navigate back to skill list from any route
-    func navigateBack() {
-        panelRoute = .skillList
     }
 }

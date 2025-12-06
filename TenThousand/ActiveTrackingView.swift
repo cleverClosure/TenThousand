@@ -16,7 +16,6 @@ struct ActiveTrackingView: View {
 
     let skill: Skill
     @ObservedObject var viewModel: AppViewModel
-    @ObservedObject var timerManager: TimerManager
 
     // MARK: - Body
 
@@ -48,7 +47,7 @@ struct ActiveTrackingView: View {
 
     private var skillColorDot: some View {
         Circle()
-            .fill(skillColor)
+            .fill(skill.color)
             .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
     }
 
@@ -68,22 +67,22 @@ struct ActiveTrackingView: View {
     }
 
     private var timerDisplay: some View {
-        Text(timerManager.elapsedSeconds.formattedTime())
+        Text(viewModel.elapsedSeconds.formattedTime())
             .font(.system(size: 48, weight: .medium, design: .monospaced))
             .monospacedDigit()
             .foregroundColor(.primary)
             .contentTransition(.numericText())
-            .animation(.microInteraction, value: timerManager.elapsedSeconds)
+            .animation(.microInteraction, value: viewModel.elapsedSeconds)
     }
 
     private var statusLabel: some View {
         Group {
-            if timerManager.isPaused {
+            if viewModel.isTimerPaused {
                 Text("Paused")
                     .foregroundColor(.secondary)
             } else {
                 Text("Tracking")
-                    .foregroundColor(skillColor)
+                    .foregroundColor(skill.color)
             }
         }
         .font(Typography.caption)
@@ -99,16 +98,16 @@ struct ActiveTrackingView: View {
 
     private var pauseResumeButton: some View {
         Button {
-            if timerManager.isPaused {
+            if viewModel.isTimerPaused {
                 viewModel.resumeTracking()
             } else {
                 viewModel.pauseTracking()
             }
         } label: {
             HStack(spacing: Spacing.tight) {
-                Image(systemName: timerManager.isPaused ? "play.fill" : "pause.fill")
+                Image(systemName: viewModel.isTimerPaused ? "play.fill" : "pause.fill")
                     .font(.system(size: Dimensions.iconSizeSmall))
-                Text(timerManager.isPaused ? "Resume" : "Pause")
+                Text(viewModel.isTimerPaused ? "Resume" : "Pause")
                     .font(Typography.body)
             }
             .frame(maxWidth: .infinity)
@@ -153,12 +152,4 @@ struct ActiveTrackingView: View {
         .padding(.horizontal, Spacing.base)
     }
 
-    // MARK: - Private Computed Properties
-
-    private var skillColor: Color {
-        ColorPaletteManager.shared.color(
-            forPaletteId: skill.paletteId,
-            colorIndex: Int(skill.colorIndex)
-        )
-    }
 }

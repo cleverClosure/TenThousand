@@ -61,12 +61,8 @@ struct DropdownPanelView: View {
 
         case .activeTracking:
             if let skill = viewModel.activeSkill {
-                ActiveTrackingView(
-                    skill: skill,
-                    viewModel: viewModel,
-                    timerManager: viewModel.timerManager
-                )
-                .transition(.opacity.combined(with: .scale(scale: ScaleValues.dismissScale)))
+                ActiveTrackingView(skill: skill, viewModel: viewModel)
+                    .transition(.opacity.combined(with: .scale(scale: ScaleValues.dismissScale)))
             } else {
                 // Fallback if activeSkill is nil (shouldn't happen normally)
                 SkillListView(viewModel: viewModel)

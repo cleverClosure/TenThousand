@@ -71,31 +71,28 @@ class StatusBarController: ObservableObject {
         button.action = #selector(togglePopover)
         button.target = self
 
-        updateStatusItemWidth()
+        updateStatusItemWidth(
+            isRunning: viewModel.isTimerRunning,
+            showTimer: UserDefaults.standard.bool(forKey: "showMenuBarTimer")
+        )
     }
 
     private func observeTimerState() {
-        // Observe timer running state to adjust width
-        viewModel.timerManager.$isRunning
+        // Combine timer state and user defaults into single reactive stream
+        viewModel.$isTimerRunning
+            .combineLatest(
+                NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+                    .map { _ in UserDefaults.standard.bool(forKey: "showMenuBarTimer") }
+                    .prepend(UserDefaults.standard.bool(forKey: "showMenuBarTimer"))
+            )
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.updateStatusItemWidth()
-            }
-            .store(in: &cancellables)
-
-        // Also observe the showMenuBarTimer setting
-        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.updateStatusItemWidth()
+            .sink { [weak self] isRunning, showTimer in
+                self?.updateStatusItemWidth(isRunning: isRunning, showTimer: showTimer)
             }
             .store(in: &cancellables)
     }
 
-    private func updateStatusItemWidth() {
-        let showTimer = UserDefaults.standard.bool(forKey: "showMenuBarTimer")
-        let isRunning = viewModel.timerManager.isRunning
-
+    private func updateStatusItemWidth(isRunning: Bool, showTimer: Bool) {
         let width = (showTimer && isRunning) ? iconWithTimerWidth : iconOnlyWidth
         statusItem?.length = width
     }

@@ -307,7 +307,7 @@ struct AppViewModelTests {
 
         #expect(viewModel.panelRoute == .skillList)
         #expect(viewModel.activeSkill != nil) // Still tracking
-        #expect(viewModel.timerManager.isRunning)
+        #expect(viewModel.isTimerRunning)
     }
 
     @Test("showActiveTracking navigates to tracking view when tracking")
@@ -352,7 +352,7 @@ struct AppViewModelTests {
 
         #expect(viewModel.activeSkill == skill)
         #expect(viewModel.currentSession != nil)
-        #expect(viewModel.timerManager.isRunning)
+        #expect(viewModel.isTimerRunning)
     }
 
     @Test("Starting tracking on a new skill stops previous session")
@@ -373,7 +373,7 @@ struct AppViewModelTests {
 
         viewModel.startTracking(skill: skill2)
         #expect(viewModel.activeSkill == skill2)
-        #expect(viewModel.timerManager.isRunning)
+        #expect(viewModel.isTimerRunning)
     }
 
     @Test("Pausing tracking pauses the timer")
@@ -389,7 +389,7 @@ struct AppViewModelTests {
         viewModel.startTracking(skill: skill)
         viewModel.pauseTracking()
 
-        #expect(viewModel.timerManager.isPaused)
+        #expect(viewModel.isTimerPaused)
     }
 
     @Test("Resuming tracking resumes the timer")
@@ -406,8 +406,8 @@ struct AppViewModelTests {
         viewModel.pauseTracking()
         viewModel.resumeTracking()
 
-        #expect(!viewModel.timerManager.isPaused)
-        #expect(viewModel.timerManager.isRunning)
+        #expect(!viewModel.isTimerPaused)
+        #expect(viewModel.isTimerRunning)
     }
 
     @Test("Stopping tracking clears active session")
@@ -425,7 +425,7 @@ struct AppViewModelTests {
 
         #expect(viewModel.activeSkill == nil)
         #expect(viewModel.currentSession == nil)
-        #expect(!viewModel.timerManager.isRunning)
+        #expect(!viewModel.isTimerRunning)
     }
 
     @Test("Stopping tracking saves the session")
@@ -467,8 +467,8 @@ struct AppViewModelTests {
 
         viewModel.pauseTracking()
 
-        #expect(!viewModel.timerManager.isPaused)
-        #expect(!viewModel.timerManager.isRunning)
+        #expect(!viewModel.isTimerPaused)
+        #expect(!viewModel.isTimerRunning)
     }
 
     @Test("Resuming without being paused is a no-op")
@@ -485,8 +485,8 @@ struct AppViewModelTests {
         // Not paused, try to resume
         viewModel.resumeTracking()
 
-        #expect(viewModel.timerManager.isRunning)
-        #expect(!viewModel.timerManager.isPaused)
+        #expect(viewModel.isTimerRunning)
+        #expect(!viewModel.isTimerPaused)
     }
 
     @Test("Stopping without active tracking is a no-op")
@@ -514,8 +514,8 @@ struct AppViewModelTests {
         viewModel.pauseTracking()
         viewModel.pauseTracking()
 
-        #expect(viewModel.timerManager.isPaused)
-        #expect(viewModel.timerManager.isRunning)
+        #expect(viewModel.isTimerPaused)
+        #expect(viewModel.isTimerRunning)
     }
 
     @Test("Pause and resume cycle maintains active skill")
@@ -556,14 +556,14 @@ struct AppViewModelTests {
 
         viewModel.startTracking(skill: skill)
         viewModel.pauseTracking()
-        #expect(viewModel.timerManager.isPaused)
+        #expect(viewModel.isTimerPaused)
 
         viewModel.stopTracking()
 
         #expect(viewModel.activeSkill == nil)
         #expect(viewModel.currentSession == nil)
-        #expect(!viewModel.timerManager.isRunning)
-        #expect(!viewModel.timerManager.isPaused)
+        #expect(!viewModel.isTimerRunning)
+        #expect(!viewModel.isTimerPaused)
     }
 
     @Test("Starting same skill while tracking restarts the session")

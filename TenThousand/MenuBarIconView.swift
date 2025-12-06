@@ -12,13 +12,7 @@ struct MenuBarIconView: View {
     // MARK: - Properties
 
     @ObservedObject var viewModel: AppViewModel
-    @ObservedObject private var timerManager: TimerManager
     @AppStorage("showMenuBarTimer") private var showMenuBarTimer = true
-
-    init(viewModel: AppViewModel) {
-        self.viewModel = viewModel
-        self.timerManager = viewModel.timerManager
-    }
 
     // MARK: - Body
 
@@ -29,8 +23,8 @@ struct MenuBarIconView: View {
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(iconColor)
 
-            if showMenuBarTimer && timerManager.isRunning {
-                Text(timerManager.elapsedSeconds.formattedTime())
+            if showMenuBarTimer && viewModel.isTimerRunning {
+                Text(viewModel.elapsedSeconds.formattedTime())
                     .monospacedDigit()
             }
         }
@@ -39,9 +33,9 @@ struct MenuBarIconView: View {
     // MARK: - Private Computed Properties
 
     private var iconName: String {
-        if timerManager.isRunning && !timerManager.isPaused {
+        if viewModel.isTimerRunning && !viewModel.isTimerPaused {
             return "circle.circle.fill"
-        } else if timerManager.isRunning && timerManager.isPaused {
+        } else if viewModel.isTimerRunning && viewModel.isTimerPaused {
             return "pause.circle"
         } else {
             return "circle.circle"
@@ -49,12 +43,9 @@ struct MenuBarIconView: View {
     }
 
     private var iconColor: Color {
-        guard let skill = viewModel.activeSkill, timerManager.isRunning else {
+        guard let skill = viewModel.activeSkill, viewModel.isTimerRunning else {
             return .primary
         }
-        return ColorPaletteManager.shared.color(
-            forPaletteId: skill.paletteId,
-            colorIndex: Int(skill.colorIndex)
-        )
+        return skill.color
     }
 }
