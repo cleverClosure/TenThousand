@@ -113,6 +113,24 @@ struct SkillDetailView: View {
                 }
             }
             .padding(.horizontal, Spacing.loose)
+
+            // Pace projection
+            if let projection = skill.projectedTimeToMastery {
+                VStack(spacing: Spacing.tight) {
+                    Text("At current pace")
+                        .font(Typography.caption)
+                        .foregroundColor(.secondary)
+                    Text(projection.formatted)
+                        .font(Typography.body)
+                        .foregroundColor(.primary)
+                }
+                .padding(.top, Spacing.base)
+            } else if skill.sessions.isEmpty {
+                Text("Start tracking to see your pace")
+                    .font(Typography.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.top, Spacing.base)
+            }
         }
         .padding(.vertical, Spacing.base)
     }

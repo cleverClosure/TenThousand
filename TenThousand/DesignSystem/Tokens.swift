@@ -167,3 +167,22 @@ struct MasteryConstants {
     static let masteryHours: Int64 = 10_000
     static let masterySeconds: Int64 = masteryHours * TimeConstants.secondsPerHour
 }
+
+// MARK: - Mastery Projection
+
+struct MasteryProjection {
+    let years: Int
+    let months: Int
+
+    var formatted: String {
+        if years == 0 && months == 0 {
+            return "less than a month"
+        } else if years == 0 {
+            return "\(months) month\(months == 1 ? "" : "s")"
+        } else if months == 0 {
+            return "\(years) year\(years == 1 ? "" : "s")"
+        } else {
+            return "\(years) year\(years == 1 ? "" : "s"), \(months) month\(months == 1 ? "" : "s")"
+        }
+    }
+}
