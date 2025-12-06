@@ -51,13 +51,14 @@ struct SkillListView: View {
 
     private var skillListContent: some View {
         ScrollView {
-            VStack(spacing: Spacing.tight) {
+            VStack(spacing: Spacing.compact) {
                 skillRows
                 AddSkillView(existingSkillNames: existingSkillNames) { name in
                     viewModel.createSkill(name: name)
                 }
             }
-            .padding(Spacing.base)
+            .padding(.horizontal, Spacing.loose)
+            .padding(.vertical, Spacing.section)
         }
         .scrollIndicators(.hidden)
         .frame(maxHeight: LayoutConstants.maxSkillListHeight)
@@ -95,7 +96,8 @@ struct SkillListView: View {
         ) {
             NSApplication.shared.terminate(nil)
         }
-        .padding(.horizontal, Spacing.base)
+        .padding(.horizontal, Spacing.loose)
+        .padding(.vertical, Spacing.tight)
     }
 
     // MARK: - Private Computed Properties

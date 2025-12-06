@@ -13,46 +13,65 @@ struct Spacing {
     static let atomic: CGFloat = 2
     static let tight: CGFloat = 4
     static let base: CGFloat = 8
+    static let compact: CGFloat = 10
     static let loose: CGFloat = 12
     static let section: CGFloat = 16
+    static let comfortable: CGFloat = 20
     static let chunk: CGFloat = 24
+    static let generous: CGFloat = 32
+    static let spacious: CGFloat = 40
 }
 
 // MARK: - Dimensions
 
 struct Dimensions {
     // Panel
-    static let panelWidth: CGFloat = 280
-    static let panelMinHeight: CGFloat = 120
-    static let panelMaxHeight: CGFloat = 400
-    static let panelCornerRadius: CGFloat = 12
+    static let panelWidth: CGFloat = 320
+    static let panelMinHeight: CGFloat = 140
+    static let panelMaxHeight: CGFloat = 480
+    static let panelCornerRadius: CGFloat = 14
 
     // Skill Row
-    static let skillRowHeight: CGFloat = 36
-    static let skillRowPaddingHorizontal: CGFloat = 8
-    static let skillRowPaddingVertical: CGFloat = 6
-    static let colorDotSize: CGFloat = 20
+    static let skillRowHeight: CGFloat = 72
+    static let skillRowPaddingHorizontal: CGFloat = 12
+    static let skillRowPaddingVertical: CGFloat = 10
+    static let colorDotSize: CGFloat = 28
+    static let colorDotSizeSmall: CGFloat = 12
+
+    // Progress Bar
+    static let progressBarHeightSmall: CGFloat = 4
+    static let progressBarHeightMedium: CGFloat = 6
+    static let progressBarHeightLarge: CGFloat = 10
+
+    // Circular Progress
+    static let circularProgressSize: CGFloat = 140
+    static let circularProgressStroke: CGFloat = 10
 
     // Active Session
-    static let activeSessionHeight: CGFloat = 64
+    static let activeSessionHeight: CGFloat = 80
 
     // Today's Summary
-    static let todaySummaryHeight: CGFloat = 48
+    static let todaySummaryHeight: CGFloat = 56
 
     // Corner Radii
-    static let cornerRadiusSmall: CGFloat = 4
-    static let cornerRadiusMedium: CGFloat = 8
-    static let cornerRadiusLarge: CGFloat = 12
+    static let cornerRadiusSmall: CGFloat = 6
+    static let cornerRadiusMedium: CGFloat = 10
+    static let cornerRadiusLarge: CGFloat = 14
 
     // Icon Sizes
     static let iconSizeSmall: CGFloat = 14
     static let iconSizeMedium: CGFloat = 24
+    static let iconSizeLarge: CGFloat = 32
 
     // Menubar
     static let menubarTimerWidth: CGFloat = 52
 
     // Dividers
     static let dividerHeight: CGFloat = 1
+
+    // Hero Typography
+    static let heroTimerSize: CGFloat = 64
+    static let heroHoursSize: CGFloat = 56
 }
 
 // MARK: - Animations
@@ -155,7 +174,7 @@ struct AnimationDurations {
 // MARK: - Layout Constants
 
 struct LayoutConstants {
-    static let maxSkillListHeight: CGFloat = 200
+    static let maxSkillListHeight: CGFloat = 320
     static let skillNameLineLimit = 1
     static let borderWidth: CGFloat = 1
 }

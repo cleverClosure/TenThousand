@@ -2,7 +2,9 @@
 //  SkillRowView.swift
 //  TenThousand
 //
-//  Individual skill row in the selector
+//  Author: Tim Isaev
+//
+//  Individual skill row in the selector - two-line layout with prominent progress
 //
 
 import SwiftUI
@@ -25,6 +27,33 @@ struct SkillRowView: View {
     @State private var isFlashing = false
     @State private var isDotHovered = false
 
+    // MARK: - Private Computed Properties
+
+    private var percentageText: String {
+        let percentage = skill.masteryPercentage
+        if percentage < 0.1 {
+            return String(format: "%.2f%%", percentage)
+        } else if percentage < 1 {
+            return String(format: "%.1f%%", percentage)
+        } else {
+            return String(format: "%.1f%%", percentage)
+        }
+    }
+
+    private var backgroundColor: Color {
+        if isFlashing {
+            return skill.color.opacity(0.15)
+        } else if isHighlighted {
+            return Color.highlightYellow.opacity(0.2)
+        } else if isSelected {
+            return skill.color.opacity(0.1)
+        } else if isHovered {
+            return skill.color.opacity(0.06)
+        } else {
+            return Color.primary.opacity(0.02)
+        }
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -44,26 +73,43 @@ struct SkillRowView: View {
     // MARK: - View Components
 
     private var rowContent: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: Spacing.base) {
+            // Top row: color dot, name, time
             HStack(spacing: Spacing.loose) {
                 colorDot
-                skillName
+                VStack(alignment: .leading, spacing: Spacing.atomic) {
+                    skillName
+                    timeLabel
+                }
                 Spacer()
-                totalTime
+                chevron
             }
-            .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
-            .padding(.vertical, Dimensions.skillRowPaddingVertical)
 
-            // Progress bar
-            ProgressBarView(
-                progress: skill.masteryProgress,
-                color: skill.color,
-                height: 2
-            )
-            .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
-            .padding(.bottom, Spacing.tight)
+            // Bottom: progress bar with percentage
+            HStack(spacing: Spacing.base) {
+                ProgressBarView(
+                    progress: skill.masteryProgress,
+                    color: skill.color,
+                    height: Dimensions.progressBarHeightSmall,
+                    animated: false
+                )
+
+                Text(percentageText)
+                    .font(Typography.caption)
+                    .foregroundColor(skill.color)
+                    .frame(width: 48, alignment: .trailing)
+            }
         }
-        .background(backgroundColor, in: RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall))
+        .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
+        .padding(.vertical, Dimensions.skillRowPaddingVertical)
+        .background(
+            RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
+                .fill(backgroundColor)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
+                .stroke(isSelected ? skill.color.opacity(0.3) : Color.clear, lineWidth: 1)
+        )
     }
 
     private var colorDot: some View {
@@ -71,14 +117,15 @@ struct SkillRowView: View {
             Circle()
                 .fill(skill.color)
                 .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
+                .shadow(color: skill.color.opacity(0.4), radius: 4, y: 2)
 
             if isDotHovered {
                 Circle()
-                    .fill(Color.black.opacity(0.5))
+                    .fill(Color.black.opacity(0.4))
                     .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
                 Image(systemName: "play.fill")
-                    .font(.system(size: 8))
+                    .font(.system(size: 10, weight: .bold))
                     .foregroundColor(.white)
             }
         }
@@ -95,16 +142,21 @@ struct SkillRowView: View {
 
     private var skillName: some View {
         Text(skill.name)
-            .font(Typography.display)
-            .kerning(Typography.displayKerning)
+            .displayFont()
             .foregroundColor(.primary)
             .lineLimit(LayoutConstants.skillNameLineLimit)
     }
 
-    private var totalTime: some View {
-        Text(skill.totalSeconds.formattedShortTime())
+    private var timeLabel: some View {
+        Text("\(skill.totalSeconds.formattedShortTime()) tracked")
             .font(Typography.caption)
             .foregroundColor(.secondary)
+    }
+
+    private var chevron: some View {
+        Image(systemName: "chevron.right")
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(.secondary.opacity(isHovered ? 1 : 0.5))
     }
 
     @ViewBuilder
@@ -113,22 +165,6 @@ struct SkillRowView: View {
             Button(action: onDelete) {
                 Label("Delete Skill", systemImage: "trash")
             }
-        }
-    }
-
-    // MARK: - Private Computed Properties
-
-    private var backgroundColor: Color {
-        if isFlashing {
-            return Color.trackingBlue.opacity(Opacity.overlayMedium)
-        } else if isHighlighted {
-            return Color.highlightYellow.opacity(Opacity.overlayStrong)
-        } else if isSelected {
-            return Color.trackingBlue.opacity(Opacity.overlayLight)
-        } else if isHovered {
-            return Color.primary.opacity(Opacity.backgroundMedium)
-        } else {
-            return Color.clear
         }
     }
 

@@ -4,7 +4,7 @@
 //
 //  Author: Tim Isaev
 //
-//  View displayed when a skill is actively being tracked
+//  View displayed when a skill is actively being tracked - bold timer display
 //
 
 import SwiftUI
@@ -17,6 +17,10 @@ struct ActiveTrackingView: View {
     let skill: Skill
     @ObservedObject var viewModel: AppViewModel
 
+    // MARK: - Private State
+
+    @State private var pulseOpacity: Double = 0.3
+
     // MARK: - Body
 
     var body: some View {
@@ -26,130 +30,164 @@ struct ActiveTrackingView: View {
             timerSection
             Spacer()
             controlsSection
-            Divider()
-                .padding(.top, Spacing.base)
             footerSection
         }
-        .padding(.vertical, Spacing.base)
+        .padding(.vertical, Spacing.section)
+        .onAppear {
+            startPulseAnimation()
+        }
     }
 
     // MARK: - View Components
 
     private var headerSection: some View {
-        HStack(spacing: Spacing.base) {
-            skillColorDot
-            skillNameLabel
+        HStack(spacing: Spacing.compact) {
+            Circle()
+                .fill(skill.color)
+                .frame(width: Dimensions.colorDotSizeSmall, height: Dimensions.colorDotSizeSmall)
+                .shadow(color: skill.color.opacity(0.5), radius: 3, y: 1)
+
+            Text(skill.name)
+                .titleFont()
+                .foregroundColor(.primary)
+                .lineLimit(LayoutConstants.skillNameLineLimit)
+
             Spacer()
         }
-        .padding(.horizontal, Spacing.loose)
-        .padding(.vertical, Spacing.base)
-    }
-
-    private var skillColorDot: some View {
-        Circle()
-            .fill(skill.color)
-            .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
-    }
-
-    private var skillNameLabel: some View {
-        Text(skill.name)
-            .font(Typography.display)
-            .foregroundColor(.primary)
-            .lineLimit(LayoutConstants.skillNameLineLimit)
+        .padding(.horizontal, Spacing.section)
     }
 
     private var timerSection: some View {
-        VStack(spacing: Spacing.tight) {
-            timerDisplay
-            statusLabel
+        VStack(spacing: Spacing.loose) {
+            // Large timer with skill color glow when active
+            Text(viewModel.elapsedSeconds.formattedTime())
+                .font(.system(size: Dimensions.heroTimerSize, weight: .medium, design: .monospaced))
+                .monospacedDigit()
+                .foregroundColor(viewModel.isTimerPaused ? .secondary : .primary)
+                .contentTransition(.numericText())
+                .animation(.microInteraction, value: viewModel.elapsedSeconds)
+                .shadow(
+                    color: viewModel.isTimerPaused ? .clear : skill.color.opacity(pulseOpacity),
+                    radius: 20,
+                    y: 0
+                )
+
+            // Status pill
+            statusPill
         }
-        .padding(.horizontal, Spacing.loose)
+        .padding(.horizontal, Spacing.section)
     }
 
-    private var timerDisplay: some View {
-        Text(viewModel.elapsedSeconds.formattedTime())
-            .font(.system(size: 48, weight: .medium, design: .monospaced))
-            .monospacedDigit()
-            .foregroundColor(.primary)
-            .contentTransition(.numericText())
-            .animation(.microInteraction, value: viewModel.elapsedSeconds)
-    }
-
-    private var statusLabel: some View {
-        Group {
-            if viewModel.isTimerPaused {
-                Text("Paused")
-                    .foregroundColor(.secondary)
-            } else {
-                Text("Tracking")
-                    .foregroundColor(skill.color)
+    private var statusPill: some View {
+        HStack(spacing: Spacing.tight) {
+            if !viewModel.isTimerPaused {
+                Circle()
+                    .fill(skill.color)
+                    .frame(width: 6, height: 6)
+                    .opacity(pulseOpacity + 0.5)
             }
+
+            Text(viewModel.isTimerPaused ? "Paused" : "Tracking")
+                .font(Typography.caption)
+                .fontWeight(.medium)
         }
-        .font(Typography.caption)
+        .foregroundColor(viewModel.isTimerPaused ? .secondary : skill.color)
+        .padding(.horizontal, Spacing.loose)
+        .padding(.vertical, Spacing.tight)
+        .background(
+            Capsule()
+                .fill(viewModel.isTimerPaused
+                    ? Color.secondary.opacity(0.1)
+                    : skill.color.opacity(0.1))
+        )
     }
 
     private var controlsSection: some View {
-        HStack(spacing: Spacing.base) {
-            pauseResumeButton
-            stopButton
-        }
-        .padding(.horizontal, Spacing.loose)
-    }
+        HStack(spacing: Spacing.loose) {
+            // Pause/Resume button
+            Button {
+                if viewModel.isTimerPaused {
+                    viewModel.resumeTracking()
+                } else {
+                    viewModel.pauseTracking()
+                }
+            } label: {
+                HStack(spacing: Spacing.base) {
+                    Image(systemName: viewModel.isTimerPaused ? "play.fill" : "pause.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                    Text(viewModel.isTimerPaused ? "Resume" : "Pause")
+                        .font(Typography.body)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, Spacing.loose)
+                .background(
+                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
+                        .fill(Color.primary.opacity(0.06))
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
 
-    private var pauseResumeButton: some View {
-        Button {
-            if viewModel.isTimerPaused {
-                viewModel.resumeTracking()
-            } else {
-                viewModel.pauseTracking()
+            // Stop button
+            Button {
+                withAnimation(.panelTransition) {
+                    viewModel.stopTracking()
+                }
+            } label: {
+                HStack(spacing: Spacing.base) {
+                    Image(systemName: "stop.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                    Text("Stop")
+                        .font(Typography.body)
+                        .fontWeight(.medium)
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, Spacing.loose)
+                .background(
+                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
+                        .fill(Color.red)
+                )
             }
-        } label: {
-            HStack(spacing: Spacing.tight) {
-                Image(systemName: viewModel.isTimerPaused ? "play.fill" : "pause.fill")
-                    .font(.system(size: Dimensions.iconSizeSmall))
-                Text(viewModel.isTimerPaused ? "Resume" : "Pause")
-                    .font(Typography.body)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.base)
-            .background(Color.primary.opacity(Opacity.backgroundMedium))
-            .clipShape(RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall))
+            .buttonStyle(PlainButtonStyle())
         }
-        .buttonStyle(PlainButtonStyle())
-    }
-
-    private var stopButton: some View {
-        Button {
-            withAnimation(.panelTransition) {
-                viewModel.stopTracking()
-            }
-        } label: {
-            HStack(spacing: Spacing.tight) {
-                Image(systemName: "stop.fill")
-                    .font(.system(size: Dimensions.iconSizeSmall))
-                Text("Stop")
-                    .font(Typography.body)
-            }
-            .foregroundColor(.red)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.base)
-            .background(Color.red.opacity(Opacity.backgroundMedium))
-            .clipShape(RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall))
-        }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal, Spacing.section)
+        .padding(.bottom, Spacing.section)
     }
 
     private var footerSection: some View {
-        PanelButton(
-            "View All Skills",
-            icon: "list.bullet",
-            alignment: .leading
-        ) {
-            withAnimation(.panelTransition) {
-                viewModel.showSkillList()
+        VStack(spacing: 0) {
+            Divider()
+            Button {
+                withAnimation(.panelTransition) {
+                    viewModel.showSkillList()
+                }
+            } label: {
+                HStack(spacing: Spacing.base) {
+                    Image(systemName: "list.bullet")
+                        .font(.system(size: 12, weight: .medium))
+                    Text("View All Skills")
+                        .font(Typography.body)
+                    Spacer()
+                }
+                .foregroundColor(.secondary)
+                .padding(.horizontal, Spacing.section)
+                .padding(.vertical, Spacing.loose)
             }
+            .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, Spacing.base)
     }
 
+    // MARK: - Private Methods
+
+    private func startPulseAnimation() {
+        guard !viewModel.isTimerPaused else { return }
+        withAnimation(
+            .easeInOut(duration: 1.5)
+            .repeatForever(autoreverses: true)
+        ) {
+            pulseOpacity = 0.6
+        }
+    }
 }
