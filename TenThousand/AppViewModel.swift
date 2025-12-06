@@ -104,6 +104,24 @@ class AppViewModel: ObservableObject {
         recalculatePaletteState()
     }
 
+    func updateSkill(_ skill: Skill, name: String, paletteId: String, colorIndex: Int16) {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty, trimmedName.count <= ValidationLimits.maxSkillNameLength else { return }
+
+        // Check for duplicate name (excluding current skill)
+        if skills.contains(where: { $0.id != skill.id && $0.name.lowercased() == trimmedName.lowercased() }) {
+            return
+        }
+
+        skill.name = trimmedName
+        skill.paletteId = paletteId
+        skill.colorIndex = colorIndex
+
+        dataStore.save()
+        fetchSkills()
+        recalculatePaletteState()
+    }
+
     // MARK: - Session Management
 
     func startTracking(skill: Skill) {
@@ -181,5 +199,9 @@ class AppViewModel: ObservableObject {
     func showActiveTracking() {
         guard activeSkill != nil else { return }
         panelRoute = .activeTracking
+    }
+
+    func showSkillEdit(_ skill: Skill) {
+        panelRoute = .skillEdit(skill)
     }
 }

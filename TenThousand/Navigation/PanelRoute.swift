@@ -23,6 +23,9 @@ enum PanelRoute: Equatable {
     /// Active tracking view (shown when a session is in progress)
     case activeTracking
 
+    /// Edit view for modifying skill settings
+    case skillEdit(Skill)
+
     // MARK: - Equatable
 
     static func == (lhs: PanelRoute, rhs: PanelRoute) -> Bool {
@@ -32,6 +35,8 @@ enum PanelRoute: Equatable {
         case (.activeTracking, .activeTracking):
             return true
         case let (.skillDetail(lhsSkill), .skillDetail(rhsSkill)):
+            return lhsSkill.id == rhsSkill.id
+        case let (.skillEdit(lhsSkill), .skillEdit(rhsSkill)):
             return lhsSkill.id == rhsSkill.id
         default:
             return false

@@ -19,6 +19,7 @@ struct SkillRowView: View {
     var isHighlighted: Bool = false
     var canDelete: Bool = true
     var onDelete: (() -> Void)?
+    var onEdit: (() -> Void)?
     var onStartTracking: (() -> Void)?
 
     // MARK: - Private State
@@ -82,6 +83,9 @@ struct SkillRowView: View {
                     timeLabel
                 }
                 Spacer()
+                if isHovered {
+                    editButton
+                }
                 chevron
             }
 
@@ -153,6 +157,24 @@ struct SkillRowView: View {
             .foregroundColor(.secondary)
     }
 
+    private var editButton: some View {
+        Button {
+            onEdit?()
+        } label: {
+            Image(systemName: "pencil")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.secondary)
+                .padding(Spacing.base)
+                .background(
+                    Circle()
+                        .fill(Color.primary.opacity(0.08))
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
+        .transition(.scale.combined(with: .opacity))
+        .onTapGesture {} // Prevent tap from propagating to row
+    }
+
     private var chevron: some View {
         Image(systemName: "chevron.right")
             .font(.system(size: 12, weight: .semibold))
@@ -161,6 +183,11 @@ struct SkillRowView: View {
 
     @ViewBuilder
     private var contextMenuContent: some View {
+        if let onEdit = onEdit {
+            Button(action: onEdit) {
+                Label("Edit Skill", systemImage: "pencil")
+            }
+        }
         if canDelete, let onDelete = onDelete {
             Button(action: onDelete) {
                 Label("Delete Skill", systemImage: "trash")

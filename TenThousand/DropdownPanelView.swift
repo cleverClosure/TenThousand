@@ -70,6 +70,10 @@ struct DropdownPanelView: View {
                         viewModel.showSkillList()
                     }
             }
+
+        case .skillEdit(let skill):
+            SkillEditView(skill: skill, viewModel: viewModel)
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
         }
     }
 
@@ -79,7 +83,7 @@ struct DropdownPanelView: View {
         switch viewModel.panelRoute {
         case .skillList:
             dismiss()
-        case .skillDetail, .activeTracking:
+        case .skillDetail, .activeTracking, .skillEdit:
             withAnimation(.panelTransition) {
                 viewModel.showSkillList()
             }

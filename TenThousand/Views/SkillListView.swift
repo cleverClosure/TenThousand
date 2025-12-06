@@ -80,6 +80,11 @@ struct SkillListView: View {
                 onDelete: {
                     handleDeleteSkill(skill)
                 },
+                onEdit: {
+                    withAnimation(.panelTransition) {
+                        viewModel.showSkillEdit(skill)
+                    }
+                },
                 onStartTracking: {
                     viewModel.startTracking(skill: skill)
                 }
