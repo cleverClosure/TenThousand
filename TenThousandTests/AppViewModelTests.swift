@@ -182,8 +182,8 @@ struct AppViewModelTests {
         #expect(viewModel.skills.contains { $0.name == "JavaScript" })
     }
 
-    @Test("Deleting selected skill clears selection")
-    func testDeleteSkillClearsSelectionWhenDeletingSelectedSkill() {
+    @Test("Deleting viewed skill navigates back to list")
+    func testDeleteSkillNavigatesBackWhenDeletingViewedSkill() {
         let viewModel = makeViewModel()
 
         viewModel.createSkill(name: "Swift")
@@ -192,16 +192,16 @@ struct AppViewModelTests {
             return
         }
 
-        viewModel.selectedSkillForDetail = skill
-        #expect(viewModel.selectedSkillForDetail != nil)
+        viewModel.showSkillDetail(skill)
+        #expect(viewModel.panelRoute == .skillDetail(skill))
 
         viewModel.deleteSkill(skill)
 
-        #expect(viewModel.selectedSkillForDetail == nil)
+        #expect(viewModel.panelRoute == .skillList)
     }
 
-    @Test("Deleting non-selected skill keeps selection intact")
-    func testDeleteSkillKeepsSelectionWhenDeletingOtherSkill() {
+    @Test("Deleting non-viewed skill keeps current route intact")
+    func testDeleteSkillKeepsRouteWhenDeletingOtherSkill() {
         let viewModel = makeViewModel()
 
         viewModel.createSkill(name: "Swift")
@@ -213,10 +213,127 @@ struct AppViewModelTests {
             return
         }
 
-        viewModel.selectedSkillForDetail = swiftSkill
+        viewModel.showSkillDetail(swiftSkill)
         viewModel.deleteSkill(pythonSkill)
 
-        #expect(viewModel.selectedSkillForDetail?.id == swiftSkill.id)
+        #expect(viewModel.panelRoute == .skillDetail(swiftSkill))
+    }
+
+    // MARK: - Navigation Behaviors
+
+    @Test("Initial panel route is skill list")
+    func testInitialPanelRouteIsSkillList() {
+        let viewModel = makeViewModel()
+
+        #expect(viewModel.panelRoute == .skillList)
+    }
+
+    @Test("showSkillDetail navigates to skill detail")
+    func testShowSkillDetailNavigatesToDetail() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.showSkillDetail(skill)
+
+        #expect(viewModel.panelRoute == .skillDetail(skill))
+    }
+
+    @Test("showSkillList navigates to skill list")
+    func testShowSkillListNavigatesToList() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.showSkillDetail(skill)
+        viewModel.showSkillList()
+
+        #expect(viewModel.panelRoute == .skillList)
+    }
+
+    @Test("Starting tracking navigates to active tracking")
+    func testStartTrackingNavigatesToActiveTracking() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+
+        #expect(viewModel.panelRoute == .activeTracking)
+    }
+
+    @Test("Stopping tracking navigates to skill list")
+    func testStopTrackingNavigatesToSkillList() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+        viewModel.stopTracking()
+
+        #expect(viewModel.panelRoute == .skillList)
+    }
+
+    @Test("Can navigate to skill list while tracking")
+    func testCanNavigateToSkillListWhileTracking() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+        #expect(viewModel.panelRoute == .activeTracking)
+
+        viewModel.showSkillList()
+
+        #expect(viewModel.panelRoute == .skillList)
+        #expect(viewModel.activeSkill != nil) // Still tracking
+        #expect(viewModel.timerManager.isRunning)
+    }
+
+    @Test("showActiveTracking navigates to tracking view when tracking")
+    func testShowActiveTrackingNavigatesWhenTracking() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.startTracking(skill: skill)
+        viewModel.showSkillList()
+        viewModel.showActiveTracking()
+
+        #expect(viewModel.panelRoute == .activeTracking)
+    }
+
+    @Test("showActiveTracking does nothing when not tracking")
+    func testShowActiveTrackingDoesNothingWhenNotTracking() {
+        let viewModel = makeViewModel()
+
+        viewModel.showActiveTracking()
+
+        #expect(viewModel.panelRoute == .skillList)
     }
 
     // MARK: - Session Management Behaviors

@@ -48,7 +48,7 @@ struct SkillDetailView: View {
         HStack {
             Button {
                 withAnimation(.panelTransition) {
-                    viewModel.selectedSkillForDetail = nil
+                    viewModel.showSkillList()
                 }
             } label: {
                 HStack(spacing: Spacing.tight) {

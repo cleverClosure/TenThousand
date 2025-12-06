@@ -17,7 +17,6 @@ struct ActiveTrackingView: View {
     let skill: Skill
     @ObservedObject var viewModel: AppViewModel
     @ObservedObject var timerManager: TimerManager
-    let onShowAllSkills: () -> Void
 
     // MARK: - Body
 
@@ -147,7 +146,9 @@ struct ActiveTrackingView: View {
             icon: "list.bullet",
             alignment: .leading
         ) {
-            onShowAllSkills()
+            withAnimation(.panelTransition) {
+                viewModel.showSkillList()
+            }
         }
         .padding(.horizontal, Spacing.base)
     }

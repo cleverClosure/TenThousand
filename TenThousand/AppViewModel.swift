@@ -17,7 +17,10 @@ class AppViewModel: ObservableObject {
     @Published var activeSkill: Skill?
     @Published var currentSession: Session?
     @Published var justUpdatedSkillId: UUID?
-    @Published var selectedSkillForDetail: Skill?
+
+    // MARK: - Navigation State
+
+    @Published var panelRoute: PanelRoute = .skillList
 
     // MARK: - Dependencies
 
@@ -72,10 +75,9 @@ class AppViewModel: ObservableObject {
     }
 
     func deleteSkill(_ skill: Skill) {
-        // Clear selection before triggering view updates to avoid
-        // SwiftUI rendering with a reference to the deleted object
-        if selectedSkillForDetail?.id == skill.id {
-            selectedSkillForDetail = nil
+        // Navigate away if viewing the deleted skill
+        if case .skillDetail(let detailSkill) = panelRoute, detailSkill.id == skill.id {
+            panelRoute = .skillList
         }
         dataStore.deleteSkill(skill)
         dataStore.save()
@@ -93,6 +95,7 @@ class AppViewModel: ObservableObject {
         activeSkill = skill
         currentSession = dataStore.createSession(for: skill)
         timerManager.start()
+        panelRoute = .activeTracking
     }
 
     func pauseTracking() {
@@ -116,6 +119,7 @@ class AppViewModel: ObservableObject {
 
         currentSession = nil
         activeSkill = nil
+        panelRoute = .skillList
 
         fetchSkills()
 
@@ -143,5 +147,39 @@ class AppViewModel: ObservableObject {
         let sessions = dataStore.fetchSessions(from: startOfDay)
         let uniqueSkills = Set(sessions.compactMap { $0.skill })
         return uniqueSkills.count
+    }
+
+    // MARK: - Navigation
+
+    func navigate(to route: PanelRoute) {
+        panelRoute = route
+    }
+
+    func showSkillList() {
+        panelRoute = .skillList
+    }
+
+    func showSkillDetail(_ skill: Skill) {
+        panelRoute = .skillDetail(skill)
+    }
+
+    func showActiveTracking() {
+        guard activeSkill != nil else { return }
+        panelRoute = .activeTracking
+    }
+
+    /// Whether the user can navigate away from the current route
+    var canNavigateBack: Bool {
+        switch panelRoute {
+        case .skillList:
+            return false
+        case .skillDetail, .activeTracking:
+            return true
+        }
+    }
+
+    /// Navigate back to skill list from any route
+    func navigateBack() {
+        panelRoute = .skillList
     }
 }
