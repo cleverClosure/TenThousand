@@ -53,7 +53,7 @@ class StatusBarController: ObservableObject {
         guard let statusItem = statusItem,
               let button = statusItem.button else { return }
 
-        let menuBarView = MenuBarIconView(timerManager: viewModel.timerManager)
+        let menuBarView = MenuBarIconView(viewModel: viewModel)
         hostingView = NSHostingView(rootView: menuBarView)
 
         guard let hostingView = hostingView else { return }
