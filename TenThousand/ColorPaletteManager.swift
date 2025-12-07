@@ -25,7 +25,7 @@ struct ColorAssignment: Equatable, Hashable {
 
     /// Resolves to the SwiftUI Color
     var color: Color {
-        skillColor?.color ?? .fallbackColor
+        skillColor?.color ?? .gray
     }
 }
 
@@ -133,7 +133,7 @@ final class ColorPaletteManager {
         guard let palette = ColorPalette.palette(withId: paletteId),
               colorIndex >= 0,
               colorIndex < palette.colors.count else {
-            return .fallbackColor
+            return .gray
         }
         return palette.colors[colorIndex].color
     }

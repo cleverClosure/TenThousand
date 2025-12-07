@@ -2,240 +2,189 @@
 //  Tokens.swift
 //  TenThousand
 //
-//  Design tokens: spacing, dimensions, animations, and other constants
+//  Created by Tim Isaev
+//
+//  Design System
+//
+//  PHILOSOPHY:
+//  1. System-First: Use macOS semantic colors for UI chrome
+//  2. 8-Point Grid: All spacing is multiples of 4 (4, 8, 12, 16, 24, 32)
+//  3. Minimal Tokens: Only define what differs from system defaults
+//  4. Semantic Naming: Names describe purpose, not appearance
+//
+//  USAGE:
+//  All design tokens are accessed via the DS namespace:
+//    DS.Spacing.md
+//    DS.DS.Color.accent
+//    DS.Font.title
+//    DS.Opacity.subtle
 //
 
 import SwiftUI
 
-// MARK: - Spacing
+// MARK: - Design System Namespace
 
-struct Spacing {
-    static let atomic: CGFloat = 2
-    static let tight: CGFloat = 4
-    static let base: CGFloat = 8
-    static let compact: CGFloat = 10
-    static let loose: CGFloat = 12
-    static let section: CGFloat = 16
-    static let comfortable: CGFloat = 20
-    static let chunk: CGFloat = 24
-    static let generous: CGFloat = 32
-    static let spacious: CGFloat = 40
+enum DS {
+    // MARK: - Spacing (8-Point Grid)
+    //
+    // Based on 4px base unit. Use for all padding, margins, and gaps.
+    //
+    enum Spacing {
+        static let xs: CGFloat = 4      // Tight: icon padding, inline gaps
+        static let sm: CGFloat = 8      // Small: related element spacing
+        static let md: CGFloat = 12     // Medium: default internal padding
+        static let lg: CGFloat = 16     // Large: section padding
+        static let xl: CGFloat = 24     // Extra large: major sections
+        static let xxl: CGFloat = 32    // Maximum: generous whitespace
+    }
+
+    // MARK: - Sizing
+    //
+    // Component-specific dimensions grouped by feature area.
+    //
+    enum Size {
+        // Panel
+        static let panelWidth: CGFloat = 320
+        static let panelMinHeight: CGFloat = 140
+        static let panelMaxHeight: CGFloat = 480
+
+        // Skill rows
+        static let skillRowHeight: CGFloat = 72
+        static let colorDot: CGFloat = 28
+        static let colorDotSmall: CGFloat = 12
+        static let percentageLabel: CGFloat = 48
+
+        // Buttons
+        static let buttonHeight: CGFloat = 36
+        static let colorPickerButton: CGFloat = 32
+
+        // Progress indicators
+        static let progressBarHeight: CGFloat = 6
+        static let progressBarLarge: CGFloat = 10
+        static let circularProgress: CGFloat = 140
+        static let circularStroke: CGFloat = 10
+
+        // Active session
+        static let pulseIndicator: CGFloat = 6
+
+        // Icons
+        static let iconSmall: CGFloat = 14
+        static let iconMedium: CGFloat = 20
+        static let iconLarge: CGFloat = 32
+
+        // Menubar
+        static let menubarTimer: CGFloat = 52
+        static let menubarIcon: CGFloat = 20
+        static let menubarStroke: CGFloat = 2
+
+        // Typography
+        static let heroTimer: CGFloat = 64
+        static let heroHours: CGFloat = 56
+    }
+
+    // MARK: - Radius
+    //
+    // Corner radii for rounded elements.
+    //
+    enum Radius {
+        static let small: CGFloat = 6
+        static let medium: CGFloat = 10
+        static let large: CGFloat = 14
+    }
+
+    // MARK: - Opacity
+    //
+    // Semantic opacity levels for backgrounds, overlays, and states.
+    //
+    enum Opacity {
+        // Backgrounds
+        static let subtle: Double = 0.04      // Subtle backgrounds
+        static let light: Double = 0.06       // Light backgrounds
+        static let medium: Double = 0.10      // Hover states
+        static let strong: Double = 0.15      // Visible backgrounds
+
+        // Overlays
+        static let overlay: Double = 0.30     // Borders, overlays
+        static let overlayDark: Double = 0.40 // Dark overlays
+
+        // States
+        static let muted: Double = 0.50       // Disabled, de-emphasized
+        static let secondary: Double = 0.60   // Secondary text opacity
+        static let prominent: Double = 0.70   // Secondary but visible
+        static let accent: Double = 0.80      // Accent emphasis
+        static let gradient: Double = 0.85    // Gradient endpoints
+    }
+
+    // MARK: - Shadow
+    //
+    // Pre-configured shadow values for elevation hierarchy.
+    //
+    enum Shadow {
+        struct Config {
+            let radius: CGFloat
+            let y: CGFloat
+            let opacity: Double
+        }
+
+        static let panel = Config(radius: 24, y: 8, opacity: 0.12)
+        static let elevated = Config(radius: 4, y: 2, opacity: 0.15)
+        static let glow = Config(radius: 8, y: 0, opacity: 0.25)
+        static let subtle = Config(radius: 2, y: 0, opacity: 0.50)
+        static let colorGlow = Config(radius: 2, y: 1, opacity: 0.15)
+    }
+
+    // MARK: - Animation
+    //
+    // Timing durations for consistent motion.
+    //
+    enum Duration {
+        static let quick: Double = 0.15
+        static let standard: Double = 0.25
+        static let emphasized: Double = 0.4
+        static let slow: Double = 0.6
+        static let pulse: Double = 1.5
+        static let highlight: Double = 1.0
+    }
+
+    // MARK: - Scale
+    //
+    // Transform scales for interactive states.
+    //
+    enum Scale {
+        static let pressed: CGFloat = 0.97
+        static let hover: CGFloat = 1.02
+        static let dismiss: CGFloat = 0.95
+    }
 }
 
-// MARK: - Dimensions
-
-struct Dimensions {
-    // Panel
-    static let panelWidth: CGFloat = 320
-    static let panelMinHeight: CGFloat = 140
-    static let panelMaxHeight: CGFloat = 480
-    static let panelCornerRadius: CGFloat = 14
-
-    // Skill Row
-    static let skillRowHeight: CGFloat = 72
-    static let skillRowPaddingHorizontal: CGFloat = 12
-    static let skillRowPaddingVertical: CGFloat = 10
-    static let colorDotSize: CGFloat = 28
-    static let colorDotSizeSmall: CGFloat = 12
-
-    // Buttons
-    static let compactButtonHeight: CGFloat = 36
-    static let colorPickerButtonSize: CGFloat = 32
-
-    // Progress Bar
-    static let progressBarHeightSmall: CGFloat = 4
-    static let progressBarHeightMedium: CGFloat = 6
-    static let progressBarHeightLarge: CGFloat = 10
-
-    // Circular Progress
-    static let circularProgressSize: CGFloat = 140
-    static let circularProgressStroke: CGFloat = 10
-    static let circularProgressTrackOffset: CGFloat = 2
-    static let circularProgressShadowOffset: CGFloat = 4
-
-    // Active Session
-    static let activeSessionHeight: CGFloat = 80
-    static let pulseIndicatorSize: CGFloat = 6
-
-    // Today's Summary
-    static let todaySummaryHeight: CGFloat = 56
-
-    // Corner Radii
-    static let cornerRadiusSmall: CGFloat = 6
-    static let cornerRadiusMedium: CGFloat = 10
-    static let cornerRadiusLarge: CGFloat = 14
-
-    // Icon Sizes (for frame dimensions)
-    static let iconSizeSmall: CGFloat = 14
-    static let iconSizeMedium: CGFloat = 24
-    static let iconSizeLarge: CGFloat = 32
-
-    // Menubar
-    static let menubarTimerWidth: CGFloat = 52
-    static let menubarIconSize: CGFloat = 20
-    static let menubarStrokeWidth: CGFloat = 2
-
-    // Dividers
-    static let dividerHeight: CGFloat = 1
-
-    // Hero Typography
-    static let heroTimerSize: CGFloat = 64
-    static let heroHoursSize: CGFloat = 56
-
-    // Frame Widths
-    static let percentageFrameWidth: CGFloat = 48
-}
-
-// MARK: - Icon Font Sizes
-
-struct IconFontSize {
-    static let tiny: CGFloat = 9
-    static let small: CGFloat = 10
-    static let caption: CGFloat = 11
-    static let body: CGFloat = 12
-    static let menubarTimer: CGFloat = 13
-    static let medium: CGFloat = 14
-    static let large: CGFloat = 16
-    static let xl: CGFloat = 20
-}
-
-// MARK: - Circular Progress Sizing
-
-struct CircularProgressSizing {
-    static let valueFontRatio: CGFloat = 0.32
-    static let labelFontRatio: CGFloat = 0.085
-}
-
-// MARK: - Animations
+// MARK: - Animation Extensions
 
 extension Animation {
-    static let microInteraction = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.2)
-    static let panelTransition = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.3)
-    static let countUp = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.4)
-    static let hoverState = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.15)
-}
-
-// MARK: - Opacity
-
-struct Opacity {
-    // Backgrounds
-    static let backgroundSubtle: Double = 0.02
-    static let backgroundLight: Double = 0.03
-    static let backgroundMedium: Double = 0.05
-    static let backgroundDark: Double = 0.08
-
-    // Overlays & Highlights
-    static let overlayLight: Double = 0.10
-    static let overlayMedium: Double = 0.20
-    static let overlayStrong: Double = 0.30
-
-    // Borders & Strokes
-    static let borderSubtle: Double = 0.30
-
-    // States
-    static let disabled: Double = 0.40
-
-    // Icon & Text States
-    static let secondaryIdle: Double = 0.35
-    static let accentStrong: Double = 0.80
-
-    // Color Picker
-    static let colorPickerSelected: Double = 0.50
-    static let colorPickerDefault: Double = 0.20
-}
-
-// MARK: - Shadows
-
-struct ShadowConfig {
-    let radius: CGFloat
-    let xOffset: CGFloat
-    let yOffset: CGFloat
-    let opacity: Double
-}
-
-struct Shadows {
-    static let floating = ShadowConfig(radius: 24, xOffset: 0, yOffset: 8, opacity: 0.12)
-    static let subtle = ShadowConfig(radius: 2, xOffset: 0, yOffset: 0, opacity: 0.50)
-    static let small = ShadowConfig(radius: 3, xOffset: 0, yOffset: 1, opacity: 0.50)
-    static let medium = ShadowConfig(radius: 4, xOffset: 0, yOffset: 2, opacity: 0.40)
-    static let progressGlow = ShadowConfig(radius: 6, xOffset: 0, yOffset: 2, opacity: 0.35)
-    static let timerGlow = ShadowConfig(radius: 20, xOffset: 0, yOffset: 0, opacity: 0.30)
-}
-
-// MARK: - Scale Values
-
-struct ScaleValues {
-    static let normal: CGFloat = 1.0
-    static let hoverGrow: CGFloat = 1.05
-    static let pressedShrink: CGFloat = 0.98
-    static let dismissScale: CGFloat = 0.95
+    static let dsQuick = Animation.easeOut(duration: DS.Duration.quick)
+    static let dsStandard = Animation.easeInOut(duration: DS.Duration.standard)
+    static let dsEmphasized = Animation.easeOut(duration: DS.Duration.emphasized)
 }
 
 // MARK: - Time Constants
 
-struct TimeConstants {
+enum Time {
     static let secondsPerMinute: Int64 = 60
-    static let secondsPerMinuteDouble: Double = 60.0
     static let secondsPerHour: Int64 = 3600
     static let timerUpdateInterval: TimeInterval = 1.0
 }
 
-// MARK: - Validation Limits
+// MARK: - Limits
 
-struct ValidationLimits {
+enum Limits {
     static let maxSkillNameLength = 30
     static let maxSkillCount = 12
 }
 
-// MARK: - UI Text
+// MARK: - Mastery
 
-struct UIText {
-    static let skillNamePlaceholder = "Skill name..."
-    static let defaultSkillName = "Untitled"
-    static let todayLabel = "Today"
-    static let addSkillLabel = "Add skill"
-    static let errorEmptySkillName = "Skill name cannot be empty"
-    static let errorDuplicateSkillName = "A skill with this name already exists"
-    static let lessThanOneMinute = "<1m"
-    static let hoursSuffix = "h"
-    static let minutesSuffix = "m"
-    static let hoursSeparator = "h "
-    static let minutesSeparator = "m"
-}
-
-// MARK: - Format Strings
-
-struct FormatStrings {
-    static let timeWithHours = "%d:%02d:%02d"
-    static let timeWithoutHours = "%02d:%02d"
-}
-
-// MARK: - Animation Durations
-
-struct AnimationDurations {
-    static let flash: Double = 0.1
-    static let updateHighlight: Double = 1.0
-    static let progressAppear: Double = 0.6
-    static let progressUpdate: Double = 0.4
-    static let circularAppear: Double = 0.8
-    static let circularUpdate: Double = 0.5
-    static let pulse: Double = 1.5
-}
-
-// MARK: - Layout Constants
-
-struct LayoutConstants {
-    static let maxSkillListHeight: CGFloat = 320
-    static let skillNameLineLimit = 1
-    static let borderWidth: CGFloat = 1
-}
-
-// MARK: - Mastery Constants
-
-struct MasteryConstants {
-    /// The 10,000 hour rule for mastery
-    static let masteryHours: Int64 = 10_000
-    static let masterySeconds: Int64 = masteryHours * TimeConstants.secondsPerHour
+enum Mastery {
+    static let targetHours: Int64 = 10_000
+    static let targetSeconds: Int64 = targetHours * Time.secondsPerHour
 }
 
 // MARK: - Mastery Projection
@@ -255,4 +204,11 @@ struct MasteryProjection {
             return "\(years) year\(years == 1 ? "" : "s"), \(months) month\(months == 1 ? "" : "s")"
         }
     }
+}
+
+// MARK: - Format Strings
+
+enum Format {
+    static let timeWithHours = "%d:%02d:%02d"
+    static let timeWithoutHours = "%02d:%02d"
 }

@@ -62,7 +62,7 @@ struct DropdownPanelView: View {
         case .activeTracking:
             if let skill = viewModel.activeSkill {
                 ActiveTrackingView(skill: skill, viewModel: viewModel)
-                    .transition(.opacity.combined(with: .scale(scale: ScaleValues.dismissScale)))
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
             } else {
                 // Fallback if activeSkill is nil (shouldn't happen normally)
                 SkillListView(viewModel: viewModel)
@@ -84,7 +84,7 @@ struct DropdownPanelView: View {
         case .skillList:
             dismiss()
         case .skillDetail, .activeTracking, .skillEdit:
-            withAnimation(.panelTransition) {
+            withAnimation(.dsStandard) {
                 viewModel.showSkillList()
             }
         }

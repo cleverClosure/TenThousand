@@ -40,7 +40,7 @@ struct SkillEditView: View {
     private var isValidName: Bool {
         let trimmed = editedName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
-        guard trimmed.count <= ValidationLimits.maxSkillNameLength else { return false }
+        guard trimmed.count <= Limits.maxSkillNameLength else { return false }
 
         // Check for duplicates (excluding current skill)
         let isDuplicate = viewModel.skills.contains {
@@ -54,7 +54,7 @@ struct SkillEditView: View {
     }
 
     private var isNearLimit: Bool {
-        characterCount >= ValidationLimits.maxSkillNameLength - 5
+        characterCount >= Limits.maxSkillNameLength - 5
     }
 
     // MARK: - Body
@@ -63,12 +63,12 @@ struct SkillEditView: View {
         VStack(spacing: 0) {
             headerSection
             ScrollView {
-                VStack(spacing: Spacing.section) {
+                VStack(spacing: DS.Spacing.lg) {
                     nameSection
                     colorSection
                 }
-                .padding(.horizontal, Spacing.section)
-                .padding(.vertical, Spacing.loose)
+                .padding(.horizontal, DS.Spacing.lg)
+                .padding(.vertical, DS.Spacing.md)
             }
             .scrollIndicators(.hidden)
             footerSection
@@ -85,15 +85,15 @@ struct SkillEditView: View {
     private var headerSection: some View {
         HStack {
             Button {
-                withAnimation(.panelTransition) {
+                withAnimation(.dsStandard) {
                     viewModel.showSkillList()
                 }
             } label: {
-                HStack(spacing: Spacing.tight) {
+                HStack(spacing: DS.Spacing.xs) {
                     Image(systemName: "chevron.left")
                         .iconFont(.body, weight: .semibold)
                     Text("Cancel")
-                        .font(Typography.body)
+                        .font(DS.Font.body)
                 }
                 .foregroundColor(.secondary)
             }
@@ -102,99 +102,99 @@ struct SkillEditView: View {
             Spacer()
 
             Text("Edit Skill")
-                .font(Typography.body)
+                .font(DS.Font.body)
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
 
             Spacer()
 
             // Invisible spacer to center title
-            HStack(spacing: Spacing.tight) {
+            HStack(spacing: DS.Spacing.xs) {
                 Image(systemName: "chevron.left")
                 Text("Cancel")
             }
-            .font(Typography.body)
+            .font(DS.Font.body)
             .opacity(0)
         }
-        .padding(.horizontal, Spacing.section)
-        .padding(.top, Spacing.loose)
-        .padding(.bottom, Spacing.base)
+        .padding(.horizontal, DS.Spacing.lg)
+        .padding(.top, DS.Spacing.md)
+        .padding(.bottom, DS.Spacing.sm)
     }
 
     private var nameSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.base) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             Text("NAME")
                 .labelFont()
                 .foregroundColor(.secondary)
 
-            VStack(alignment: .leading, spacing: Spacing.tight) {
-                HStack(spacing: Spacing.loose) {
+            VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                HStack(spacing: DS.Spacing.md) {
                     Circle()
                         .fill(selectedColor)
-                        .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
-                        .shadow(color: selectedColor.opacity(Shadows.medium.opacity), radius: Shadows.medium.radius, y: Shadows.medium.yOffset)
+                        .frame(width: DS.Size.colorDot, height: DS.Size.colorDot)
+                        .shadow(color: selectedColor.opacity(DS.Shadow.elevated.opacity), radius: DS.Shadow.elevated.radius, y: DS.Shadow.elevated.y)
 
                     TextField("Skill name", text: $editedName)
-                        .displayFont()
+                        .titleFont()
                         .textFieldStyle(PlainTextFieldStyle())
                         .onChange(of: editedName) { _, newValue in
                             errorMessage = nil
-                            if newValue.count > ValidationLimits.maxSkillNameLength {
-                                editedName = String(newValue.prefix(ValidationLimits.maxSkillNameLength))
+                            if newValue.count > Limits.maxSkillNameLength {
+                                editedName = String(newValue.prefix(Limits.maxSkillNameLength))
                             }
                         }
                 }
-                .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
-                .padding(.vertical, Dimensions.skillRowPaddingVertical)
+                .padding(.horizontal, DS.Spacing.md)
+                .padding(.vertical, DS.Spacing.sm)
                 .background(
-                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(Color.backgroundPrimary(.light))
+                    RoundedRectangle(cornerRadius: DS.Radius.medium)
+                        .fill(DS.Color.background(.subtle))
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .stroke(Color.backgroundSecondary(.overlay), lineWidth: LayoutConstants.borderWidth)
+                    RoundedRectangle(cornerRadius: DS.Radius.medium)
+                        .stroke(Color.primary.opacity(DS.Opacity.strong), lineWidth: 1)
                 )
 
                 HStack {
                     if let error = errorMessage {
-                        HStack(spacing: Spacing.tight) {
+                        HStack(spacing: DS.Spacing.xs) {
                             Image(systemName: "exclamationmark.circle.fill")
-                                .iconFont(.caption)
+                                .iconFont(.body)
                             Text(error)
-                                .font(Typography.caption)
+                                .font(DS.Font.caption)
                         }
-                        .foregroundColor(.stateError)
+                        .foregroundColor(DS.Color.error)
                     }
                     Spacer()
-                    Text("\(characterCount)/\(ValidationLimits.maxSkillNameLength)")
-                        .font(Typography.caption)
-                        .foregroundColor(isNearLimit ? .stateWarning : .secondary.opacity(0.6))
+                    Text("\(characterCount)/\(Limits.maxSkillNameLength)")
+                        .font(DS.Font.caption)
+                        .foregroundColor(isNearLimit ? DS.Color.warning : .secondary.opacity(0.6))
                 }
             }
         }
     }
 
     private var colorSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.base) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             Text("COLOR")
                 .labelFont()
                 .foregroundColor(.secondary)
 
-            VStack(spacing: Spacing.loose) {
+            VStack(spacing: DS.Spacing.md) {
                 ForEach(ColorPalette.all) { palette in
                     paletteRow(palette)
                 }
             }
-            .padding(Spacing.loose)
+            .padding(DS.Spacing.md)
             .background(
-                RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                    .fill(Color.backgroundPrimary(.ultraLight))
+                RoundedRectangle(cornerRadius: DS.Radius.medium)
+                    .fill(DS.Color.background(.subtle))
             )
         }
     }
 
     private func paletteRow(_ palette: ColorPalette) -> some View {
-        HStack(spacing: Spacing.compact) {
+        HStack(spacing: DS.Spacing.md) {
             ForEach(Array(palette.colors.enumerated()), id: \.element.id) { index, skillColor in
                 colorButton(
                     color: skillColor.color,
@@ -209,7 +209,7 @@ struct SkillEditView: View {
         let isSelected = selectedPaletteId == paletteId && selectedColorIndex == colorIndex
 
         return Button {
-            withAnimation(.microInteraction) {
+            withAnimation(.dsQuick) {
                 selectedPaletteId = paletteId
                 selectedColorIndex = colorIndex
             }
@@ -217,21 +217,21 @@ struct SkillEditView: View {
             ZStack {
                 Circle()
                     .fill(color)
-                    .frame(width: Dimensions.colorPickerButtonSize, height: Dimensions.colorPickerButtonSize)
+                    .frame(width: DS.Size.colorPickerButton, height: DS.Size.colorPickerButton)
                     .shadow(
-                        color: color.opacity(isSelected ? Opacity.colorPickerSelected : Opacity.colorPickerDefault),
-                        radius: isSelected ? Shadows.medium.radius : Shadows.subtle.radius,
-                        y: Shadows.small.yOffset
+                        color: color.opacity(isSelected ? DS.Opacity.muted : DS.Opacity.medium),
+                        radius: isSelected ? DS.Shadow.elevated.radius : 2,
+                        y: DS.Shadow.elevated.y
                     )
 
                 if isSelected {
                     Circle()
-                        .stroke(Color.buttonTextLight, lineWidth: Dimensions.menubarStrokeWidth)
-                        .frame(width: Dimensions.colorPickerButtonSize, height: Dimensions.colorPickerButtonSize)
+                        .stroke(Color.white, lineWidth: DS.Size.menubarStroke)
+                        .frame(width: DS.Size.colorPickerButton, height: DS.Size.colorPickerButton)
 
                     Image(systemName: "checkmark")
                         .iconFont(.body, weight: .bold)
-                        .foregroundColor(.buttonTextLight)
+                        .foregroundColor(.white)
                 }
             }
         }
@@ -246,25 +246,25 @@ struct SkillEditView: View {
             Button {
                 saveChanges()
             } label: {
-                HStack(spacing: Spacing.base) {
+                HStack(spacing: DS.Spacing.sm) {
                     Image(systemName: "checkmark.circle.fill")
                         .iconFont(.large, weight: .semibold)
                     Text("Save Changes")
-                        .font(Typography.body)
+                        .font(DS.Font.body)
                         .fontWeight(.semibold)
                 }
-                .foregroundColor(hasChanges && isValidName ? .buttonTextLight : .secondary)
+                .foregroundColor(hasChanges && isValidName ? .white : .secondary)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.loose)
+                .padding(.vertical, DS.Spacing.md)
                 .background(
-                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(hasChanges && isValidName ? selectedColor : Color.backgroundPrimary(.medium))
+                    RoundedRectangle(cornerRadius: DS.Radius.medium)
+                        .fill(hasChanges && isValidName ? selectedColor : DS.Color.background(.medium))
                 )
             }
             .buttonStyle(PlainButtonStyle())
             .disabled(!hasChanges || !isValidName)
-            .padding(.horizontal, Spacing.section)
-            .padding(.vertical, Spacing.loose)
+            .padding(.horizontal, DS.Spacing.lg)
+            .padding(.vertical, DS.Spacing.md)
         }
     }
 
@@ -274,8 +274,8 @@ struct SkillEditView: View {
         let trimmed = editedName.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if trimmed.isEmpty {
-            withAnimation(.microInteraction) {
-                errorMessage = UIText.errorEmptySkillName
+            withAnimation(.dsQuick) {
+                errorMessage = "Skill name cannot be empty"
             }
             return
         }
@@ -285,8 +285,8 @@ struct SkillEditView: View {
         }
 
         if isDuplicate {
-            withAnimation(.microInteraction) {
-                errorMessage = UIText.errorDuplicateSkillName
+            withAnimation(.dsQuick) {
+                errorMessage = "A skill with this name already exists"
             }
             return
         }
@@ -298,7 +298,7 @@ struct SkillEditView: View {
             colorIndex: Int16(selectedColorIndex)
         )
 
-        withAnimation(.panelTransition) {
+        withAnimation(.dsStandard) {
             viewModel.showSkillList()
         }
     }

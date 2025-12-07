@@ -18,8 +18,8 @@ struct MenuBarIconView: View {
 
     // MARK: - Constants
 
-    private let iconSize: CGFloat = Dimensions.menubarIconSize
-    private let strokeWidth: CGFloat = Dimensions.menubarStrokeWidth
+    private let iconSize: CGFloat = DS.Size.menubarIcon
+    private let strokeWidth: CGFloat = DS.Size.menubarStroke
 
     // MARK: - Body
 
@@ -41,7 +41,7 @@ struct MenuBarIconView: View {
             // Background circle
             Circle()
                 .stroke(
-                    Color.primary.opacity(isTracking ? 0.15 : Opacity.secondaryIdle),
+                    Color.primary.opacity(isTracking ? DS.Opacity.strong : DS.Opacity.strong),
                     lineWidth: strokeWidth
                 )
 
@@ -54,12 +54,12 @@ struct MenuBarIconView: View {
                         style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
-                    .shadow(color: skillColor.opacity(Shadows.subtle.opacity), radius: Shadows.subtle.radius, y: 0)
+                    .shadow(color: skillColor.opacity(0.5), radius: 2, y: 0)
             }
 
             // Fire icon with padding
             centerIndicator
-                .padding(Spacing.tight)
+                .padding(DS.Spacing.xs)
         }
     }
 
@@ -70,19 +70,19 @@ struct MenuBarIconView: View {
             Image(systemName: isPaused ? "flame" : "flame.fill")
                 .iconFont(.small, weight: .bold)
                 .foregroundColor(skillColor)
-                .shadow(color: isPaused ? .transparent : skillColor.opacity(0.6), radius: Shadows.subtle.radius, y: 0)
+                .shadow(color: isPaused ? .clear : skillColor.opacity(0.6), radius: 2, y: 0)
         } else {
             // Idle - subtle flame outline
             Image(systemName: "flame")
-                .iconFont(.tiny)
-                .foregroundColor(Color.backgroundPrimary(.heavy))
+                .iconFont(.small)
+                .foregroundColor(Color.primary.opacity(0.15))
         }
     }
 
     private var timerText: some View {
         Text(viewModel.elapsedSeconds.formattedTime())
             .menubarTimerFont()
-            .foregroundColor(isPaused ? .secondary : .primary)
+            .foregroundColor(isPaused ? .primary.opacity(DS.Opacity.secondary) : .primary)
     }
 
     // MARK: - Private Computed Properties
@@ -102,8 +102,8 @@ struct MenuBarIconView: View {
     private var progressTrim: CGFloat {
         // Show a subtle animated progress based on seconds (completes every minute)
         // This gives visual feedback that tracking is active
-        let secondsInMinute = viewModel.elapsedSeconds % Int64(TimeConstants.secondsPerMinute)
-        return CGFloat(secondsInMinute) / TimeConstants.secondsPerMinuteDouble
+        let secondsInMinute = viewModel.elapsedSeconds % Time.secondsPerMinute
+        return CGFloat(secondsInMinute) / 60.0
     }
 }
 

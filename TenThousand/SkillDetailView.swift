@@ -64,7 +64,7 @@ struct SkillDetailView: View {
             headerSection
             heroSection
             statsSection
-            Spacer(minLength: Spacing.section)
+            Spacer(minLength: DS.Spacing.lg)
             footerSection
         }
         .confirmationDialog(
@@ -73,7 +73,7 @@ struct SkillDetailView: View {
             titleVisibility: .visible
         ) {
             Button("Delete", role: .destructive) {
-                withAnimation(.panelTransition) {
+                withAnimation(.dsStandard) {
                     viewModel.deleteSkill(skill)
                 }
             }
@@ -88,15 +88,15 @@ struct SkillDetailView: View {
     private var headerSection: some View {
         HStack {
             Button {
-                withAnimation(.panelTransition) {
+                withAnimation(.dsStandard) {
                     viewModel.showSkillList()
                 }
             } label: {
-                HStack(spacing: Spacing.tight) {
+                HStack(spacing: DS.Spacing.xs) {
                     Image(systemName: "chevron.left")
                         .iconFont(.body, weight: .semibold)
                     Text("Back")
-                        .font(Typography.body)
+                        .font(DS.Font.body)
                 }
                 .foregroundColor(.secondary)
             }
@@ -104,24 +104,24 @@ struct SkillDetailView: View {
 
             Spacer()
         }
-        .padding(.horizontal, Spacing.section)
-        .padding(.top, Spacing.loose)
-        .padding(.bottom, Spacing.base)
+        .padding(.horizontal, DS.Spacing.lg)
+        .padding(.top, DS.Spacing.md)
+        .padding(.bottom, DS.Spacing.sm)
     }
 
     private var heroSection: some View {
-        VStack(spacing: Spacing.section) {
+        VStack(spacing: DS.Spacing.lg) {
             // Skill name with color dot
-            HStack(spacing: Spacing.compact) {
+            HStack(spacing: DS.Spacing.md) {
                 Circle()
                     .fill(skill.color)
-                    .frame(width: Dimensions.colorDotSizeSmall, height: Dimensions.colorDotSizeSmall)
-                    .shadow(color: skill.color.opacity(Shadows.small.opacity), radius: Shadows.small.radius, y: Shadows.small.yOffset)
+                    .frame(width: DS.Size.colorDotSmall, height: DS.Size.colorDotSmall)
+                    .shadow(color: skill.color.opacity(DS.Shadow.elevated.opacity), radius: DS.Shadow.elevated.radius, y: DS.Shadow.elevated.y)
 
                 Text(skill.name)
                     .titleFont()
                     .foregroundColor(.primary)
-                    .lineLimit(LayoutConstants.skillNameLineLimit)
+                    .lineLimit(1)
             }
 
             // Circular progress hero
@@ -132,29 +132,29 @@ struct SkillDetailView: View {
                 labelText: "HOURS"
             )
         }
-        .padding(.horizontal, Spacing.section)
+        .padding(.horizontal, DS.Spacing.lg)
     }
 
     private var statsSection: some View {
-        VStack(spacing: Spacing.section) {
+        VStack(spacing: DS.Spacing.lg) {
             // Progress bar with stats
-            VStack(spacing: Spacing.base) {
+            VStack(spacing: DS.Spacing.sm) {
                 ProgressBarView(
                     progress: skill.masteryProgress,
                     color: skill.color,
-                    height: Dimensions.progressBarHeightLarge
+                    height: 10
                 )
 
                 HStack {
                     Text(formattedPercentage)
-                        .font(Typography.body)
+                        .font(DS.Font.body)
                         .fontWeight(.medium)
                         .foregroundColor(skill.color)
 
                     Spacer()
 
                     Text("\(skill.hoursRemaining.formatted()) to go")
-                        .font(Typography.caption)
+                        .font(DS.Font.caption)
                         .foregroundColor(.secondary)
                 }
             }
@@ -162,59 +162,59 @@ struct SkillDetailView: View {
             // Pace projection
             if let projection = skill.projectedTimeToMastery {
                 HStack {
-                    VStack(alignment: .leading, spacing: Spacing.atomic) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                         Text("AT CURRENT PACE")
                             .labelFont()
                             .foregroundColor(.secondary)
                         Text(projection.formatted)
-                            .font(Typography.body)
+                            .font(DS.Font.body)
                             .fontWeight(.medium)
                             .foregroundColor(.primary)
                     }
                     Spacer()
                 }
-                .padding(Spacing.loose)
+                .padding(DS.Spacing.md)
                 .background(
-                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(Color.backgroundPrimary(.subtle))
+                    RoundedRectangle(cornerRadius: DS.Radius.medium)
+                        .fill(DS.Color.background(.subtle))
                 )
             } else if skill.sessions.isEmpty {
                 HStack {
                     Text("Start tracking to see your pace")
-                        .font(Typography.caption)
+                        .font(DS.Font.caption)
                         .foregroundColor(.secondary)
                     Spacer()
                 }
-                .padding(Spacing.loose)
+                .padding(DS.Spacing.md)
                 .background(
-                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(Color.backgroundPrimary(.subtle))
+                    RoundedRectangle(cornerRadius: DS.Radius.medium)
+                        .fill(DS.Color.background(.subtle))
                 )
             }
         }
-        .padding(.horizontal, Spacing.section)
-        .padding(.top, Spacing.comfortable)
+        .padding(.horizontal, DS.Spacing.lg)
+        .padding(.top, DS.Spacing.xl)
     }
 
     private var footerSection: some View {
-        VStack(spacing: Spacing.base) {
+        VStack(spacing: DS.Spacing.sm) {
             // Start tracking button - prominent
             Button {
                 viewModel.startTracking(skill: skill)
             } label: {
-                HStack(spacing: Spacing.base) {
+                HStack(spacing: DS.Spacing.sm) {
                     Image(systemName: isSkillActive ? "checkmark.circle.fill" : "play.fill")
                         .iconFont(.large, weight: .semibold)
                     Text(isSkillActive ? "Currently Tracking" : "Start Tracking")
-                        .font(Typography.body)
+                        .font(DS.Font.body)
                         .fontWeight(.semibold)
                 }
-                .foregroundColor(isSkillActive ? .secondary : .buttonTextLight)
+                .foregroundColor(isSkillActive ? .secondary : .white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, Spacing.loose)
+                .padding(.vertical, DS.Spacing.md)
                 .background(
-                    RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(isSkillActive ? Color.backgroundPrimary(.medium) : skill.color)
+                    RoundedRectangle(cornerRadius: DS.Radius.medium)
+                        .fill(isSkillActive ? DS.Color.background(.medium) : skill.color)
                 )
             }
             .buttonStyle(PlainButtonStyle())
@@ -225,13 +225,13 @@ struct SkillDetailView: View {
                 showingDeleteAlert = true
             } label: {
                 Text("Delete Skill")
-                    .font(Typography.caption)
-                    .foregroundColor(isSkillActive ? .secondary.opacity(0.5) : Color.stateError.opacity(Opacity.accentStrong))
+                    .font(DS.Font.caption)
+                    .foregroundColor(isSkillActive ? .secondary.opacity(DS.Opacity.muted) : DS.Color.error.opacity(DS.Opacity.accent))
             }
             .buttonStyle(PlainButtonStyle())
             .disabled(isSkillActive)
         }
-        .padding(.horizontal, Spacing.section)
-        .padding(.bottom, Spacing.section)
+        .padding(.horizontal, DS.Spacing.lg)
+        .padding(.bottom, DS.Spacing.lg)
     }
 }

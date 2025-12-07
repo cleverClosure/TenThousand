@@ -2,6 +2,8 @@
 //  PanelButton.swift
 //  TenThousand
 //
+//  Author: Tim Isaev
+//
 //  Reusable button component for panel actions
 //
 
@@ -18,25 +20,25 @@ enum ButtonVariant {
         case .secondary:
             return .secondary
         case .destructive:
-            return .stateError
+            return DS.Color.error
         }
     }
 
     var restingBackgroundColor: Color {
         switch self {
         case .secondary:
-            return .transparent
+            return .clear
         case .destructive:
-            return Color.stateError.opacity(Opacity.backgroundMedium)
+            return DS.Color.error.opacity(DS.Opacity.subtle)
         }
     }
 
     var hoverBackgroundColor: Color {
         switch self {
         case .secondary:
-            return Color.backgroundPrimary(.medium)
+            return DS.Color.background(.medium)
         case .destructive:
-            return Color.stateError.opacity(Opacity.overlayLight)
+            return DS.Color.error.opacity(DS.Opacity.medium)
         }
     }
 }
@@ -81,23 +83,23 @@ struct PanelButton: View {
     }
 
     private var buttonHeight: CGFloat {
-        isCompact ? Dimensions.compactButtonHeight : Dimensions.skillRowHeight
+        isCompact ? DS.Size.buttonHeight : DS.Size.skillRowHeight
     }
 
     var body: some View {
         Button(action: action) {
             buttonContent
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
-                .padding(.vertical, isCompact ? Spacing.tight : Dimensions.skillRowPaddingVertical)
+                .padding(.horizontal, DS.Spacing.md)
+                .padding(.vertical, isCompact ? DS.Spacing.xs : DS.Spacing.sm)
                 .frame(height: buttonHeight)
-                .background(backgroundColor, in: RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall))
+                .background(backgroundColor, in: RoundedRectangle(cornerRadius: DS.Radius.small))
         }
         .buttonStyle(PlainButtonStyle())
         .disabled(isDisabled)
-        .opacity(isDisabled ? Opacity.disabled : 1.0)
+        .opacity(isDisabled ? DS.Opacity.muted : 1.0)
         .onHover { hovering in
-            withAnimation(.hoverState) {
+            withAnimation(.dsQuick) {
                 isHovered = hovering
             }
         }
@@ -114,22 +116,22 @@ struct PanelButton: View {
     }
 
     private var leadingContent: some View {
-        HStack(spacing: Spacing.tight) {
+        HStack(spacing: DS.Spacing.xs) {
             if let icon = icon {
                 Image(systemName: icon)
-                    .font(.system(size: Dimensions.iconSizeSmall))
+                    .font(.system(size: DS.Size.iconSmall))
                     .foregroundColor(variant.foregroundColor)
             }
 
             Text(title)
-                .font(Typography.body)
+                .font(DS.Font.body)
                 .foregroundColor(variant.foregroundColor)
 
             Spacer()
 
             if let shortcut = shortcut {
                 Text(shortcut)
-                    .font(Typography.caption)
+                    .font(DS.Font.caption)
                     .foregroundColor(.secondary)
             }
         }
@@ -137,15 +139,15 @@ struct PanelButton: View {
 
     private var centeredContent: some View {
         ZStack {
-            HStack(spacing: Spacing.tight) {
+            HStack(spacing: DS.Spacing.xs) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: Dimensions.iconSizeSmall))
+                        .font(.system(size: DS.Size.iconSmall))
                         .foregroundColor(variant.foregroundColor)
                 }
 
                 Text(title)
-                    .font(Typography.body)
+                    .font(DS.Font.body)
                     .foregroundColor(variant.foregroundColor)
             }
 
@@ -153,7 +155,7 @@ struct PanelButton: View {
                 HStack {
                     Spacer()
                     Text(shortcut)
-                        .font(Typography.caption)
+                        .font(DS.Font.caption)
                         .foregroundColor(.secondary)
                 }
             }
@@ -161,7 +163,7 @@ struct PanelButton: View {
     }
 
     private var backgroundColor: Color {
-        guard !isDisabled else { return variant.restingBackgroundColor.opacity(Opacity.disabled) }
+        guard !isDisabled else { return variant.restingBackgroundColor.opacity(DS.Opacity.muted) }
         return isHovered ? variant.hoverBackgroundColor : variant.restingBackgroundColor
     }
 }

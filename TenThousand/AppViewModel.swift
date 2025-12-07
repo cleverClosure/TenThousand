@@ -73,14 +73,14 @@ class AppViewModel: ObservableObject {
 
     func createSkill(name: String) {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty, trimmedName.count <= ValidationLimits.maxSkillNameLength else { return }
+        guard !trimmedName.isEmpty, trimmedName.count <= Limits.maxSkillNameLength else { return }
 
         if skills.contains(where: { $0.name == trimmedName }) {
             return
         }
 
         // Check skill limit
-        guard skills.count < ValidationLimits.maxSkillCount else { return }
+        guard skills.count < Limits.maxSkillCount else { return }
 
         // Get next available color from palette manager
         let usedColors = skills.map { $0.colorAssignment }
@@ -106,7 +106,7 @@ class AppViewModel: ObservableObject {
 
     func updateSkill(_ skill: Skill, name: String, paletteId: String, colorIndex: Int16) {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty, trimmedName.count <= ValidationLimits.maxSkillNameLength else { return }
+        guard !trimmedName.isEmpty, trimmedName.count <= Limits.maxSkillNameLength else { return }
 
         // Check for duplicate name (excluding current skill)
         if skills.contains(where: { $0.id != skill.id && $0.name.lowercased() == trimmedName.lowercased() }) {
@@ -160,7 +160,7 @@ class AppViewModel: ObservableObject {
 
         fetchSkills()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationDurations.updateHighlight) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             self?.justUpdatedSkillId = nil
         }
     }

@@ -2,6 +2,8 @@
 //  ButtonStyles.swift
 //  TenThousand
 //
+//  Author: Tim Isaev
+//
 //  Custom button styles with hover effects
 //
 
@@ -14,10 +16,10 @@ struct IconButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(isHovered ? ScaleValues.hoverGrow : ScaleValues.normal)
-            .scaleEffect(configuration.isPressed ? ScaleValues.pressedShrink : ScaleValues.normal)
-            .animation(.hoverState, value: isHovered)
-            .animation(.microInteraction, value: configuration.isPressed)
+            .scaleEffect(isHovered ? DS.Scale.hover : 1.0)
+            .scaleEffect(configuration.isPressed ? DS.Scale.pressed : 1.0)
+            .animation(.dsQuick, value: isHovered)
+            .animation(.dsQuick, value: configuration.isPressed)
             .onHover { hovering in
                 isHovered = hovering
             }
@@ -32,12 +34,12 @@ struct PanelButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .background(
-                RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall)
-                    .fill(isHovered ? Color.backgroundPrimary(.medium) : .transparent)
+                RoundedRectangle(cornerRadius: DS.Radius.small)
+                    .fill(isHovered ? DS.Color.background(.medium) : .clear)
             )
-            .scaleEffect(configuration.isPressed ? ScaleValues.pressedShrink : ScaleValues.normal)
-            .animation(.hoverState, value: isHovered)
-            .animation(.microInteraction, value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? DS.Scale.pressed : 1.0)
+            .animation(.dsQuick, value: isHovered)
+            .animation(.dsQuick, value: configuration.isPressed)
             .onHover { hovering in
                 isHovered = hovering
             }

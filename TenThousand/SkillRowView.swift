@@ -43,15 +43,15 @@ struct SkillRowView: View {
 
     private var backgroundColor: Color {
         if isFlashing {
-            return skill.color.opacity(0.15)
+            return skill.color.opacity(DS.Opacity.strong)
         } else if isHighlighted {
-            return Color.highlightYellow.opacity(0.2)
+            return DS.Color.accent.opacity(0.2)
         } else if isSelected {
-            return skill.color.opacity(0.1)
+            return skill.color.opacity(DS.Opacity.medium)
         } else if isHovered {
-            return skill.color.opacity(0.06)
+            return skill.color.opacity(DS.Opacity.light)
         } else {
-            return Color.backgroundPrimary(.ultraLight)
+            return DS.Color.background(.subtle)
         }
     }
 
@@ -65,7 +65,7 @@ struct SkillRowView: View {
         .focusEffectDisabled()
         .contextMenu { contextMenuContent }
         .onHover { hovering in
-            withAnimation(.hoverState) {
+            withAnimation(.dsQuick) {
                 isHovered = hovering
             }
         }
@@ -74,11 +74,11 @@ struct SkillRowView: View {
     // MARK: - View Components
 
     private var rowContent: some View {
-        VStack(alignment: .leading, spacing: Spacing.base) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             // Top row: color dot, name, time
-            HStack(spacing: Spacing.loose) {
+            HStack(spacing: DS.Spacing.md) {
                 colorDot
-                VStack(alignment: .leading, spacing: Spacing.atomic) {
+                VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                     skillName
                     timeLabel
                 }
@@ -90,29 +90,29 @@ struct SkillRowView: View {
             }
 
             // Bottom: progress bar with percentage
-            HStack(spacing: Spacing.base) {
+            HStack(spacing: DS.Spacing.sm) {
                 ProgressBarView(
                     progress: skill.masteryProgress,
                     color: skill.color,
-                    height: Dimensions.progressBarHeightSmall,
+                    height: 4,
                     animated: false
                 )
 
                 Text(percentageText)
-                    .font(Typography.caption)
+                    .font(DS.Font.caption)
                     .foregroundColor(skill.color)
-                    .frame(width: Dimensions.percentageFrameWidth, alignment: .trailing)
+                    .frame(width: DS.Size.percentageLabel, alignment: .trailing)
             }
         }
-        .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
-        .padding(.vertical, Dimensions.skillRowPaddingVertical)
+        .padding(.horizontal, DS.Spacing.md)
+        .padding(.vertical, DS.Spacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
+            RoundedRectangle(cornerRadius: DS.Radius.medium)
                 .fill(backgroundColor)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                .stroke(isSelected ? skill.color.opacity(0.3) : .transparent, lineWidth: LayoutConstants.borderWidth)
+            RoundedRectangle(cornerRadius: DS.Radius.medium)
+                .stroke(isSelected ? skill.color.opacity(DS.Opacity.overlay) : .clear, lineWidth: 1)
         )
     }
 
@@ -120,21 +120,21 @@ struct SkillRowView: View {
         ZStack {
             Circle()
                 .fill(skill.color)
-                .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
-                .shadow(color: skill.color.opacity(Shadows.medium.opacity), radius: Shadows.medium.radius, y: Shadows.medium.yOffset)
+                .frame(width: DS.Size.colorDot, height: DS.Size.colorDot)
+                .shadow(color: skill.color.opacity(DS.Shadow.elevated.opacity), radius: DS.Shadow.elevated.radius, y: DS.Shadow.elevated.y)
 
             if isDotHovered {
                 Circle()
-                    .fill(Color.overlayDark.opacity(BackgroundOpacity.overlayDark.rawValue))
-                    .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
+                    .fill(Color.black.opacity(DS.Opacity.overlayDark))
+                    .frame(width: DS.Size.colorDot, height: DS.Size.colorDot)
 
                 Image(systemName: "play.fill")
                     .iconFont(.small, weight: .bold)
-                    .foregroundColor(.buttonTextLight)
+                    .foregroundColor(.white)
             }
         }
         .onHover { hovering in
-            withAnimation(.hoverState) {
+            withAnimation(.dsQuick) {
                 isDotHovered = hovering
             }
         }
@@ -146,14 +146,14 @@ struct SkillRowView: View {
 
     private var skillName: some View {
         Text(skill.name)
-            .displayFont()
+            .titleFont()
             .foregroundColor(.primary)
-            .lineLimit(LayoutConstants.skillNameLineLimit)
+            .lineLimit(1)
     }
 
     private var timeLabel: some View {
         Text("\(skill.totalSeconds.formattedShortTime()) tracked")
-            .font(Typography.caption)
+            .font(DS.Font.caption)
             .foregroundColor(.secondary)
     }
 
@@ -164,10 +164,10 @@ struct SkillRowView: View {
             Image(systemName: "pencil")
                 .iconFont(.body)
                 .foregroundColor(.secondary)
-                .padding(Spacing.base)
+                .padding(DS.Spacing.sm)
                 .background(
                     Circle()
-                        .fill(Color.backgroundPrimary(.strong))
+                        .fill(DS.Color.background(.medium))
                 )
         }
         .buttonStyle(PlainButtonStyle())
@@ -178,7 +178,7 @@ struct SkillRowView: View {
     private var chevron: some View {
         Image(systemName: "chevron.right")
             .iconFont(.body, weight: .semibold)
-            .foregroundColor(.secondary.opacity(isHovered ? 1 : 0.5))
+            .foregroundColor(.secondary.opacity(isHovered ? 1 : DS.Opacity.muted))
     }
 
     @ViewBuilder
@@ -198,11 +198,11 @@ struct SkillRowView: View {
     // MARK: - Private Methods
 
     private func handleTap() {
-        withAnimation(.linear(duration: AnimationDurations.flash)) {
+        withAnimation(.linear(duration: DS.Duration.quick)) {
             isFlashing = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationDurations.flash) {
-            withAnimation(.linear(duration: AnimationDurations.flash)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + DS.Duration.quick) {
+            withAnimation(.linear(duration: DS.Duration.quick)) {
                 isFlashing = false
             }
         }

@@ -35,12 +35,12 @@ final class Skill {
 
     /// Total hours tracked (decimal).
     var totalHours: Double {
-        Double(totalSeconds) / Double(TimeConstants.secondsPerHour)
+        Double(totalSeconds) / Double(Time.secondsPerHour)
     }
 
     /// Progress toward 10,000 hours mastery (0.0 to 1.0).
     var masteryProgress: Double {
-        min(Double(totalSeconds) / Double(MasteryConstants.masterySeconds), 1.0)
+        min(Double(totalSeconds) / Double(Mastery.targetSeconds), 1.0)
     }
 
     /// Progress percentage (0 to 100).
@@ -50,7 +50,7 @@ final class Skill {
 
     /// Hours remaining to reach 10,000 hours.
     var hoursRemaining: Int64 {
-        max(MasteryConstants.masteryHours - Int64(totalHours), 0)
+        max(Mastery.targetHours - Int64(totalHours), 0)
     }
 
     /// Date of the first session, if any.

@@ -51,17 +51,17 @@ struct SkillListView: View {
 
     private var skillListContent: some View {
         ScrollView {
-            VStack(spacing: Spacing.compact) {
+            VStack(spacing: DS.Spacing.md) {
                 skillRows
                 AddSkillView(existingSkillNames: existingSkillNames) { name in
                     viewModel.createSkill(name: name)
                 }
             }
-            .padding(.horizontal, Spacing.loose)
-            .padding(.vertical, Spacing.section)
+            .padding(.horizontal, DS.Spacing.md)
+            .padding(.vertical, DS.Spacing.lg)
         }
         .scrollIndicators(.hidden)
-        .frame(maxHeight: LayoutConstants.maxSkillListHeight)
+        .frame(maxHeight: 320)
         .focusEffectDisabled()
     }
 
@@ -70,7 +70,7 @@ struct SkillListView: View {
             SkillRowView(
                 skill: skill,
                 onTap: {
-                    withAnimation(.panelTransition) {
+                    withAnimation(.dsStandard) {
                         viewModel.showSkillDetail(skill)
                     }
                 },
@@ -81,7 +81,7 @@ struct SkillListView: View {
                     handleDeleteSkill(skill)
                 },
                 onEdit: {
-                    withAnimation(.panelTransition) {
+                    withAnimation(.dsStandard) {
                         viewModel.showSkillEdit(skill)
                     }
                 },
@@ -102,8 +102,8 @@ struct SkillListView: View {
         ) {
             NSApplication.shared.terminate(nil)
         }
-        .padding(.horizontal, Spacing.loose)
-        .padding(.vertical, Spacing.tight)
+        .padding(.horizontal, DS.Spacing.md)
+        .padding(.vertical, DS.Spacing.xs)
     }
 
     // MARK: - Private Computed Properties
@@ -132,7 +132,7 @@ struct SkillListView: View {
             message: Text(message),
             primaryButton: .destructive(Text("Delete")) {
                 if let skillToDelete = skillToDelete {
-                    withAnimation(.panelTransition) {
+                    withAnimation(.dsStandard) {
                         viewModel.deleteSkill(skillToDelete)
                     }
                 }
@@ -155,7 +155,7 @@ struct SkillListView: View {
     private func handleReturnKey() -> Bool {
         if let index = selectedSkillIndex, index < viewModel.skills.count {
             let skill = viewModel.skills[index]
-            withAnimation(.panelTransition) {
+            withAnimation(.dsStandard) {
                 viewModel.showSkillDetail(skill)
             }
             selectedSkillIndex = nil
@@ -188,7 +188,7 @@ struct SkillListView: View {
         if let index = SkillListKeyboardShortcuts.numberKeys.firstIndex(of: press.key),
            index < viewModel.skills.count {
             let skill = viewModel.skills[index]
-            withAnimation(.panelTransition) {
+            withAnimation(.dsStandard) {
                 viewModel.showSkillDetail(skill)
             }
             return true

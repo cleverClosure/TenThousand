@@ -28,15 +28,14 @@ struct PanelContainer<Content: View>: View {
 
     var body: some View {
         content
-            .frame(width: Dimensions.panelWidth)
+            .frame(width: DS.Size.panelWidth)
             .background(backgroundView)
-            .clipShape(RoundedRectangle(cornerRadius: Dimensions.panelCornerRadius))
+            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.large))
             .overlay(overlayBorder)
             .shadow(
-                color: shadowColor,
-                radius: Shadows.floating.radius,
-                x: Shadows.floating.xOffset,
-                y: Shadows.floating.yOffset
+                color: Color.black.opacity(DS.Shadow.panel.opacity),
+                radius: DS.Shadow.panel.radius,
+                y: DS.Shadow.panel.y
             )
     }
 
@@ -47,12 +46,8 @@ struct PanelContainer<Content: View>: View {
     }
 
     private var overlayBorder: some View {
-        RoundedRectangle(cornerRadius: Dimensions.panelCornerRadius)
-            .stroke(Color.primary.opacity(Opacity.backgroundMedium), lineWidth: LayoutConstants.borderWidth)
-    }
-
-    private var shadowColor: Color {
-        Color.black.opacity(Shadows.floating.opacity)
+        RoundedRectangle(cornerRadius: DS.Radius.large)
+            .stroke(Color.primary.opacity(DS.Opacity.subtle), lineWidth: 1)
     }
 }
 

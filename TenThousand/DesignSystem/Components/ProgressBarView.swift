@@ -14,7 +14,7 @@ struct ProgressBarView: View {
 
     let progress: Double
     let color: Color
-    var height: CGFloat = Dimensions.progressBarHeightMedium
+    var height: CGFloat = DS.Size.progressBarHeight
     var showPercentage: Bool = false
     var animated: Bool = true
 
@@ -46,7 +46,7 @@ struct ProgressBarView: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: Spacing.tight) {
+        VStack(spacing: DS.Spacing.xs) {
             progressBar
 
             if showPercentage {
@@ -55,14 +55,14 @@ struct ProgressBarView: View {
         }
         .onAppear {
             if animated {
-                withAnimation(.easeOut(duration: AnimationDurations.progressAppear)) {
+                withAnimation(.easeOut(duration: DS.Duration.slow)) {
                     animatedProgress = clampedProgress
                 }
             }
         }
         .onChange(of: progress) { _, newValue in
             if animated {
-                withAnimation(.easeOut(duration: AnimationDurations.progressUpdate)) {
+                withAnimation(.easeOut(duration: DS.Duration.emphasized)) {
                     animatedProgress = min(max(newValue, 0), 1)
                 }
             }
@@ -74,14 +74,10 @@ struct ProgressBarView: View {
     private var progressBar: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                // Background track with subtle depth
+                // Background track
                 RoundedRectangle(cornerRadius: height / 2)
-                    .fill(Color.backgroundPrimary(.strong))
+                    .fill(Color.primary.opacity(DS.Opacity.medium))
                     .frame(height: height)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: height / 2)
-                            .stroke(Color.backgroundPrimary(.subtle), lineWidth: 0.5)
-                    )
 
                 // Filled progress with gradient
                 if displayProgress > 0 {
@@ -104,7 +100,7 @@ struct ProgressBarView: View {
     private var percentageLabel: some View {
         HStack {
             Text(percentageText)
-                .font(Typography.caption)
+                .font(DS.Font.caption)
                 .foregroundColor(color)
                 .contentTransition(.numericText())
             Spacer()

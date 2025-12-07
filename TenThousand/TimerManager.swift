@@ -161,7 +161,7 @@ class TimerManager: ObservableObject {
     }
 
     private func startTimer() {
-        timerCancellable = Timer.publish(every: TimeConstants.timerUpdateInterval, on: .main, in: .common)
+        timerCancellable = Timer.publish(every: Time.timerUpdateInterval, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 self?.updateElapsedTime()
@@ -209,14 +209,14 @@ extension Int64 {
     /// Int64(3665).formattedTime()    // "1:01:05"
     /// ```
     func formattedTime() -> String {
-        let hours = self / TimeConstants.secondsPerHour
-        let minutes = (self % TimeConstants.secondsPerHour) / TimeConstants.secondsPerMinute
-        let seconds = self % TimeConstants.secondsPerMinute
+        let hours = self / Time.secondsPerHour
+        let minutes = (self % Time.secondsPerHour) / Time.secondsPerMinute
+        let seconds = self % Time.secondsPerMinute
 
         if hours > 0 {
-            return String(format: FormatStrings.timeWithHours, hours, minutes, seconds)
+            return String(format: Format.timeWithHours, hours, minutes, seconds)
         } else {
-            return String(format: FormatStrings.timeWithoutHours, minutes, seconds)
+            return String(format: Format.timeWithoutHours, minutes, seconds)
         }
     }
 
@@ -238,19 +238,19 @@ extension Int64 {
     /// Int64(5430).formattedShortTime()    // "1h 30m"
     /// ```
     func formattedShortTime() -> String {
-        let hours = self / TimeConstants.secondsPerHour
-        let minutes = (self % TimeConstants.secondsPerHour) / TimeConstants.secondsPerMinute
+        let hours = self / Time.secondsPerHour
+        let minutes = (self % Time.secondsPerHour) / Time.secondsPerMinute
 
         if hours > 0 {
             if minutes > 0 {
-                return "\(hours)\(UIText.hoursSeparator)\(minutes)\(UIText.minutesSuffix)"
+                return "\(hours)h \(minutes)m"
             } else {
-                return "\(hours)\(UIText.hoursSuffix)"
+                return "\(hours)h"
             }
         } else if minutes > 0 {
-            return "\(minutes)\(UIText.minutesSuffix)"
+            return "\(minutes)m"
         } else {
-            return UIText.lessThanOneMinute
+            return "<1m"
         }
     }
 }
