@@ -18,6 +18,7 @@ struct ColorAssignment: Equatable, Hashable {
     /// Resolves to the actual SkillColor
     var skillColor: SkillColor? {
         guard let palette = ColorPalette.palette(withId: paletteId),
+              colorIndex >= 0,
               colorIndex < palette.colors.count else { return nil }
         return palette.colors[colorIndex]
     }
@@ -130,6 +131,7 @@ final class ColorPaletteManager {
     /// - Returns: The resolved Color, or gray if not found.
     func color(forPaletteId paletteId: String, colorIndex: Int) -> Color {
         guard let palette = ColorPalette.palette(withId: paletteId),
+              colorIndex >= 0,
               colorIndex < palette.colors.count else {
             return Color.gray
         }
@@ -144,6 +146,7 @@ final class ColorPaletteManager {
     /// - Returns: The SkillColor, or nil if not found.
     func skillColor(forPaletteId paletteId: String, colorIndex: Int) -> SkillColor? {
         guard let palette = ColorPalette.palette(withId: paletteId),
+              colorIndex >= 0,
               colorIndex < palette.colors.count else {
             return nil
         }

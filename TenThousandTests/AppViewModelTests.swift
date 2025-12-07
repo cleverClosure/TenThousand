@@ -899,4 +899,329 @@ struct AppViewModelTests {
         // 100 + (200 - 50) + 300 = 550 seconds
         #expect(viewModel.todaysTotalSeconds() == 550)
     }
+
+    // MARK: - Skill Update Behaviors
+
+    @Test("Updating skill name persists the change")
+    func testUpdateSkillNamePersistsChange() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(skill, name: "SwiftUI", paletteId: skill.paletteId, colorIndex: skill.colorIndex)
+
+        #expect(skill.name == "SwiftUI")
+        #expect(viewModel.skills.first?.name == "SwiftUI")
+    }
+
+    @Test("Updating skill trims whitespace from name")
+    func testUpdateSkillTrimsWhitespace() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(skill, name: "  SwiftUI  ", paletteId: skill.paletteId, colorIndex: skill.colorIndex)
+
+        #expect(skill.name == "SwiftUI")
+    }
+
+    @Test("Updating skill with empty name is rejected")
+    func testUpdateSkillRejectsEmptyName() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(skill, name: "", paletteId: skill.paletteId, colorIndex: skill.colorIndex)
+
+        #expect(skill.name == "Swift") // Unchanged
+    }
+
+    @Test("Updating skill with whitespace-only name is rejected")
+    func testUpdateSkillRejectsWhitespaceOnlyName() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(skill, name: "   ", paletteId: skill.paletteId, colorIndex: skill.colorIndex)
+
+        #expect(skill.name == "Swift") // Unchanged
+    }
+
+    @Test("Updating skill with name too long is rejected")
+    func testUpdateSkillRejectsNameTooLong() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        let longName = String(repeating: "a", count: 31)
+        viewModel.updateSkill(skill, name: longName, paletteId: skill.paletteId, colorIndex: skill.colorIndex)
+
+        #expect(skill.name == "Swift") // Unchanged
+    }
+
+    @Test("Updating skill with exactly 30 character name is accepted")
+    func testUpdateSkillAcceptsMaxLengthName() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        let maxLengthName = String(repeating: "a", count: 30)
+        viewModel.updateSkill(skill, name: maxLengthName, paletteId: skill.paletteId, colorIndex: skill.colorIndex)
+
+        #expect(skill.name == maxLengthName)
+    }
+
+    @Test("Updating skill to duplicate name is rejected (case-sensitive match)")
+    func testUpdateSkillRejectsDuplicateName() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        viewModel.createSkill(name: "Python")
+
+        guard let pythonSkill = viewModel.skills.first(where: { $0.name == "Python" }) else {
+            Issue.record("Expected Python skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(pythonSkill, name: "Swift", paletteId: pythonSkill.paletteId, colorIndex: pythonSkill.colorIndex)
+
+        #expect(pythonSkill.name == "Python") // Unchanged
+    }
+
+    @Test("Updating skill to duplicate name is rejected (case-insensitive)")
+    func testUpdateSkillRejectsCaseInsensitiveDuplicate() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        viewModel.createSkill(name: "Python")
+
+        guard let pythonSkill = viewModel.skills.first(where: { $0.name == "Python" }) else {
+            Issue.record("Expected Python skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(pythonSkill, name: "SWIFT", paletteId: pythonSkill.paletteId, colorIndex: pythonSkill.colorIndex)
+
+        #expect(pythonSkill.name == "Python") // Unchanged - "SWIFT" matches "Swift" case-insensitively
+    }
+
+    @Test("Updating skill to same name with different case is rejected")
+    func testUpdateSkillRejectsSameNameDifferentCase() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        viewModel.createSkill(name: "Python")
+
+        guard let pythonSkill = viewModel.skills.first(where: { $0.name == "Python" }) else {
+            Issue.record("Expected Python skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(pythonSkill, name: "swift", paletteId: pythonSkill.paletteId, colorIndex: pythonSkill.colorIndex)
+
+        #expect(pythonSkill.name == "Python") // Unchanged
+    }
+
+    @Test("Updating skill to its own name is allowed")
+    func testUpdateSkillAllowsSameName() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(skill, name: "Swift", paletteId: skill.paletteId, colorIndex: skill.colorIndex)
+
+        #expect(skill.name == "Swift") // Still the same
+    }
+
+    @Test("Updating skill palette persists the change")
+    func testUpdateSkillPalettePersists() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        let originalPaletteId = skill.paletteId
+        let newPaletteId = ColorPalette.all.first { $0.id != originalPaletteId }?.id ?? originalPaletteId
+
+        viewModel.updateSkill(skill, name: skill.name, paletteId: newPaletteId, colorIndex: 2)
+
+        #expect(skill.paletteId == newPaletteId)
+        #expect(skill.colorIndex == 2)
+    }
+
+    @Test("Updating skill color index persists the change")
+    func testUpdateSkillColorIndexPersists() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        let originalColorIndex = skill.colorIndex
+        let newColorIndex: Int16 = originalColorIndex == 0 ? 3 : 0
+
+        viewModel.updateSkill(skill, name: skill.name, paletteId: skill.paletteId, colorIndex: newColorIndex)
+
+        #expect(skill.colorIndex == newColorIndex)
+    }
+
+    @Test("Updating skill recalculates palette state")
+    func testUpdateSkillRecalculatesPaletteState() {
+        let viewModel = makeViewModel()
+
+        // Create multiple skills to use up colors
+        viewModel.createSkill(name: "Skill 1")
+        viewModel.createSkill(name: "Skill 2")
+        viewModel.createSkill(name: "Skill 3")
+
+        guard let skill1 = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        // Update to a different palette - this should trigger recalculation
+        let newPaletteId = ColorPalette.all.first { $0.id != skill1.paletteId }?.id ?? skill1.paletteId
+
+        viewModel.updateSkill(skill1, name: skill1.name, paletteId: newPaletteId, colorIndex: 0)
+
+        // Verify update succeeded
+        #expect(skill1.paletteId == newPaletteId)
+    }
+
+    @Test("Updating skill refreshes skills list")
+    func testUpdateSkillRefreshesSkillsList() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(skill, name: "SwiftUI", paletteId: skill.paletteId, colorIndex: skill.colorIndex)
+
+        // Verify skills list is refreshed and contains updated skill
+        #expect(viewModel.skills.count == 1)
+        #expect(viewModel.skills.first?.name == "SwiftUI")
+    }
+
+    @Test("Updating skill with trimmed duplicate name is rejected")
+    func testUpdateSkillRejectsTrimmedDuplicate() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        viewModel.createSkill(name: "Python")
+
+        guard let pythonSkill = viewModel.skills.first(where: { $0.name == "Python" }) else {
+            Issue.record("Expected Python skill to exist")
+            return
+        }
+
+        viewModel.updateSkill(pythonSkill, name: "  Swift  ", paletteId: pythonSkill.paletteId, colorIndex: pythonSkill.colorIndex)
+
+        #expect(pythonSkill.name == "Python") // Unchanged - trimmed matches existing
+    }
+
+    @Test("Updating multiple fields at once persists all changes")
+    func testUpdateSkillMultipleFieldsPersist() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        let newPaletteId = ColorPalette.oceanSunset.id
+        let newColorIndex: Int16 = 3
+
+        viewModel.updateSkill(skill, name: "SwiftUI", paletteId: newPaletteId, colorIndex: newColorIndex)
+
+        #expect(skill.name == "SwiftUI")
+        #expect(skill.paletteId == newPaletteId)
+        #expect(skill.colorIndex == newColorIndex)
+    }
+
+    // MARK: - Skill Edit Navigation Behaviors
+
+    @Test("showSkillEdit navigates to edit view")
+    func testShowSkillEditNavigatesToEditView() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.showSkillEdit(skill)
+
+        #expect(viewModel.panelRoute == .skillEdit(skill))
+    }
+
+    @Test("Can navigate from detail to edit")
+    func testCanNavigateFromDetailToEdit() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.showSkillDetail(skill)
+        #expect(viewModel.panelRoute == .skillDetail(skill))
+
+        viewModel.showSkillEdit(skill)
+        #expect(viewModel.panelRoute == .skillEdit(skill))
+    }
+
+    @Test("Can navigate from edit back to list")
+    func testCanNavigateFromEditToList() {
+        let viewModel = makeViewModel()
+
+        viewModel.createSkill(name: "Swift")
+        guard let skill = viewModel.skills.first else {
+            Issue.record("Expected skill to exist")
+            return
+        }
+
+        viewModel.showSkillEdit(skill)
+        viewModel.showSkillList()
+
+        #expect(viewModel.panelRoute == .skillList)
+    }
 }

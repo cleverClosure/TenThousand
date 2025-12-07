@@ -418,3 +418,260 @@ struct SessionModelTests {
         #expect(session.durationSeconds == 3)
     }
 }
+
+// MARK: - Skill Color Resolution Behaviors
+
+@Suite("Skill Color Resolution Behaviors", .serialized)
+struct SkillColorResolutionTests {
+    // MARK: - Valid Color Resolution Tests
+
+    @Test("Skill with valid palette and color index resolves to correct color")
+    func testValidColorResolution() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 0
+        )
+
+        let color = skill.color
+
+        // Should not be gray (gray is the fallback)
+        #expect(color != .gray)
+    }
+
+    @Test("Skill color resolves correctly for each palette")
+    func testColorResolutionForEachPalette() {
+        for palette in ColorPalette.all {
+            let skill = Skill(
+                name: "Test",
+                paletteId: palette.id,
+                colorIndex: 0
+            )
+
+            let color = skill.color
+
+            // Each valid palette should resolve to a non-gray color
+            #expect(color != .gray, "Palette \(palette.id) should resolve to non-gray color")
+        }
+    }
+
+    @Test("Skill color resolves correctly for each color index in palette")
+    func testColorResolutionForEachColorIndex() {
+        let palette = ColorPalette.summerOceanBreeze
+
+        for index in 0..<palette.colorCount {
+            let skill = Skill(
+                name: "Test",
+                paletteId: palette.id,
+                colorIndex: Int16(index)
+            )
+
+            let color = skill.color
+
+            #expect(color != .gray, "Color index \(index) should resolve to non-gray color")
+        }
+    }
+
+    // MARK: - Invalid Color Resolution Tests
+
+    @Test("Skill with invalid palette ID returns gray color")
+    func testInvalidPaletteIdReturnsGray() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: "nonexistent_palette",
+            colorIndex: 0
+        )
+
+        let color = skill.color
+
+        #expect(color == .gray)
+    }
+
+    @Test("Skill with empty palette ID returns gray color")
+    func testEmptyPaletteIdReturnsGray() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: "",
+            colorIndex: 0
+        )
+
+        let color = skill.color
+
+        #expect(color == .gray)
+    }
+
+    @Test("Skill with out-of-range color index returns gray color")
+    func testOutOfRangeColorIndexReturnsGray() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 99 // Way out of range (only 5 colors)
+        )
+
+        let color = skill.color
+
+        #expect(color == .gray)
+    }
+
+    @Test("Skill with color index at boundary (5) returns gray color")
+    func testBoundaryColorIndexReturnsGray() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 5 // Exactly one past the last valid index (0-4)
+        )
+
+        let color = skill.color
+
+        #expect(color == .gray)
+    }
+
+    @Test("Skill with negative color index returns gray color")
+    func testNegativeColorIndexReturnsGray() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: -1
+        )
+
+        let color = skill.color
+
+        #expect(color == .gray)
+    }
+
+    @Test("Skill with very large negative color index returns gray color")
+    func testVeryLargeNegativeColorIndexReturnsGray() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: Int16.min
+        )
+
+        let color = skill.color
+
+        #expect(color == .gray)
+    }
+
+    @Test("Skill with very large positive color index returns gray color")
+    func testVeryLargePositiveColorIndexReturnsGray() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: Int16.max
+        )
+
+        let color = skill.color
+
+        #expect(color == .gray)
+    }
+
+    // MARK: - ColorAssignment Tests
+
+    @Test("Skill colorAssignment has correct palette ID")
+    func testColorAssignmentPaletteId() {
+        let paletteId = ColorPalette.oceanSunset.id
+        let skill = Skill(name: "Swift", paletteId: paletteId, colorIndex: 2)
+
+        let assignment = skill.colorAssignment
+
+        #expect(assignment.paletteId == paletteId)
+    }
+
+    @Test("Skill colorAssignment has correct color index")
+    func testColorAssignmentColorIndex() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.oceanSunset.id,
+            colorIndex: 3
+        )
+
+        let assignment = skill.colorAssignment
+
+        #expect(assignment.colorIndex == 3)
+    }
+
+    @Test("ColorAssignment from skill resolves to same color as skill.color")
+    func testColorAssignmentResolvesToSameColor() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 2
+        )
+
+        let skillColor = skill.color
+        let assignmentColor = skill.colorAssignment.color
+
+        #expect(skillColor == assignmentColor)
+    }
+
+    // MARK: - Consistency Tests
+
+    @Test("Skill color is consistent across multiple accesses")
+    func testColorConsistency() {
+        let skill = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 1
+        )
+
+        let color1 = skill.color
+        let color2 = skill.color
+        let color3 = skill.color
+
+        #expect(color1 == color2)
+        #expect(color2 == color3)
+    }
+
+    @Test("Different skills with same color settings have same color")
+    func testSameColorSettingsSameColor() {
+        let skill1 = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 2
+        )
+
+        let skill2 = Skill(
+            name: "Python",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 2
+        )
+
+        #expect(skill1.color == skill2.color)
+    }
+
+    @Test("Skills with different color indices have different colors")
+    func testDifferentColorIndicesDifferentColors() {
+        let skill1 = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 0
+        )
+
+        let skill2 = Skill(
+            name: "Python",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 1
+        )
+
+        // Colors should be different (both valid but different indices)
+        #expect(skill1.color != skill2.color)
+    }
+
+    @Test("Skills with different palettes can have different colors even with same index")
+    func testDifferentPalettesDifferentColors() {
+        let skill1 = Skill(
+            name: "Swift",
+            paletteId: ColorPalette.summerOceanBreeze.id,
+            colorIndex: 0
+        )
+
+        let skill2 = Skill(
+            name: "Python",
+            paletteId: ColorPalette.oceanSunset.id,
+            colorIndex: 0
+        )
+
+        // Different palettes have different first colors
+        #expect(skill1.color != skill2.color)
+    }
+}

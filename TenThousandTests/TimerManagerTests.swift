@@ -342,3 +342,322 @@ struct TimeFormattingTests {
         #expect(!negativeShortFormatted.isEmpty)
     }
 }
+
+// MARK: - Pause Tracking Precision Behaviors
+
+@Suite("Pause Tracking Precision Behaviors", .serialized)
+struct PauseTrackingPrecisionTests {
+    // MARK: - Multiple Pause Cycle Tests
+
+    @Test("Multiple pause-resume cycles maintain state correctly")
+    func testMultiplePauseResumeCyclesMaintainState() {
+        let timer = TimerManager()
+
+        timer.start()
+
+        // Cycle 1
+        timer.pause()
+        #expect(timer.isPaused)
+        #expect(timer.isRunning)
+        timer.resume()
+        #expect(!timer.isPaused)
+        #expect(timer.isRunning)
+
+        // Cycle 2
+        timer.pause()
+        #expect(timer.isPaused)
+        timer.resume()
+        #expect(!timer.isPaused)
+
+        // Cycle 3
+        timer.pause()
+        #expect(timer.isPaused)
+        timer.resume()
+        #expect(!timer.isPaused)
+
+        // Cycle 4
+        timer.pause()
+        #expect(timer.isPaused)
+        timer.resume()
+        #expect(!timer.isPaused)
+
+        // Cycle 5
+        timer.pause()
+        #expect(timer.isPaused)
+        timer.resume()
+        #expect(!timer.isPaused)
+
+        #expect(timer.isRunning)
+    }
+
+    @Test("Pause duration is zero immediately after start")
+    func testPauseDurationZeroAfterStart() {
+        let timer = TimerManager()
+
+        timer.start()
+
+        #expect(timer.getPausedDuration() == 0)
+    }
+
+    @Test("Paused duration accessible after resume")
+    func testPausedDurationAccessibleAfterResume() {
+        let timer = TimerManager()
+
+        timer.start()
+        timer.pause()
+        timer.resume()
+
+        // Paused duration should be >= 0 (could be 0 if paused very briefly)
+        #expect(timer.getPausedDuration() >= 0)
+    }
+
+    @Test("Stop while running returns elapsed time")
+    func testStopWhileRunningReturnsElapsedTime() {
+        let timer = TimerManager()
+
+        timer.start()
+        let finalSeconds = timer.stop()
+
+        #expect(finalSeconds >= 0)
+        #expect(!timer.isRunning)
+        #expect(!timer.isPaused)
+    }
+
+    @Test("Stop while paused returns elapsed time before pause")
+    func testStopWhilePausedReturnsElapsedTime() {
+        let timer = TimerManager()
+
+        timer.start()
+        timer.pause()
+        let finalSeconds = timer.stop()
+
+        #expect(finalSeconds >= 0)
+        #expect(!timer.isRunning)
+        #expect(!timer.isPaused)
+    }
+
+    @Test("Paused duration resets after stop")
+    func testPausedDurationResetsAfterStop() {
+        let timer = TimerManager()
+
+        timer.start()
+        timer.pause()
+        timer.resume()
+        _ = timer.stop()
+
+        #expect(timer.getPausedDuration() == 0)
+    }
+
+    @Test("Paused duration resets after restart")
+    func testPausedDurationResetsAfterRestart() {
+        let timer = TimerManager()
+
+        timer.start()
+        timer.pause()
+        timer.resume()
+        _ = timer.stop()
+
+        timer.start()
+
+        #expect(timer.getPausedDuration() == 0)
+    }
+
+    // MARK: - Idempotence Tests
+
+    @Test("Multiple resume calls while not paused are idempotent")
+    func testMultipleResumeCallsIdempotent() {
+        let timer = TimerManager()
+
+        timer.start()
+
+        // Call resume multiple times without pausing
+        timer.resume()
+        timer.resume()
+        timer.resume()
+
+        #expect(timer.isRunning)
+        #expect(!timer.isPaused)
+    }
+
+    @Test("Multiple pause calls while paused are idempotent")
+    func testMultiplePauseCallsIdempotent() {
+        let timer = TimerManager()
+
+        timer.start()
+        timer.pause()
+
+        let pausedDuration1 = timer.getPausedDuration()
+
+        timer.pause()
+        timer.pause()
+        timer.pause()
+
+        // Paused duration should not dramatically increase from extra pause calls
+        let pausedDuration2 = timer.getPausedDuration()
+
+        #expect(timer.isPaused)
+        #expect(pausedDuration2 >= pausedDuration1)
+    }
+
+    @Test("Multiple stop calls are idempotent")
+    func testMultipleStopCallsIdempotent() {
+        let timer = TimerManager()
+
+        timer.start()
+        let firstStop = timer.stop()
+        let secondStop = timer.stop()
+        let thirdStop = timer.stop()
+
+        #expect(secondStop == 0)
+        #expect(thirdStop == 0)
+        #expect(!timer.isRunning)
+    }
+
+    // MARK: - State Consistency Tests
+
+    @Test("Timer state is consistent after rapid pause-resume cycles")
+    func testStateConsistencyAfterRapidCycles() {
+        let timer = TimerManager()
+
+        timer.start()
+
+        // Rapid pause-resume cycles
+        for _ in 0..<10 {
+            timer.pause()
+            timer.resume()
+        }
+
+        #expect(timer.isRunning)
+        #expect(!timer.isPaused)
+        #expect(timer.elapsedSeconds >= 0)
+    }
+
+    @Test("Timer can be stopped from any state")
+    func testTimerCanBeStoppedFromAnyState() {
+        // Test stopping from stopped state
+        let timer1 = TimerManager()
+        let result1 = timer1.stop()
+        #expect(result1 == 0)
+
+        // Test stopping from running state
+        let timer2 = TimerManager()
+        timer2.start()
+        let result2 = timer2.stop()
+        #expect(result2 >= 0)
+
+        // Test stopping from paused state
+        let timer3 = TimerManager()
+        timer3.start()
+        timer3.pause()
+        let result3 = timer3.stop()
+        #expect(result3 >= 0)
+    }
+
+    @Test("Elapsed seconds is always non-negative")
+    func testElapsedSecondsNonNegative() {
+        let timer = TimerManager()
+
+        #expect(timer.elapsedSeconds >= 0)
+
+        timer.start()
+        #expect(timer.elapsedSeconds >= 0)
+
+        timer.pause()
+        #expect(timer.elapsedSeconds >= 0)
+
+        timer.resume()
+        #expect(timer.elapsedSeconds >= 0)
+
+        _ = timer.stop()
+        #expect(timer.elapsedSeconds >= 0)
+    }
+
+    @Test("Paused duration is always non-negative")
+    func testPausedDurationNonNegative() {
+        let timer = TimerManager()
+
+        #expect(timer.getPausedDuration() >= 0)
+
+        timer.start()
+        #expect(timer.getPausedDuration() >= 0)
+
+        timer.pause()
+        #expect(timer.getPausedDuration() >= 0)
+
+        timer.resume()
+        #expect(timer.getPausedDuration() >= 0)
+
+        _ = timer.stop()
+        #expect(timer.getPausedDuration() >= 0)
+    }
+
+    // MARK: - Edge Case Tests
+
+    @Test("Timer handles start after being stopped")
+    func testStartAfterStop() {
+        let timer = TimerManager()
+
+        timer.start()
+        _ = timer.stop()
+
+        timer.start()
+
+        #expect(timer.isRunning)
+        #expect(!timer.isPaused)
+        #expect(timer.elapsedSeconds == 0)
+        #expect(timer.getPausedDuration() == 0)
+    }
+
+    @Test("Timer handles pause-stop-start sequence")
+    func testPauseStopStartSequence() {
+        let timer = TimerManager()
+
+        timer.start()
+        timer.pause()
+        _ = timer.stop()
+        timer.start()
+
+        #expect(timer.isRunning)
+        #expect(!timer.isPaused)
+        #expect(timer.elapsedSeconds == 0)
+    }
+
+    @Test("Timer handles start-stop-start-stop sequence")
+    func testStartStopStartStopSequence() {
+        let timer = TimerManager()
+
+        timer.start()
+        let result1 = timer.stop()
+        #expect(result1 >= 0)
+
+        timer.start()
+        let result2 = timer.stop()
+        #expect(result2 >= 0)
+
+        #expect(!timer.isRunning)
+    }
+
+    @Test("Pausing immediately after start works correctly")
+    func testPauseImmediatelyAfterStart() {
+        let timer = TimerManager()
+
+        timer.start()
+        timer.pause()
+
+        #expect(timer.isRunning)
+        #expect(timer.isPaused)
+        #expect(timer.elapsedSeconds == 0)
+    }
+
+    @Test("Stopping immediately after start returns zero or near-zero")
+    func testStopImmediatelyAfterStart() {
+        let timer = TimerManager()
+
+        timer.start()
+        let result = timer.stop()
+
+        // Should be 0 since no time has passed
+        #expect(result >= 0)
+        #expect(result < 2) // Allow for small timing variations
+    }
+}

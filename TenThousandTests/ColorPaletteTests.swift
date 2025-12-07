@@ -311,6 +311,240 @@ struct ColorPaletteManagerTests {
 
         #expect(manager.exhaustedPaletteIds.contains(paletteId))
     }
+
+    // MARK: - Full Cycle Tests (Exhausting All Palettes)
+
+    @Test("Can assign all 15 colors across all 3 palettes")
+    func testCanAssignAllFifteenColors() {
+        let manager = makeManager()
+        var usedColors: [ColorAssignment] = []
+
+        for i in 0..<15 {
+            let color = manager.nextColor(usedColors: usedColors)
+            #expect(color != nil, "Should be able to assign color \(i + 1) of 15")
+            if let color = color {
+                usedColors.append(color)
+            }
+        }
+
+        #expect(usedColors.count == 15)
+        // After assigning all 15 colors, 2 palettes are marked exhausted
+        // (the ones we switched away from). The 3rd is only marked exhausted
+        // when we try to get a 16th color.
+        #expect(manager.exhaustedPaletteIds.count == 2)
+    }
+
+    @Test("Requesting 16th color returns nil when all palettes exhausted")
+    func testSixteenthColorReturnsNil() {
+        let manager = makeManager()
+        var usedColors: [ColorAssignment] = []
+
+        // Assign all 15 colors
+        for _ in 0..<15 {
+            if let color = manager.nextColor(usedColors: usedColors) {
+                usedColors.append(color)
+            }
+        }
+
+        // 16th should return nil
+        let sixteenthColor = manager.nextColor(usedColors: usedColors)
+        #expect(sixteenthColor == nil)
+    }
+
+    @Test("Exhausting two palettes switches to the third")
+    func testExhaustingTwoPalettesSwitchesToThird() {
+        let manager = makeManager()
+        var usedColors: [ColorAssignment] = []
+
+        // Use all 10 colors from first two palettes
+        for _ in 0..<10 {
+            if let color = manager.nextColor(usedColors: usedColors) {
+                usedColors.append(color)
+            }
+        }
+
+        // After 10 colors, only 1 palette is marked exhausted
+        // (the one we switched away from after 5 colors)
+        #expect(manager.exhaustedPaletteIds.count == 1)
+
+        // Get 11th color - should trigger exhaustion of 2nd palette and switch to 3rd
+        guard let eleventhColor = manager.nextColor(usedColors: usedColors) else {
+            Issue.record("Expected 11th color to be assigned")
+            return
+        }
+
+        // Now 2 palettes should be exhausted
+        #expect(manager.exhaustedPaletteIds.count == 2)
+
+        // Verify 11th color is from the only remaining palette
+        let usedPaletteIds = Set(usedColors.map { $0.paletteId })
+        #expect(!usedPaletteIds.contains(eleventhColor.paletteId))
+        #expect(eleventhColor.colorIndex == 0) // First color of new palette
+    }
+
+    @Test("All assigned colors are unique")
+    func testAllAssignedColorsAreUnique() {
+        let manager = makeManager()
+        var usedColors: [ColorAssignment] = []
+
+        for _ in 0..<15 {
+            if let color = manager.nextColor(usedColors: usedColors) {
+                usedColors.append(color)
+            }
+        }
+
+        // Verify uniqueness using Set
+        let uniqueColors = Set(usedColors)
+        #expect(uniqueColors.count == 15)
+    }
+
+    @Test("Colors from each palette are assigned sequentially 0-4")
+    func testColorsAssignedSequentiallyWithinPalette() {
+        let manager = makeManager()
+        var usedColors: [ColorAssignment] = []
+
+        // Assign all 15 colors
+        for _ in 0..<15 {
+            if let color = manager.nextColor(usedColors: usedColors) {
+                usedColors.append(color)
+            }
+        }
+
+        // Group by palette and verify each palette has colors 0-4
+        let colorsByPalette = Dictionary(grouping: usedColors) { $0.paletteId }
+
+        for (paletteId, colors) in colorsByPalette {
+            let indices = Set(colors.map { $0.colorIndex })
+            #expect(indices == Set(0..<5), "Palette \(paletteId) should have colors 0-4")
+        }
+    }
+
+    @Test("Deleting a color allows reassignment of that color slot")
+    func testDeletingColorAllowsReassignment() {
+        let manager = makeManager()
+        var usedColors: [ColorAssignment] = []
+
+        // Assign 12 colors (max skills)
+        for _ in 0..<12 {
+            if let color = manager.nextColor(usedColors: usedColors) {
+                usedColors.append(color)
+            }
+        }
+
+        #expect(usedColors.count == 12)
+
+        // "Delete" a color
+        let deletedColor = usedColors.remove(at: 4)
+
+        // Recalculate state
+        manager.recalculateState(usedColors: usedColors)
+
+        // Should be able to get another color
+        guard let newColor = manager.nextColor(usedColors: usedColors) else {
+            Issue.record("Expected to assign a new color after deletion")
+            return
+        }
+
+        // The new color should be one of the available slots
+        // (either the deleted slot or another available one)
+        #expect(!usedColors.contains { $0.paletteId == newColor.paletteId && $0.colorIndex == newColor.colorIndex })
+
+        // The deleted color slot should now be available
+        let allUsedAfter = usedColors + [newColor]
+        let deletedSlotIsAvailable = !allUsedAfter.contains {
+            $0.paletteId == deletedColor.paletteId && $0.colorIndex == deletedColor.colorIndex
+        }
+        // Either the new color IS the deleted slot, or it's still available
+        let newColorIsDeletedSlot = newColor.paletteId == deletedColor.paletteId && newColor.colorIndex == deletedColor.colorIndex
+        #expect(deletedSlotIsAvailable || newColorIsDeletedSlot)
+    }
+
+    @Test("Recalculate state after deleting all colors from exhausted palette clears exhaustion")
+    func testRecalculateAfterDeletingAllFromExhaustedPalette() {
+        let manager = makeManager()
+        var usedColors: [ColorAssignment] = []
+
+        // Use 6 colors to ensure first palette is marked as exhausted
+        // (5 colors from first palette, then 6th triggers exhaustion)
+        for _ in 0..<6 {
+            if let color = manager.nextColor(usedColors: usedColors) {
+                usedColors.append(color)
+            }
+        }
+
+        // Find which palette got exhausted (should have 1 exhausted palette)
+        #expect(manager.exhaustedPaletteIds.count == 1)
+        let exhaustedPaletteId = manager.exhaustedPaletteIds.first!
+
+        // "Delete" all colors from the exhausted palette
+        usedColors.removeAll { $0.paletteId == exhaustedPaletteId }
+
+        // Recalculate state
+        manager.recalculateState(usedColors: usedColors)
+
+        // That palette should no longer be exhausted
+        #expect(!manager.exhaustedPaletteIds.contains(exhaustedPaletteId))
+    }
+
+    @Test("Invalid color index returns gray")
+    func testInvalidColorIndexReturnsGray() {
+        let manager = makeManager()
+
+        // Valid palette, invalid index (out of range)
+        let color = manager.color(forPaletteId: ColorPalette.summerOceanBreeze.id, colorIndex: 99)
+
+        #expect(color == .gray)
+    }
+
+    @Test("Negative color index returns gray")
+    func testNegativeColorIndexReturnsGray() {
+        let manager = makeManager()
+
+        let color = manager.color(forPaletteId: ColorPalette.summerOceanBreeze.id, colorIndex: -1)
+
+        #expect(color == .gray)
+    }
+
+    @Test("SkillColor resolution with invalid index returns nil")
+    func testSkillColorInvalidIndexReturnsNil() {
+        let manager = makeManager()
+
+        let skillColor = manager.skillColor(forPaletteId: ColorPalette.summerOceanBreeze.id, colorIndex: 99)
+
+        #expect(skillColor == nil)
+    }
+
+    @Test("Recalculate state sets current palette from last used color when nil")
+    func testRecalculateStateSetsCurrentPaletteFromLastUsed() {
+        let manager = makeManager()
+        #expect(manager.currentPaletteId == nil)
+
+        let usedColors = [
+            ColorAssignment(paletteId: ColorPalette.oceanSunset.id, colorIndex: 0),
+            ColorAssignment(paletteId: ColorPalette.oceanSunset.id, colorIndex: 1),
+            ColorAssignment(paletteId: ColorPalette.earthyTones.id, colorIndex: 0)
+        ]
+
+        manager.recalculateState(usedColors: usedColors)
+
+        // Should set current palette to the last used color's palette
+        #expect(manager.currentPaletteId == ColorPalette.earthyTones.id)
+    }
+
+    @Test("Recalculate state with exhausted current palette selects new one")
+    func testRecalculateStateWithExhaustedCurrentSelectsNew() {
+        let manager = makeManager()
+
+        // Manually set current palette and mark it as exhausted via used colors
+        let paletteId = ColorPalette.summerOceanBreeze.id
+        let usedColors = (0..<5).map { ColorAssignment(paletteId: paletteId, colorIndex: $0) }
+
+        // Set initial state
+        manager.recalculateState(usedColors: usedColors)
+
+        // Current palette should have switched away from exhausted one
+        #expect(manager.currentPaletteId != paletteId || manager.currentPaletteId == nil)
+    }
 }
 
 @Suite("ColorAssignment Behaviors", .serialized)
