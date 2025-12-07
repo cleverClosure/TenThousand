@@ -160,40 +160,101 @@ struct SkillDetailView: View {
             }
 
             // Pace projection
-            if let projection = skill.projectedTimeToMastery {
-                HStack {
-                    VStack(alignment: .leading, spacing: DS.Spacing.xs) {
-                        Text("AT CURRENT PACE")
-                            .labelFont()
-                            .foregroundColor(.secondary)
-                        Text(projection.formatted)
-                            .font(DS.Font.body)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
-                    }
-                    Spacer()
-                }
-                .padding(DS.Spacing.md)
-                .background(
-                    RoundedRectangle(cornerRadius: DS.Radius.medium)
-                        .fill(DS.Color.background(.subtle))
-                )
-            } else if skill.sessions.isEmpty {
-                HStack {
-                    Text("Start tracking to see your pace")
-                        .font(DS.Font.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
-                .padding(DS.Spacing.md)
-                .background(
-                    RoundedRectangle(cornerRadius: DS.Radius.medium)
-                        .fill(DS.Color.background(.subtle))
-                )
-            }
+            paceProjectionSection
         }
         .padding(.horizontal, DS.Spacing.lg)
         .padding(.top, DS.Spacing.xl)
+    }
+
+    @ViewBuilder
+    private var paceProjectionSection: some View {
+        let projection = skill.smartProjection
+
+        switch projection.confidence {
+        case .insufficient:
+            if skill.sessions.isEmpty {
+                paceCard {
+                    Text("Start tracking to see your pace")
+                        .font(DS.Font.caption)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                paceCard {
+                    Text("Keep practicing to see projection")
+                        .font(DS.Font.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+        case .low, .medium, .high:
+            paceCard {
+                VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                    // Header with mode indicator
+                    HStack {
+                        Text(projection.mode == .targetBased ? "AT TARGET PACE" : "AT CURRENT PACE")
+                            .labelFont()
+                            .foregroundColor(.secondary)
+
+                        Spacer()
+
+                        // Trend indicator
+                        if !projection.trendArrow.isEmpty {
+                            HStack(spacing: DS.Spacing.xs) {
+                                Text(projection.trendArrow)
+                                    .font(DS.Font.caption)
+                                Text(projection.trendDescription)
+                                    .font(DS.Font.caption)
+                            }
+                            .foregroundColor(trendColor(for: projection.trend))
+                        }
+                    }
+
+                    // Projection value
+                    Text(projection.formatted)
+                        .font(DS.Font.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+
+                    // Show actual vs target for target mode
+                    if projection.mode == .targetBased, let gap = skill.targetPaceGap {
+                        let actualPace = skill.actualRecentPace
+                        HStack(spacing: DS.Spacing.xs) {
+                            Text("Actual:")
+                                .font(DS.Font.caption)
+                                .foregroundColor(.secondary)
+                            Text(String(format: "%.1f hrs/week", actualPace))
+                                .font(DS.Font.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(gap >= 0 ? .green : DS.Color.error)
+                            Text(gap >= 0 ? "(ahead)" : "(behind)")
+                                .font(DS.Font.caption)
+                                .foregroundColor(gap >= 0 ? .green : DS.Color.error)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func paceCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        HStack {
+            content()
+            Spacer()
+        }
+        .padding(DS.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.medium)
+                .fill(DS.Color.background(.subtle))
+        )
+    }
+
+    private func trendColor(for trend: PaceTrend) -> Color {
+        switch trend {
+        case .increasing: return .green
+        case .steady: return .secondary
+        case .decreasing: return DS.Color.error
+        case .unknown: return .secondary
+        }
     }
 
     private var footerSection: some View {

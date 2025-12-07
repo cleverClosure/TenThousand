@@ -170,6 +170,10 @@ extension Animation {
 enum Time {
     static let secondsPerMinute: Int64 = 60
     static let secondsPerHour: Int64 = 3600
+    static let secondsPerDay: Double = 86_400
+    static let secondsPerWeek: Double = 604_800
+    static let weeksPerMonth: Double = 4.33
+    static let monthsPerYear: Int = 12
     static let timerUpdateInterval: TimeInterval = 1.0
 }
 

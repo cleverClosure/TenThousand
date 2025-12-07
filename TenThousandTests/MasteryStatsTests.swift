@@ -212,39 +212,82 @@ struct SkillMasteryStatsTests {
         #expect(skill.firstSessionDate == oldestTime)
     }
 
-    // MARK: - weeksSinceStart Tests
+    // MARK: - lastSessionDate Tests
 
-    @Test("Skill with no sessions has zero weeks since start")
-    func testWeeksSinceStartNoSessions() {
+    @Test("Skill with no sessions has nil last session date")
+    func testLastSessionDateNil() {
         let skill = Skill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
-        #expect(skill.weeksSinceStart == 0)
+        #expect(skill.lastSessionDate == nil)
     }
 
-    @Test("Skill started 7 days ago has ~1 week since start")
-    func testWeeksSinceStartOneWeek() {
+    @Test("Skill with multiple sessions returns latest start time")
+    func testLastSessionDateMultiple() {
         let store = makeStore()
         let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
-        let session = store.createSession(for: skill)
-        session.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
 
-        let weeks = skill.weeksSinceStart
-        #expect(weeks >= 0.99 && weeks <= 1.01)
+        let oldestTime = Date().addingTimeInterval(-7 * 24 * 3600) // 7 days ago
+        let newestTime = Date().addingTimeInterval(-1 * 24 * 3600) // 1 day ago
+
+        let session1 = store.createSession(for: skill)
+        session1.startTime = oldestTime
+
+        let session2 = store.createSession(for: skill)
+        session2.startTime = newestTime
+
+        #expect(skill.lastSessionDate == newestTime)
     }
 
-    @Test("Skill started today has minimum weeks (1 day)")
-    func testWeeksSinceStartMinimum() {
+    // MARK: - uniqueLoggedDays Tests
+
+    @Test("Skill with no sessions has zero unique logged days")
+    func testUniqueLoggedDaysNoSessions() {
+        let skill = Skill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        #expect(skill.uniqueLoggedDays == 0)
+    }
+
+    @Test("Skill with one session has one unique logged day")
+    func testUniqueLoggedDaysOneSession() {
         let store = makeStore()
         let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
-        let session = store.createSession(for: skill)
-        session.startTime = Date()
+        _ = store.createSession(for: skill)
 
-        // Minimum is 1/7 week (1 day)
-        let weeks = skill.weeksSinceStart
-        #expect(weeks >= 1.0 / 7.0)
+        #expect(skill.uniqueLoggedDays == 1)
     }
 
-    // MARK: - hoursPerWeek Tests
+    @Test("Multiple sessions on same day count as one unique day")
+    func testUniqueLoggedDaysSameDay() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date()
+
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date().addingTimeInterval(3600) // 1 hour later, same day
+
+        #expect(skill.uniqueLoggedDays == 1)
+    }
+
+    @Test("Sessions on different days count as separate unique days")
+    func testUniqueLoggedDaysDifferentDays() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date()
+
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date().addingTimeInterval(-24 * 3600) // Yesterday
+
+        let session3 = store.createSession(for: skill)
+        session3.startTime = Date().addingTimeInterval(-48 * 3600) // 2 days ago
+
+        #expect(skill.uniqueLoggedDays == 3)
+    }
+
+    // MARK: - hoursPerWeek Tests (Closed Period)
 
     @Test("Skill with no sessions has zero hours per week")
     func testHoursPerWeekNoSessions() {
@@ -253,32 +296,48 @@ struct SkillMasteryStatsTests {
         #expect(skill.hoursPerWeek == 0)
     }
 
-    @Test("Skill with 7 hours over 1 week has 7 hours per week")
-    func testHoursPerWeekCalculation() {
+    @Test("Skill with sessions spanning 1 week calculates hours per week correctly")
+    func testHoursPerWeekClosedPeriod() {
         let store = makeStore()
         let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
-        // Started 7 days ago
-        let session = store.createSession(for: skill)
-        session.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
-        session.endTime = session.startTime.addingTimeInterval(7 * 3600) // 7 hours
-        session.pausedDuration = 0
+        // First session 7 days ago (3 hours)
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
+        session1.endTime = session1.startTime.addingTimeInterval(3 * 3600)
+        session1.pausedDuration = 0
 
+        // Last session today (4 hours)
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date()
+        session2.endTime = session2.startTime.addingTimeInterval(4 * 3600)
+        session2.pausedDuration = 0
+
+        // 7 hours over 1 week closed period = 7 hours/week
         let hoursPerWeek = skill.hoursPerWeek
         #expect(hoursPerWeek >= 6.9 && hoursPerWeek <= 7.1)
     }
 
-    @Test("Skill with 14 hours over 2 weeks has 7 hours per week")
-    func testHoursPerWeekTwoWeeks() {
+    @Test("Open-ended time after last session is not counted in pace")
+    func testHoursPerWeekIgnoresOpenEndedTime() {
         let store = makeStore()
         let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
-        // Started 14 days ago
-        let session = store.createSession(for: skill)
-        session.startTime = Date().addingTimeInterval(-14 * 24 * 3600)
-        session.endTime = session.startTime.addingTimeInterval(14 * 3600) // 14 hours
-        session.pausedDuration = 0
+        // First session 21 days ago (3.5 hours)
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date().addingTimeInterval(-21 * 24 * 3600)
+        session1.endTime = session1.startTime.addingTimeInterval(3.5 * 3600)
+        session1.pausedDuration = 0
 
+        // Last session 14 days ago (3.5 hours) - 7 days of open-ended time
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date().addingTimeInterval(-14 * 24 * 3600)
+        session2.endTime = session2.startTime.addingTimeInterval(3.5 * 3600)
+        session2.pausedDuration = 0
+
+        // Closed period is 7 days (21 days ago to 14 days ago)
+        // 7 hours / 1 week = 7 hours/week
+        // NOT: 7 hours / 3 weeks = 2.33 hours/week
         let hoursPerWeek = skill.hoursPerWeek
         #expect(hoursPerWeek >= 6.9 && hoursPerWeek <= 7.1)
     }
@@ -292,43 +351,101 @@ struct SkillMasteryStatsTests {
         #expect(skill.projectedTimeToMastery == nil)
     }
 
+    @Test("Skill with fewer than 3 unique logged days has nil projection")
+    func testProjectionNilInsufficientDays() {
+        let store = makeStore()
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        // Only 2 unique days
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
+        session1.endTime = session1.startTime.addingTimeInterval(10 * 3600)
+        session1.pausedDuration = 0
+
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date()
+        session2.endTime = session2.startTime.addingTimeInterval(10 * 3600)
+        session2.pausedDuration = 0
+
+        #expect(skill.uniqueLoggedDays == 2)
+        #expect(skill.projectedTimeToMastery == nil)
+    }
+
     @Test("Skill at mastery has nil projection")
     func testProjectionNilAtMastery() {
         let store = makeStore()
-        let skill = createSkillWithSession(store: store, durationSeconds: 10000 * 3600)
+        let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
+
+        // Create 3 sessions on different days to meet the requirement
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date().addingTimeInterval(-2 * 24 * 3600)
+        session1.endTime = session1.startTime.addingTimeInterval(5000 * 3600)
+        session1.pausedDuration = 0
+
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date().addingTimeInterval(-1 * 24 * 3600)
+        session2.endTime = session2.startTime.addingTimeInterval(3000 * 3600)
+        session2.pausedDuration = 0
+
+        let session3 = store.createSession(for: skill)
+        session3.startTime = Date()
+        session3.endTime = session3.startTime.addingTimeInterval(2000 * 3600)
+        session3.pausedDuration = 0
 
         #expect(skill.projectedTimeToMastery == nil)
     }
 
-    @Test("Skill with 10 hours/week projects ~19 years to mastery")
+    @Test("Skill with 3+ days and 10 hours/week projects ~19 years to mastery")
     func testProjectionTenHoursPerWeek() {
         let store = makeStore()
         let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
-        // Started 1 week ago, logged 10 hours = 10 hours/week
-        // 10000 hours / 10 hours/week = 1000 weeks = ~19.2 years
-        let session = store.createSession(for: skill)
-        session.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
-        session.endTime = session.startTime.addingTimeInterval(10 * 3600)
-        session.pausedDuration = 0
+        // 3 sessions on 3 different days spanning 1 week, totaling 10 hours
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
+        session1.endTime = session1.startTime.addingTimeInterval(3 * 3600)
+        session1.pausedDuration = 0
 
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date().addingTimeInterval(-4 * 24 * 3600)
+        session2.endTime = session2.startTime.addingTimeInterval(3 * 3600)
+        session2.pausedDuration = 0
+
+        let session3 = store.createSession(for: skill)
+        session3.startTime = Date()
+        session3.endTime = session3.startTime.addingTimeInterval(4 * 3600)
+        session3.pausedDuration = 0
+
+        // 10 hours over 1 week = 10 hours/week
+        // 10000 hours / 10 hours/week = 1000 weeks = ~19.2 years
         let projection = skill.projectedTimeToMastery
         #expect(projection != nil)
         #expect(projection!.years >= 18 && projection!.years <= 20)
     }
 
-    @Test("Skill with 40 hours/week projects ~5 years to mastery")
+    @Test("Skill with 3+ days and 40 hours/week projects ~5 years to mastery")
     func testProjectionFortyHoursPerWeek() {
         let store = makeStore()
         let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
-        // Started 1 week ago, logged 40 hours = 40 hours/week
-        // 10000 hours / 40 hours/week = 250 weeks = ~4.8 years
-        let session = store.createSession(for: skill)
-        session.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
-        session.endTime = session.startTime.addingTimeInterval(40 * 3600)
-        session.pausedDuration = 0
+        // 3 sessions on 3 different days spanning 1 week, totaling 40 hours
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date().addingTimeInterval(-7 * 24 * 3600)
+        session1.endTime = session1.startTime.addingTimeInterval(15 * 3600)
+        session1.pausedDuration = 0
 
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date().addingTimeInterval(-4 * 24 * 3600)
+        session2.endTime = session2.startTime.addingTimeInterval(10 * 3600)
+        session2.pausedDuration = 0
+
+        let session3 = store.createSession(for: skill)
+        session3.startTime = Date()
+        session3.endTime = session3.startTime.addingTimeInterval(15 * 3600)
+        session3.pausedDuration = 0
+
+        // 40 hours over 1 week = 40 hours/week
+        // 10000 hours / 40 hours/week = 250 weeks = ~4.8 years
         let projection = skill.projectedTimeToMastery
         #expect(projection != nil)
         #expect(projection!.years >= 4 && projection!.years <= 6)
@@ -339,12 +456,23 @@ struct SkillMasteryStatsTests {
         let store = makeStore()
         let skill = store.createSkill(name: "Swift", paletteId: Self.testPaletteId, colorIndex: 0)
 
-        // 9900 hours logged, 100 remaining, at 10 hours/week = 10 weeks
-        let session = store.createSession(for: skill)
-        session.startTime = Date().addingTimeInterval(-990 * 7 * 24 * 3600) // ~990 weeks ago
-        session.endTime = session.startTime.addingTimeInterval(9900 * 3600)
-        session.pausedDuration = 0
+        // 3 sessions over ~990 weeks, totaling 9900 hours
+        let session1 = store.createSession(for: skill)
+        session1.startTime = Date().addingTimeInterval(-990 * 7 * 24 * 3600)
+        session1.endTime = session1.startTime.addingTimeInterval(5000 * 3600)
+        session1.pausedDuration = 0
 
+        let session2 = store.createSession(for: skill)
+        session2.startTime = Date().addingTimeInterval(-500 * 7 * 24 * 3600)
+        session2.endTime = session2.startTime.addingTimeInterval(2500 * 3600)
+        session2.pausedDuration = 0
+
+        let session3 = store.createSession(for: skill)
+        session3.startTime = Date()
+        session3.endTime = session3.startTime.addingTimeInterval(2400 * 3600)
+        session3.pausedDuration = 0
+
+        // ~9900 hours, ~100 remaining, at 10 hours/week
         let projection = skill.projectedTimeToMastery
         #expect(projection != nil)
         #expect(projection!.years == 0)
