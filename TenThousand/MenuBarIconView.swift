@@ -68,21 +68,20 @@ struct MenuBarIconView: View {
         if isTracking {
             // Fire icon when tracking
             Image(systemName: isPaused ? "flame" : "flame.fill")
-                .font(.system(size: IconFontSize.small, weight: .bold))
+                .iconFont(.small, weight: .bold)
                 .foregroundColor(skillColor)
-                .shadow(color: isPaused ? .clear : skillColor.opacity(0.6), radius: Shadows.subtle.radius, y: 0)
+                .shadow(color: isPaused ? .transparent : skillColor.opacity(0.6), radius: Shadows.subtle.radius, y: 0)
         } else {
             // Idle - subtle flame outline
             Image(systemName: "flame")
-                .font(.system(size: IconFontSize.tiny, weight: .medium))
-                .foregroundColor(Color.primary.opacity(Opacity.secondaryIdle))
+                .iconFont(.tiny)
+                .foregroundColor(Color.backgroundPrimary(.heavy))
         }
     }
 
     private var timerText: some View {
         Text(viewModel.elapsedSeconds.formattedTime())
-            .font(.system(size: IconFontSize.menubarTimer, weight: .semibold, design: .monospaced))
-            .monospacedDigit()
+            .menubarTimerFont()
             .foregroundColor(isPaused ? .secondary : .primary)
     }
 

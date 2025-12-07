@@ -51,6 +51,36 @@ struct Typography {
         .monospacedDigit()
     static let largeTimeDisplayKerning: CGFloat = 0.5
     static let largeTimeDisplayLineHeight: CGFloat = 28
+
+    // Hero Timer - large timer display in active tracking
+    static let heroTimer = Font.system(size: Dimensions.heroTimerSize, weight: .medium, design: .monospaced)
+        .monospacedDigit()
+
+    // Menubar Timer - timer in menu bar
+    static let menubarTimer = Font.system(size: IconFontSize.menubarTimer, weight: .semibold, design: .monospaced)
+        .monospacedDigit()
+}
+
+// MARK: - Icon Font Definitions
+
+extension Typography {
+    // Icon fonts with various weights
+    static func icon(_ size: IconSize, weight: Font.Weight = .medium) -> Font {
+        .system(size: size.rawValue, weight: weight)
+    }
+}
+
+// MARK: - Icon Sizes
+
+enum IconSize: CGFloat {
+    case tiny = 9
+    case small = 10
+    case caption = 11
+    case body = 12
+    case menubar = 13
+    case medium = 14
+    case large = 16
+    case xl = 20
 }
 
 // MARK: - Typography View Modifiers
@@ -105,5 +135,21 @@ extension View {
             .font(Typography.largeTimeDisplay)
             .kerning(Typography.largeTimeDisplayKerning)
             .monospacedDigit()
+    }
+
+    func heroTimerFont() -> some View {
+        self
+            .font(Typography.heroTimer)
+            .monospacedDigit()
+    }
+
+    func menubarTimerFont() -> some View {
+        self
+            .font(Typography.menubarTimer)
+            .monospacedDigit()
+    }
+
+    func iconFont(_ size: IconSize, weight: Font.Weight = .medium) -> some View {
+        self.font(Typography.icon(size, weight: weight))
     }
 }

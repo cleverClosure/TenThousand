@@ -41,6 +41,45 @@ extension Color {
     static let highlightYellow = Color(hex: "FFD60A")
 }
 
+// MARK: - Semantic Colors
+
+extension Color {
+    // State Colors
+    static let stateError = Color.red
+    static let stateSuccess = Color.green
+    static let stateWarning = Color.orange
+
+    // UI Colors
+    static let buttonTextLight = Color.white
+    static let overlayDark = Color.black
+    static let fallbackColor = Color.gray
+    static let transparent = Color.clear
+
+    // Background Opacities (using primary)
+    static func backgroundPrimary(_ opacity: BackgroundOpacity) -> Color {
+        Color.primary.opacity(opacity.rawValue)
+    }
+
+    static func backgroundSecondary(_ opacity: BackgroundOpacity) -> Color {
+        Color.secondary.opacity(opacity.rawValue)
+    }
+}
+
+// MARK: - Background Opacity Levels
+
+enum BackgroundOpacity: Double {
+    case ultraLight = 0.02
+    case subtle = 0.03
+    case light = 0.04
+    case medium = 0.05
+    case regular = 0.06
+    case strong = 0.08
+    case intense = 0.10
+    case heavy = 0.15
+    case overlay = 0.20
+    case overlayDark = 0.40
+}
+
 // MARK: - Hex Color Initializer
 
 extension Color {

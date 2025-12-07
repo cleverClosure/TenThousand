@@ -40,16 +40,16 @@ struct CircularProgressView: View {
         ZStack {
             // Outer subtle shadow ring (depth)
             Circle()
-                .stroke(Color.black.opacity(0.05), lineWidth: trackWidth + Dimensions.circularProgressShadowOffset)
+                .stroke(Color.overlayDark.opacity(0.05), lineWidth: trackWidth + Dimensions.circularProgressShadowOffset)
                 .blur(radius: Shadows.subtle.radius)
 
             // Background track - inset style
             Circle()
-                .stroke(Color.primary.opacity(0.06), lineWidth: trackWidth)
+                .stroke(Color.backgroundPrimary(.regular), lineWidth: trackWidth)
 
             // Inner shadow on track
             Circle()
-                .stroke(Color.black.opacity(0.08), lineWidth: trackWidth)
+                .stroke(Color.overlayDark.opacity(0.08), lineWidth: trackWidth)
                 .blur(radius: 1)
                 .mask(
                     Circle()

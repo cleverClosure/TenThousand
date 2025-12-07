@@ -94,7 +94,7 @@ struct SkillDetailView: View {
             } label: {
                 HStack(spacing: Spacing.tight) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: IconFontSize.body, weight: .semibold))
+                        .iconFont(.body, weight: .semibold)
                     Text("Back")
                         .font(Typography.body)
                 }
@@ -176,7 +176,7 @@ struct SkillDetailView: View {
                 .padding(Spacing.loose)
                 .background(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(Color.primary.opacity(0.03))
+                        .fill(Color.backgroundPrimary(.subtle))
                 )
             } else if skill.sessions.isEmpty {
                 HStack {
@@ -188,7 +188,7 @@ struct SkillDetailView: View {
                 .padding(Spacing.loose)
                 .background(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(Color.primary.opacity(0.03))
+                        .fill(Color.backgroundPrimary(.subtle))
                 )
             }
         }
@@ -204,17 +204,17 @@ struct SkillDetailView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: isSkillActive ? "checkmark.circle.fill" : "play.fill")
-                        .font(.system(size: IconFontSize.large, weight: .semibold))
+                        .iconFont(.large, weight: .semibold)
                     Text(isSkillActive ? "Currently Tracking" : "Start Tracking")
                         .font(Typography.body)
                         .fontWeight(.semibold)
                 }
-                .foregroundColor(isSkillActive ? .secondary : .white)
+                .foregroundColor(isSkillActive ? .secondary : .buttonTextLight)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.loose)
                 .background(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(isSkillActive ? Color.primary.opacity(0.05) : skill.color)
+                        .fill(isSkillActive ? Color.backgroundPrimary(.medium) : skill.color)
                 )
             }
             .buttonStyle(PlainButtonStyle())
@@ -226,7 +226,7 @@ struct SkillDetailView: View {
             } label: {
                 Text("Delete Skill")
                     .font(Typography.caption)
-                    .foregroundColor(isSkillActive ? .secondary.opacity(0.5) : .red.opacity(Opacity.accentStrong))
+                    .foregroundColor(isSkillActive ? .secondary.opacity(0.5) : Color.stateError.opacity(Opacity.accentStrong))
             }
             .buttonStyle(PlainButtonStyle())
             .disabled(isSkillActive)

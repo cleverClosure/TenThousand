@@ -51,7 +51,7 @@ struct SkillRowView: View {
         } else if isHovered {
             return skill.color.opacity(0.06)
         } else {
-            return Color.primary.opacity(0.02)
+            return Color.backgroundPrimary(.ultraLight)
         }
     }
 
@@ -112,7 +112,7 @@ struct SkillRowView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                .stroke(isSelected ? skill.color.opacity(0.3) : Color.clear, lineWidth: LayoutConstants.borderWidth)
+                .stroke(isSelected ? skill.color.opacity(0.3) : .transparent, lineWidth: LayoutConstants.borderWidth)
         )
     }
 
@@ -125,12 +125,12 @@ struct SkillRowView: View {
 
             if isDotHovered {
                 Circle()
-                    .fill(Color.black.opacity(0.4))
+                    .fill(Color.overlayDark.opacity(BackgroundOpacity.overlayDark.rawValue))
                     .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
                 Image(systemName: "play.fill")
-                    .font(.system(size: IconFontSize.small, weight: .bold))
-                    .foregroundColor(.white)
+                    .iconFont(.small, weight: .bold)
+                    .foregroundColor(.buttonTextLight)
             }
         }
         .onHover { hovering in
@@ -162,12 +162,12 @@ struct SkillRowView: View {
             onEdit?()
         } label: {
             Image(systemName: "pencil")
-                .font(.system(size: IconFontSize.body, weight: .medium))
+                .iconFont(.body)
                 .foregroundColor(.secondary)
                 .padding(Spacing.base)
                 .background(
                     Circle()
-                        .fill(Color.primary.opacity(0.08))
+                        .fill(Color.backgroundPrimary(.strong))
                 )
         }
         .buttonStyle(PlainButtonStyle())
@@ -177,7 +177,7 @@ struct SkillRowView: View {
 
     private var chevron: some View {
         Image(systemName: "chevron.right")
-            .font(.system(size: IconFontSize.body, weight: .semibold))
+            .iconFont(.body, weight: .semibold)
             .foregroundColor(.secondary.opacity(isHovered ? 1 : 0.5))
     }
 

@@ -76,11 +76,11 @@ struct ProgressBarView: View {
             ZStack(alignment: .leading) {
                 // Background track with subtle depth
                 RoundedRectangle(cornerRadius: height / 2)
-                    .fill(Color.primary.opacity(0.08))
+                    .fill(Color.backgroundPrimary(.strong))
                     .frame(height: height)
                     .overlay(
                         RoundedRectangle(cornerRadius: height / 2)
-                            .stroke(Color.primary.opacity(0.03), lineWidth: 0.5)
+                            .stroke(Color.backgroundPrimary(.subtle), lineWidth: 0.5)
                     )
 
                 // Filled progress with gradient

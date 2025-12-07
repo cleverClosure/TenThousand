@@ -59,7 +59,7 @@ struct AddSkillView: View {
                     Spacer()
                     Text("\(characterCount)/\(ValidationLimits.maxSkillNameLength)")
                         .font(Typography.caption)
-                        .foregroundColor(isNearLimit ? .orange : .secondary.opacity(0.6))
+                        .foregroundColor(isNearLimit ? .stateWarning : .secondary.opacity(0.6))
                 }
             }
         }
@@ -67,12 +67,12 @@ struct AddSkillView: View {
         .padding(.vertical, Dimensions.skillRowPaddingVertical)
         .background(
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                .fill(Color.primary.opacity(isFocused ? 0.04 : 0.02))
+                .fill(Color.backgroundPrimary(isFocused ? .light : .ultraLight))
         )
         .overlay(
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
                 .stroke(
-                    isFocused ? Color.secondary.opacity(0.2) : Color.clear,
+                    isFocused ? Color.backgroundSecondary(.overlay) : .transparent,
                     lineWidth: LayoutConstants.borderWidth
                 )
         )
@@ -81,11 +81,11 @@ struct AddSkillView: View {
     private var placeholderDot: some View {
         ZStack {
             Circle()
-                .fill(Color.secondary.opacity(0.2))
+                .fill(Color.backgroundSecondary(.overlay))
                 .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
             Image(systemName: "plus")
-                .font(.system(size: IconFontSize.body, weight: .medium))
+                .iconFont(.body)
                 .foregroundColor(.secondary.opacity(0.6))
         }
     }
@@ -121,8 +121,8 @@ struct AddSkillView: View {
     private var submitButton: some View {
         Button(action: createSkill) {
             Image(systemName: "arrow.right.circle.fill")
-                .font(.system(size: IconFontSize.xl, weight: .medium))
-                .foregroundColor(.green)
+                .iconFont(.xl)
+                .foregroundColor(.stateSuccess)
         }
         .buttonStyle(PlainButtonStyle())
         .transition(.scale.combined(with: .opacity))
@@ -133,11 +133,11 @@ struct AddSkillView: View {
         if let error = errorMessage {
             HStack(spacing: Spacing.tight) {
                 Image(systemName: "exclamationmark.circle.fill")
-                    .font(.system(size: IconFontSize.caption))
+                    .iconFont(.caption)
                 Text(error)
                     .font(Typography.caption)
             }
-            .foregroundColor(.red)
+            .foregroundColor(.stateError)
             .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
             .transition(.opacity.combined(with: .move(edge: .top)))
         }

@@ -91,7 +91,7 @@ struct SkillEditView: View {
             } label: {
                 HStack(spacing: Spacing.tight) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: IconFontSize.body, weight: .semibold))
+                        .iconFont(.body, weight: .semibold)
                     Text("Cancel")
                         .font(Typography.body)
                 }
@@ -148,27 +148,27 @@ struct SkillEditView: View {
                 .padding(.vertical, Dimensions.skillRowPaddingVertical)
                 .background(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(Color.primary.opacity(0.04))
+                        .fill(Color.backgroundPrimary(.light))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: LayoutConstants.borderWidth)
+                        .stroke(Color.backgroundSecondary(.overlay), lineWidth: LayoutConstants.borderWidth)
                 )
 
                 HStack {
                     if let error = errorMessage {
                         HStack(spacing: Spacing.tight) {
                             Image(systemName: "exclamationmark.circle.fill")
-                                .font(.system(size: IconFontSize.caption))
+                                .iconFont(.caption)
                             Text(error)
                                 .font(Typography.caption)
                         }
-                        .foregroundColor(.red)
+                        .foregroundColor(.stateError)
                     }
                     Spacer()
                     Text("\(characterCount)/\(ValidationLimits.maxSkillNameLength)")
                         .font(Typography.caption)
-                        .foregroundColor(isNearLimit ? .orange : .secondary.opacity(0.6))
+                        .foregroundColor(isNearLimit ? .stateWarning : .secondary.opacity(0.6))
                 }
             }
         }
@@ -188,7 +188,7 @@ struct SkillEditView: View {
             .padding(Spacing.loose)
             .background(
                 RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                    .fill(Color.primary.opacity(0.02))
+                    .fill(Color.backgroundPrimary(.ultraLight))
             )
         }
     }
@@ -226,12 +226,12 @@ struct SkillEditView: View {
 
                 if isSelected {
                     Circle()
-                        .stroke(Color.white, lineWidth: Dimensions.menubarStrokeWidth)
+                        .stroke(Color.buttonTextLight, lineWidth: Dimensions.menubarStrokeWidth)
                         .frame(width: Dimensions.colorPickerButtonSize, height: Dimensions.colorPickerButtonSize)
 
                     Image(systemName: "checkmark")
-                        .font(.system(size: IconFontSize.body, weight: .bold))
-                        .foregroundColor(.white)
+                        .iconFont(.body, weight: .bold)
+                        .foregroundColor(.buttonTextLight)
                 }
             }
         }
@@ -248,17 +248,17 @@ struct SkillEditView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: IconFontSize.large, weight: .semibold))
+                        .iconFont(.large, weight: .semibold)
                     Text("Save Changes")
                         .font(Typography.body)
                         .fontWeight(.semibold)
                 }
-                .foregroundColor(hasChanges && isValidName ? .white : .secondary)
+                .foregroundColor(hasChanges && isValidName ? .buttonTextLight : .secondary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.loose)
                 .background(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(hasChanges && isValidName ? selectedColor : Color.primary.opacity(0.05))
+                        .fill(hasChanges && isValidName ? selectedColor : Color.backgroundPrimary(.medium))
                 )
             }
             .buttonStyle(PlainButtonStyle())

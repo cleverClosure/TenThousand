@@ -61,13 +61,12 @@ struct ActiveTrackingView: View {
         VStack(spacing: Spacing.loose) {
             // Large timer with skill color glow when active
             Text(viewModel.elapsedSeconds.formattedTime())
-                .font(.system(size: Dimensions.heroTimerSize, weight: .medium, design: .monospaced))
-                .monospacedDigit()
+                .heroTimerFont()
                 .foregroundColor(viewModel.isTimerPaused ? .secondary : .primary)
                 .contentTransition(.numericText())
                 .animation(.microInteraction, value: viewModel.elapsedSeconds)
                 .shadow(
-                    color: viewModel.isTimerPaused ? .clear : skill.color.opacity(pulseOpacity),
+                    color: viewModel.isTimerPaused ? .transparent : skill.color.opacity(pulseOpacity),
                     radius: Shadows.timerGlow.radius,
                     y: Shadows.timerGlow.yOffset
                 )
@@ -97,7 +96,7 @@ struct ActiveTrackingView: View {
         .background(
             Capsule()
                 .fill(viewModel.isTimerPaused
-                    ? Color.secondary.opacity(0.1)
+                    ? Color.backgroundSecondary(.intense)
                     : skill.color.opacity(0.1))
         )
     }
@@ -114,7 +113,7 @@ struct ActiveTrackingView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: viewModel.isTimerPaused ? "play.fill" : "pause.fill")
-                        .font(.system(size: IconFontSize.medium, weight: .semibold))
+                        .iconFont(.medium, weight: .semibold)
                     Text(viewModel.isTimerPaused ? "Resume" : "Pause")
                         .font(Typography.body)
                         .fontWeight(.medium)
@@ -124,7 +123,7 @@ struct ActiveTrackingView: View {
                 .padding(.vertical, Spacing.loose)
                 .background(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(Color.primary.opacity(0.06))
+                        .fill(Color.backgroundPrimary(.regular))
                 )
             }
             .buttonStyle(PlainButtonStyle())
@@ -137,17 +136,17 @@ struct ActiveTrackingView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: "stop.fill")
-                        .font(.system(size: IconFontSize.medium, weight: .semibold))
+                        .iconFont(.medium, weight: .semibold)
                     Text("Stop")
                         .font(Typography.body)
                         .fontWeight(.medium)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.buttonTextLight)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Spacing.loose)
                 .background(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .fill(Color.red)
+                        .fill(Color.stateError)
                 )
             }
             .buttonStyle(PlainButtonStyle())
@@ -166,7 +165,7 @@ struct ActiveTrackingView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: "list.bullet")
-                        .font(.system(size: IconFontSize.body, weight: .medium))
+                        .iconFont(.body)
                     Text("View All Skills")
                         .font(Typography.body)
                     Spacer()

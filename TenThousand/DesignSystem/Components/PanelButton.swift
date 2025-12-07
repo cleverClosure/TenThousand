@@ -18,25 +18,25 @@ enum ButtonVariant {
         case .secondary:
             return .secondary
         case .destructive:
-            return .red
+            return .stateError
         }
     }
 
     var restingBackgroundColor: Color {
         switch self {
         case .secondary:
-            return Color.clear
+            return .transparent
         case .destructive:
-            return Color.red.opacity(Opacity.backgroundMedium)
+            return Color.stateError.opacity(Opacity.backgroundMedium)
         }
     }
 
     var hoverBackgroundColor: Color {
         switch self {
         case .secondary:
-            return Color.primary.opacity(Opacity.backgroundMedium)
+            return Color.backgroundPrimary(.medium)
         case .destructive:
-            return Color.red.opacity(Opacity.overlayLight)
+            return Color.stateError.opacity(Opacity.overlayLight)
         }
     }
 }
