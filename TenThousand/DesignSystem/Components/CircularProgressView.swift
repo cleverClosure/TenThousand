@@ -31,7 +31,7 @@ struct CircularProgressView: View {
     }
 
     private var trackWidth: CGFloat {
-        strokeWidth + 2
+        strokeWidth + Dimensions.circularProgressTrackOffset
     }
 
     // MARK: - Body
@@ -40,8 +40,8 @@ struct CircularProgressView: View {
         ZStack {
             // Outer subtle shadow ring (depth)
             Circle()
-                .stroke(Color.black.opacity(0.05), lineWidth: trackWidth + 4)
-                .blur(radius: 2)
+                .stroke(Color.black.opacity(0.05), lineWidth: trackWidth + Dimensions.circularProgressShadowOffset)
+                .blur(radius: Shadows.subtle.radius)
 
             // Background track - inset style
             Circle()
@@ -69,35 +69,35 @@ struct CircularProgressView: View {
                         style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
-                    .shadow(color: color.opacity(0.35), radius: 6, y: 2)
+                    .shadow(color: color.opacity(Shadows.progressGlow.opacity), radius: Shadows.progressGlow.radius, y: Shadows.progressGlow.yOffset)
             }
 
             // Center content
             if showValue {
                 VStack(spacing: Spacing.tight) {
                     Text(valueText)
-                        .font(.system(size: size * 0.32, weight: .medium, design: .rounded))
+                        .font(.system(size: size * CircularProgressSizing.valueFontRatio, weight: .medium, design: .rounded))
                         .foregroundColor(.primary)
                         .contentTransition(.numericText())
 
                     if !labelText.isEmpty {
                         Text(labelText)
-                            .font(.system(size: size * 0.085, weight: .semibold))
+                            .font(.system(size: size * CircularProgressSizing.labelFontRatio, weight: .semibold))
                             .tracking(2)
                             .foregroundColor(.secondary.opacity(0.7))
                     }
                 }
-                .offset(y: labelText.isEmpty ? 0 : 2)
+                .offset(y: labelText.isEmpty ? 0 : Dimensions.circularProgressTrackOffset)
             }
         }
         .frame(width: size, height: size)
         .onAppear {
-            withAnimation(.easeOut(duration: 0.8)) {
+            withAnimation(.easeOut(duration: AnimationDurations.circularAppear)) {
                 animatedProgress = clampedProgress
             }
         }
         .onChange(of: progress) { _, newValue in
-            withAnimation(.easeOut(duration: 0.5)) {
+            withAnimation(.easeOut(duration: AnimationDurations.circularUpdate)) {
                 animatedProgress = min(max(newValue, 0), 1)
             }
         }

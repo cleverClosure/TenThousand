@@ -94,7 +94,7 @@ struct SkillDetailView: View {
             } label: {
                 HStack(spacing: Spacing.tight) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: IconFontSize.body, weight: .semibold))
                     Text("Back")
                         .font(Typography.body)
                 }
@@ -116,7 +116,7 @@ struct SkillDetailView: View {
                 Circle()
                     .fill(skill.color)
                     .frame(width: Dimensions.colorDotSizeSmall, height: Dimensions.colorDotSizeSmall)
-                    .shadow(color: skill.color.opacity(0.5), radius: 3, y: 1)
+                    .shadow(color: skill.color.opacity(Shadows.small.opacity), radius: Shadows.small.radius, y: Shadows.small.yOffset)
 
                 Text(skill.name)
                     .titleFont()
@@ -204,7 +204,7 @@ struct SkillDetailView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: isSkillActive ? "checkmark.circle.fill" : "play.fill")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: IconFontSize.large, weight: .semibold))
                     Text(isSkillActive ? "Currently Tracking" : "Start Tracking")
                         .font(Typography.body)
                         .fontWeight(.semibold)
@@ -226,7 +226,7 @@ struct SkillDetailView: View {
             } label: {
                 Text("Delete Skill")
                     .font(Typography.caption)
-                    .foregroundColor(isSkillActive ? .secondary.opacity(0.5) : .red.opacity(0.8))
+                    .foregroundColor(isSkillActive ? .secondary.opacity(0.5) : .red.opacity(Opacity.accentStrong))
             }
             .buttonStyle(PlainButtonStyle())
             .disabled(isSkillActive)

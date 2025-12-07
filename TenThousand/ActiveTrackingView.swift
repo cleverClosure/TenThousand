@@ -45,7 +45,7 @@ struct ActiveTrackingView: View {
             Circle()
                 .fill(skill.color)
                 .frame(width: Dimensions.colorDotSizeSmall, height: Dimensions.colorDotSizeSmall)
-                .shadow(color: skill.color.opacity(0.5), radius: 3, y: 1)
+                .shadow(color: skill.color.opacity(Shadows.small.opacity), radius: Shadows.small.radius, y: Shadows.small.yOffset)
 
             Text(skill.name)
                 .titleFont()
@@ -68,8 +68,8 @@ struct ActiveTrackingView: View {
                 .animation(.microInteraction, value: viewModel.elapsedSeconds)
                 .shadow(
                     color: viewModel.isTimerPaused ? .clear : skill.color.opacity(pulseOpacity),
-                    radius: 20,
-                    y: 0
+                    radius: Shadows.timerGlow.radius,
+                    y: Shadows.timerGlow.yOffset
                 )
 
             // Status pill
@@ -83,7 +83,7 @@ struct ActiveTrackingView: View {
             if !viewModel.isTimerPaused {
                 Circle()
                     .fill(skill.color)
-                    .frame(width: 6, height: 6)
+                    .frame(width: Dimensions.pulseIndicatorSize, height: Dimensions.pulseIndicatorSize)
                     .opacity(pulseOpacity + 0.5)
             }
 
@@ -114,7 +114,7 @@ struct ActiveTrackingView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: viewModel.isTimerPaused ? "play.fill" : "pause.fill")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: IconFontSize.medium, weight: .semibold))
                     Text(viewModel.isTimerPaused ? "Resume" : "Pause")
                         .font(Typography.body)
                         .fontWeight(.medium)
@@ -137,7 +137,7 @@ struct ActiveTrackingView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: "stop.fill")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: IconFontSize.medium, weight: .semibold))
                     Text("Stop")
                         .font(Typography.body)
                         .fontWeight(.medium)
@@ -166,7 +166,7 @@ struct ActiveTrackingView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: "list.bullet")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: IconFontSize.body, weight: .medium))
                     Text("View All Skills")
                         .font(Typography.body)
                     Spacer()
@@ -184,7 +184,7 @@ struct ActiveTrackingView: View {
     private func startPulseAnimation() {
         guard !viewModel.isTimerPaused else { return }
         withAnimation(
-            .easeInOut(duration: 1.5)
+            .easeInOut(duration: AnimationDurations.pulse)
             .repeatForever(autoreverses: true)
         ) {
             pulseOpacity = 0.6

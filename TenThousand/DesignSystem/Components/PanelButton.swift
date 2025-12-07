@@ -81,7 +81,7 @@ struct PanelButton: View {
     }
 
     private var buttonHeight: CGFloat {
-        isCompact ? 36 : Dimensions.skillRowHeight
+        isCompact ? Dimensions.compactButtonHeight : Dimensions.skillRowHeight
     }
 
     var body: some View {

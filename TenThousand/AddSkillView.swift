@@ -73,7 +73,7 @@ struct AddSkillView: View {
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
                 .stroke(
                     isFocused ? Color.secondary.opacity(0.2) : Color.clear,
-                    lineWidth: 1
+                    lineWidth: LayoutConstants.borderWidth
                 )
         )
     }
@@ -85,7 +85,7 @@ struct AddSkillView: View {
                 .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
             Image(systemName: "plus")
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: IconFontSize.body, weight: .medium))
                 .foregroundColor(.secondary.opacity(0.6))
         }
     }
@@ -121,7 +121,7 @@ struct AddSkillView: View {
     private var submitButton: some View {
         Button(action: createSkill) {
             Image(systemName: "arrow.right.circle.fill")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: IconFontSize.xl, weight: .medium))
                 .foregroundColor(.green)
         }
         .buttonStyle(PlainButtonStyle())
@@ -133,7 +133,7 @@ struct AddSkillView: View {
         if let error = errorMessage {
             HStack(spacing: Spacing.tight) {
                 Image(systemName: "exclamationmark.circle.fill")
-                    .font(.system(size: 11))
+                    .font(.system(size: IconFontSize.caption))
                 Text(error)
                     .font(Typography.caption)
             }

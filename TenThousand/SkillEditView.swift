@@ -91,7 +91,7 @@ struct SkillEditView: View {
             } label: {
                 HStack(spacing: Spacing.tight) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: IconFontSize.body, weight: .semibold))
                     Text("Cancel")
                         .font(Typography.body)
                 }
@@ -132,7 +132,7 @@ struct SkillEditView: View {
                     Circle()
                         .fill(selectedColor)
                         .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
-                        .shadow(color: selectedColor.opacity(0.4), radius: 4, y: 2)
+                        .shadow(color: selectedColor.opacity(Shadows.medium.opacity), radius: Shadows.medium.radius, y: Shadows.medium.yOffset)
 
                     TextField("Skill name", text: $editedName)
                         .displayFont()
@@ -152,14 +152,14 @@ struct SkillEditView: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: LayoutConstants.borderWidth)
                 )
 
                 HStack {
                     if let error = errorMessage {
                         HStack(spacing: Spacing.tight) {
                             Image(systemName: "exclamationmark.circle.fill")
-                                .font(.system(size: 11))
+                                .font(.system(size: IconFontSize.caption))
                             Text(error)
                                 .font(Typography.caption)
                         }
@@ -217,16 +217,20 @@ struct SkillEditView: View {
             ZStack {
                 Circle()
                     .fill(color)
-                    .frame(width: 32, height: 32)
-                    .shadow(color: color.opacity(isSelected ? 0.5 : 0.2), radius: isSelected ? 4 : 2, y: 1)
+                    .frame(width: Dimensions.colorPickerButtonSize, height: Dimensions.colorPickerButtonSize)
+                    .shadow(
+                        color: color.opacity(isSelected ? Opacity.colorPickerSelected : Opacity.colorPickerDefault),
+                        radius: isSelected ? Shadows.medium.radius : Shadows.subtle.radius,
+                        y: Shadows.small.yOffset
+                    )
 
                 if isSelected {
                     Circle()
-                        .stroke(Color.white, lineWidth: 2)
-                        .frame(width: 32, height: 32)
+                        .stroke(Color.white, lineWidth: Dimensions.menubarStrokeWidth)
+                        .frame(width: Dimensions.colorPickerButtonSize, height: Dimensions.colorPickerButtonSize)
 
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: IconFontSize.body, weight: .bold))
                         .foregroundColor(.white)
                 }
             }
@@ -244,7 +248,7 @@ struct SkillEditView: View {
             } label: {
                 HStack(spacing: Spacing.base) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: IconFontSize.large, weight: .semibold))
                     Text("Save Changes")
                         .font(Typography.body)
                         .fontWeight(.semibold)

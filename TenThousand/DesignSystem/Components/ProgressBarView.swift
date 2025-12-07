@@ -55,14 +55,14 @@ struct ProgressBarView: View {
         }
         .onAppear {
             if animated {
-                withAnimation(.easeOut(duration: 0.6)) {
+                withAnimation(.easeOut(duration: AnimationDurations.progressAppear)) {
                     animatedProgress = clampedProgress
                 }
             }
         }
         .onChange(of: progress) { _, newValue in
             if animated {
-                withAnimation(.easeOut(duration: 0.4)) {
+                withAnimation(.easeOut(duration: AnimationDurations.progressUpdate)) {
                     animatedProgress = min(max(newValue, 0), 1)
                 }
             }

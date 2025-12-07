@@ -101,7 +101,7 @@ struct SkillRowView: View {
                 Text(percentageText)
                     .font(Typography.caption)
                     .foregroundColor(skill.color)
-                    .frame(width: 48, alignment: .trailing)
+                    .frame(width: Dimensions.percentageFrameWidth, alignment: .trailing)
             }
         }
         .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
@@ -112,7 +112,7 @@ struct SkillRowView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: Dimensions.cornerRadiusMedium)
-                .stroke(isSelected ? skill.color.opacity(0.3) : Color.clear, lineWidth: 1)
+                .stroke(isSelected ? skill.color.opacity(0.3) : Color.clear, lineWidth: LayoutConstants.borderWidth)
         )
     }
 
@@ -121,7 +121,7 @@ struct SkillRowView: View {
             Circle()
                 .fill(skill.color)
                 .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
-                .shadow(color: skill.color.opacity(0.4), radius: 4, y: 2)
+                .shadow(color: skill.color.opacity(Shadows.medium.opacity), radius: Shadows.medium.radius, y: Shadows.medium.yOffset)
 
             if isDotHovered {
                 Circle()
@@ -129,7 +129,7 @@ struct SkillRowView: View {
                     .frame(width: Dimensions.colorDotSize, height: Dimensions.colorDotSize)
 
                 Image(systemName: "play.fill")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: IconFontSize.small, weight: .bold))
                     .foregroundColor(.white)
             }
         }
@@ -162,7 +162,7 @@ struct SkillRowView: View {
             onEdit?()
         } label: {
             Image(systemName: "pencil")
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: IconFontSize.body, weight: .medium))
                 .foregroundColor(.secondary)
                 .padding(Spacing.base)
                 .background(
@@ -177,7 +177,7 @@ struct SkillRowView: View {
 
     private var chevron: some View {
         Image(systemName: "chevron.right")
-            .font(.system(size: 12, weight: .semibold))
+            .font(.system(size: IconFontSize.body, weight: .semibold))
             .foregroundColor(.secondary.opacity(isHovered ? 1 : 0.5))
     }
 
