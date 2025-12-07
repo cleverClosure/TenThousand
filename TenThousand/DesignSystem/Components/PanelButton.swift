@@ -55,6 +55,7 @@ struct PanelButton: View {
     let alignment: ButtonAlignment
     let shortcut: String?
     let isDisabled: Bool
+    let isCompact: Bool
     let action: () -> Void
 
     @State private var isHovered = false
@@ -66,6 +67,7 @@ struct PanelButton: View {
         alignment: ButtonAlignment = .center,
         shortcut: String? = nil,
         isDisabled: Bool = false,
+        isCompact: Bool = false,
         action: @escaping () -> Void
     ) {
         self.title = title
@@ -74,7 +76,12 @@ struct PanelButton: View {
         self.alignment = alignment
         self.shortcut = shortcut
         self.isDisabled = isDisabled
+        self.isCompact = isCompact
         self.action = action
+    }
+
+    private var buttonHeight: CGFloat {
+        isCompact ? 36 : Dimensions.skillRowHeight
     }
 
     var body: some View {
@@ -82,8 +89,8 @@ struct PanelButton: View {
             buttonContent
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, Dimensions.skillRowPaddingHorizontal)
-                .padding(.vertical, Dimensions.skillRowPaddingVertical)
-                .frame(height: Dimensions.skillRowHeight)
+                .padding(.vertical, isCompact ? Spacing.tight : Dimensions.skillRowPaddingVertical)
+                .frame(height: buttonHeight)
                 .background(backgroundColor, in: RoundedRectangle(cornerRadius: Dimensions.cornerRadiusSmall))
         }
         .buttonStyle(PlainButtonStyle())

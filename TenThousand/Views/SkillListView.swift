@@ -97,7 +97,8 @@ struct SkillListView: View {
             "Quit",
             icon: "xmark.circle",
             alignment: .leading,
-            shortcut: "⌘Q"
+            shortcut: "⌘Q",
+            isCompact: true
         ) {
             NSApplication.shared.terminate(nil)
         }
