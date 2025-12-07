@@ -41,6 +41,17 @@ struct DropdownPanelView: View {
             }
             return .ignored
         }
+        #if DEBUG
+        .onKeyPress(keys: [KeyEquivalent("d")], phases: .down) { press in
+            if press.modifiers.contains(.command) {
+                withAnimation(.dsStandard) {
+                    viewModel.panelRoute = .debug
+                }
+                return .handled
+            }
+            return .ignored
+        }
+        #endif
         .onCommand(#selector(NSResponder.cancelOperation(_:))) {
             handleEscape()
         }
@@ -74,6 +85,12 @@ struct DropdownPanelView: View {
         case .skillEdit(let skill):
             SkillEditView(skill: skill, viewModel: viewModel)
                 .transition(.opacity.combined(with: .move(edge: .trailing)))
+
+        #if DEBUG
+        case .debug:
+            DebugView(viewModel: viewModel)
+                .transition(.opacity.combined(with: .move(edge: .trailing)))
+        #endif
         }
     }
 
@@ -87,6 +104,12 @@ struct DropdownPanelView: View {
             withAnimation(.dsStandard) {
                 viewModel.showSkillList()
             }
+        #if DEBUG
+        case .debug:
+            withAnimation(.dsStandard) {
+                viewModel.showSkillList()
+            }
+        #endif
         }
     }
 }

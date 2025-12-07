@@ -26,6 +26,11 @@ enum PanelRoute: Equatable {
     /// Edit view for modifying skill settings
     case skillEdit(Skill)
 
+    #if DEBUG
+    /// Developer debug screen (only available in debug builds)
+    case debug
+    #endif
+
     // MARK: - Equatable
 
     static func == (lhs: PanelRoute, rhs: PanelRoute) -> Bool {
@@ -38,6 +43,10 @@ enum PanelRoute: Equatable {
             return lhsSkill.id == rhsSkill.id
         case let (.skillEdit(lhsSkill), .skillEdit(rhsSkill)):
             return lhsSkill.id == rhsSkill.id
+        #if DEBUG
+        case (.debug, .debug):
+            return true
+        #endif
         default:
             return false
         }
